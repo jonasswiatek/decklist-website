@@ -1,8 +1,5 @@
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
 import { Event, LoginContinueResponse, LoginStartResponse } from '../model/api/apimodel';
-
-var baseUrl = "http://localhost:5156";
 
 type DecklistStore = {
   isLoggedIn: boolean | null;
