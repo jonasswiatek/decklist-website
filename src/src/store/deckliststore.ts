@@ -1,10 +1,10 @@
 import { create } from 'zustand'
-import { Event, LoginContinueResponse, LoginStartResponse } from '../model/api/apimodel';
+import { Event, LoginContinueResponse, LoginStartResponse, ValidationErrorResponse } from '../model/api/apimodel';
 
 type DecklistStore = {
-  isLoggedIn: boolean | null;
-  events: Event[];
-  pendingLoginEmail: string | null;
+    isLoggedIn: boolean | null;
+    events: Event[];
+    pendingLoginEmail: string | null;
 }
 
 type Actions = {
@@ -13,22 +13,36 @@ type Actions = {
     logout: () => Promise<void>;
     loadEvents: () => Promise<void>;
     reset: () => void
-  }
+}
   
-
 const initialState: DecklistStore = {
     events: [],
     isLoggedIn: null,
     pendingLoginEmail: null,
 }
-  
+
+export class ValidationError extends Error {
+    public Errors: ValidationErrorResponse;
+
+    constructor(errors: ValidationErrorResponse) {
+        super(errors.title);
+        this.Errors = errors;
+    }
+}
+
+async function ThrowIfValidationErrors(response: Response) {
+    if (response.status == 400 && response.headers.get("Content-Type") === "application/problem+json; charset=utf-8") {
+        var errors = await response.json() as ValidationErrorResponse;
+        throw new ValidationError(errors);
+    }
+}
 
 export const useDecklistStore = create<DecklistStore & Actions>()(
     (set) => ({
         ...initialState,
         startLogin: async (email) => 
         {
-            let res = await fetch("/api/login/start", {
+            let httpResponse = await fetch("/api/login/start", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
@@ -38,15 +52,17 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
                 })
             });
 
-            if (res.ok) {
-                var data = await res.json() as LoginStartResponse
+            await ThrowIfValidationErrors(httpResponse);
+
+            if (httpResponse.ok) {
+                var data = await httpResponse.json() as LoginStartResponse
                 if (data.success)
                     set({pendingLoginEmail: email});
             }
         },
         continueLogin: async (email, code) => 
         {
-            let resp = await fetch("/api/login/continue", {
+            let httpResponse = await fetch("/api/login/continue", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
@@ -56,24 +72,26 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
                     code: code
                 })
             });
+
+            await ThrowIfValidationErrors(httpResponse);
             
-            var res = await resp.json() as LoginContinueResponse;
+            var res = await httpResponse.json() as LoginContinueResponse;
             if (res.success) {
                 set({pendingLoginEmail: null, isLoggedIn: true});
             }
         },
         logout: async() => {
-            let resp = await fetch("/api/logout", {
+            let httpResponse = await fetch("/api/logout", {
                 method: "POST",
             });
 
-            if (resp.ok) {
+            if (httpResponse.ok) {
                 set(initialState);
             }
         },
         loadEvents: async () => {
-            let res = await fetch("/api/events");
-            if (res.status === 401) 
+            let httpResponse = await fetch("/api/events");
+            if (httpResponse.status === 401) 
             {
                 set({isLoggedIn: false});
             }
@@ -81,7 +99,7 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
             {
                 set({
                     isLoggedIn: true,
-                    events: await res.json()
+                    events: await httpResponse.json()
                 });
             }
         },

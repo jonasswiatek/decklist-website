@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
+        //target: 'https://decklist.lol',
         target: 'http://localhost:5156',
         changeOrigin: true,
       },
