@@ -22,11 +22,11 @@ const initialState: DecklistStore = {
 }
 
 export class ValidationError extends Error {
-    public Errors: ValidationErrorResponse;
+    public ValidationError: ValidationErrorResponse;
 
     constructor(errors: ValidationErrorResponse) {
         super(errors.title);
-        this.Errors = errors;
+        this.ValidationError = errors;
     }
 }
 

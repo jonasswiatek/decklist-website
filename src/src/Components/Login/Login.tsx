@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useDecklistStore, ValidationError } from '../../store/deckliststore';
+import { useDecklistStore } from '../../store/deckliststore';
+import { HandleValidation } from "../../Util/Validators";
 
 export function StartLogin() {
   type Inputs = {
@@ -13,15 +13,8 @@ export function StartLogin() {
     try {
       await startLogin(data.email);
     }
-    catch(err) {
-      if (err instanceof ValidationError) {
-        if (err.Errors.errors.email) {
-          setError("email", { type: 'custom', message: err.Errors.errors.email[0] });
-        }
-      }
-      else {
-        throw err;
-      }
+    catch(e) {
+      HandleValidation(setError, e);
     }
   }
 
@@ -72,20 +65,11 @@ export function ContinueLogin() {
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
     try {
-      let result = await continueLogin(pendingLoginEmail!, data.code);
-      if (!result.success) {
-        setError("code", { type: 'custom', message: "Invalid code" });
-      }
+      await continueLogin(pendingLoginEmail!, data.code);
     }
-    catch(err) {
-      if (err instanceof ValidationError) {
-        if (err.Errors.errors.code) {
-          setError("code", { type: 'custom', message: err.Errors.errors.code[0] });
-        }
-      }
-      else {
-        throw err;
-      }
+    catch(e) {
+      console.log("err", e);
+      HandleValidation(setError, e);
     }
   }
 
