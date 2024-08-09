@@ -20,5 +20,5 @@ export type LoginContinueResponse = {
 export type ValidationErrorResponse = {
     title: string,
     status: number,
-    errors: Map<string, string[]>
+    errors: any
 }

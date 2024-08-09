@@ -9,7 +9,7 @@ type DecklistStore = {
 
 type Actions = {
     startLogin: (email: string) => Promise<void>;
-    continueLogin: (email: string, code: string) => Promise<void>;
+    continueLogin: (email: string, code: string) => Promise<LoginContinueResponse>;
     logout: () => Promise<void>;
     loadEvents: () => Promise<void>;
     reset: () => void
@@ -79,6 +79,8 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
             if (res.success) {
                 set({pendingLoginEmail: null, isLoggedIn: true});
             }
+
+            return res;
         },
         logout: async() => {
             let httpResponse = await fetch("/api/logout", {

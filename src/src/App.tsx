@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import './App.scss'
 import { useDecklistStore } from './store/deckliststore';
 import { ContinueLogin, StartLogin } from './Components/Login/Login';
-import React from 'react';
 
 function App() {
   const { isLoggedIn, loadEvents, events, pendingLoginEmail, logout } = useDecklistStore();
@@ -23,25 +22,27 @@ function App() {
         )
     )
   }
-
+  
+  let component;
   if (isLoggedIn) {
-    return (
-    <>
+    component = <>
       <EventList />
-        <p>
-        <button onClick={() => logout()}> 
-            Log out
-          </button>
-        </p>
-      </>
-    )
+      <p>
+      <button onClick={() => logout()}> 
+          Log out
+        </button>
+      </p>
+    </>;
   }
   else {
     if (pendingLoginEmail === null)
-      return <StartLogin />
+      component = <StartLogin />
     else
-      return <ContinueLogin />
+    component = <ContinueLogin />
   }
+
+
+  return component
 
 }
 
