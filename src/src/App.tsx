@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
-import './App.css'
+import './App.scss'
 import { useDecklistStore } from './store/deckliststore';
 import { ContinueLogin, StartLogin } from './Components/Login/Login';
+import React from 'react';
 
 function App() {
   const { isLoggedIn, loadEvents, events, pendingLoginEmail, logout } = useDecklistStore();
