@@ -1,5 +1,4 @@
 import { FieldValues, UseFormSetError, Path } from "react-hook-form";
-import { ValidationErrorResponse } from "../model/api/apimodel";
 import { ValidationError } from "../store/deckliststore";
 
 export function HandleValidation<T extends FieldValues>(setError: UseFormSetError<T>, e: any) {    

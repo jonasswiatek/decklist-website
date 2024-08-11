@@ -1,6 +1,4 @@
 import '../../App.scss'
-import { useState } from 'react'
-import { useDecklistStore } from '../../store/deckliststore';
 
 export function EventList() {
   //const { loadEvents, events, logout } = useDecklistStore();
