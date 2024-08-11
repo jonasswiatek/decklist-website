@@ -1,36 +1,48 @@
-import { useEffect } from 'react'
 import './App.scss'
 import { useDecklistStore } from './store/deckliststore';
-import { ContinueLogin, StartLogin } from './Components/Login/Login';
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import { EventList } from './Components/Events/Events.tsx'
+import { LoggedIn } from './Util/LoggedIn.tsx';
+import { ReactNode, useEffect } from 'react'
+import { LoginScreen } from './Components/Login/Login.tsx';
 
-function App() {
-  const { isLoggedIn, loadEvents, pendingLoginEmail, logout } = useDecklistStore();
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <LoginScreen />,
+  },
+  {
+    path: "/events",
+    element: 
+      <LoggedIn>
+        <EventList />
+      </LoggedIn>,
+  },
+]);
+
+const Loader = (props: {children: ReactNode}) => {
+  const { isLoggedIn, loadEvents } = useDecklistStore();
 
   useEffect(() => {
-    console.log("Run: " + isLoggedIn);
     if (isLoggedIn === null || isLoggedIn) {
       loadEvents();
     }
   }, [isLoggedIn]);
-  
-  let component;
-  if (isLoggedIn) {
-    component = <>
-      <p>
-      <button onClick={() => logout()}> 
-          Log out
-        </button>
-      </p>
-    </>;
-  }
-  else {
-    if (pendingLoginEmail === null)
-      component = <StartLogin />
-    else
-      component = <ContinueLogin />
-  }
 
-  return component
+  if (isLoggedIn != null)
+    return props.children;
+};
+
+
+function App() {
+  return (
+    <Loader>
+      <RouterProvider router={router} />
+    </Loader>
+  );
 }
 
 export default App

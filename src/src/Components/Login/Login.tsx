@@ -3,6 +3,29 @@ import { useDecklistStore } from '../../store/deckliststore';
 import { HandleValidation } from "../../Util/Validators";
 import { useNavigate } from "react-router-dom";
 
+export function LoginScreen() {
+  const { isLoggedIn, pendingLoginEmail, logout } = useDecklistStore();
+  
+  let component;
+  if (isLoggedIn) {
+    component = <>
+      <p>
+      <button onClick={() => logout()}> 
+          Log out
+        </button>
+      </p>
+    </>;
+  }
+  else {
+    if (pendingLoginEmail === null)
+      component = <StartLogin />
+    else
+      component = <ContinueLogin />
+  }
+
+  return component
+}
+
 export function StartLogin() {
   type Inputs = {
     email: string
