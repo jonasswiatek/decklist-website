@@ -27,12 +27,9 @@ export function LoginScreen() {
 }
 
 export function StartLogin() {
-  type Inputs = {
-    email: string
-  };
-  
   const { register, handleSubmit, setError, formState: { errors } } = useForm<Inputs>();
   const { startLogin } = useDecklistStore();
+  
   const onSubmit: SubmitHandler<Inputs> = async data => {
     try {
       await startLogin(data.email);
@@ -41,6 +38,10 @@ export function StartLogin() {
       HandleValidation(setError, e);
     }
   }
+
+  type Inputs = {
+    email: string
+  };
 
   return (
     <> 

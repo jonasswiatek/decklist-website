@@ -12,6 +12,7 @@ type Actions = {
     continueLogin: (email: string, code: string) => Promise<LoginContinueResponse>;
     logout: () => Promise<void>;
     loadEvents: () => Promise<void>;
+    createEvent: (event_name: string, format: string, event_date: Date) => Promise<void>;
     reset: () => void
 }
   
@@ -104,6 +105,21 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
                     events: await httpResponse.json()
                 });
             }
+        },
+        createEvent: async (event_name: string, format: string, event_date: Date) => {
+            let httpResponse = await fetch("/api/events", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    event_name: event_name,
+                    format: format,
+                    event_date: event_date
+                })
+            }); 
+
+            await ThrowIfValidationErrors(httpResponse);
         },
         reset: () => {
             set(initialState)

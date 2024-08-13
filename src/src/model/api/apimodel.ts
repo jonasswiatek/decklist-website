@@ -4,7 +4,7 @@ export type Event = {
     event_id: string;
     format: string;
     role: string;
-    created: Date;
+    event_date: Date;
 }
 
 export type LoginStartResponse = {

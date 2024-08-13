@@ -16,11 +16,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/events",
-    element: 
+    element:
       <LoggedIn>
         <EventList />
       </LoggedIn>,
   },
+  {
+    path: "/events/:event_id",
+    element:
+      <LoggedIn>
+        <p>Event details here</p>
+      </LoggedIn>,
+  },
+
 ]);
 
 const Loader = (props: {children: ReactNode}) => {
