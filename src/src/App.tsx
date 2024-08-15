@@ -8,6 +8,7 @@ import { EventList } from './Components/Events/Events.tsx'
 import { LoggedIn } from './Util/LoggedIn.tsx';
 import { ReactNode, useEffect } from 'react'
 import { LoginScreen } from './Components/Login/Login.tsx';
+import { EventView } from './Components/Events/Event.tsx'
 
 const router = createBrowserRouter([
   {
@@ -25,7 +26,7 @@ const router = createBrowserRouter([
     path: "/events/:event_id",
     element:
       <LoggedIn>
-        <p>Event details here</p>
+        <EventView />
       </LoggedIn>,
   },
 
