@@ -1,125 +1,66 @@
 import { create } from 'zustand'
-import { Event, LoginContinueResponse, LoginStartResponse, ValidationErrorResponse } from '../model/api/apimodel';
+import { LoginContinueResponse, startLoginRequest, continueLoginRequest, logoutRequest, meRequest } from '../model/api/apimodel';
+
+export enum AuthState {
+    Loading,
+    Unauthorized,
+    Authorized
+}
 
 type DecklistStore = {
-    isLoggedIn: boolean | null;
-    events: Event[];
-    pendingLoginEmail: string | null;
+    authState: AuthState,
+    email?: string,
 }
 
 type Actions = {
+    checkAuth: () => Promise<void>;
     startLogin: (email: string) => Promise<void>;
     continueLogin: (email: string, code: string) => Promise<LoginContinueResponse>;
     logout: () => Promise<void>;
-    loadEvents: () => Promise<void>;
-    createEvent: (event_name: string, format: string, event_date: Date) => Promise<void>;
     reset: () => void
 }
   
 const initialState: DecklistStore = {
-    events: [],
-    isLoggedIn: null,
-    pendingLoginEmail: null,
-}
-
-export class ValidationError extends Error {
-    public ValidationError: ValidationErrorResponse;
-
-    constructor(errors: ValidationErrorResponse) {
-        super(errors.title);
-        this.ValidationError = errors;
-    }
-}
-
-async function ThrowIfValidationErrors(response: Response) {
-    if (response.status == 400 && response.headers.get("Content-Type") === "application/problem+json; charset=utf-8") {
-        var errors = await response.json() as ValidationErrorResponse;
-        throw new ValidationError(errors);
-    }
+    authState: AuthState.Loading,
 }
 
 export const useDecklistStore = create<DecklistStore & Actions>()(
     (set) => ({
         ...initialState,
+        checkAuth: async () => {
+            const me = await meRequest();
+            if (me.authorized) {
+                set({
+                    authState: AuthState.Authorized,
+                    email: me.email
+                })
+            }
+            else {
+                set({
+                    authState: AuthState.Unauthorized,
+                    email: undefined
+                })
+            }
+        },
         startLogin: async (email) => 
         {
-            let httpResponse = await fetch("/api/login/start", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                })
-            });
-
-            await ThrowIfValidationErrors(httpResponse);
-
-            if (httpResponse.ok) {
-                var data = await httpResponse.json() as LoginStartResponse
-                if (data.success)
-                    set({pendingLoginEmail: email});
-            }
+            await startLoginRequest({email: email});
         },
         continueLogin: async (email, code) => 
         {
-            let httpResponse = await fetch("/api/login/continue", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    code: code
-                })
-            });
-
-            await ThrowIfValidationErrors(httpResponse);
-            
-            var res = await httpResponse.json() as LoginContinueResponse;
+            const res = await continueLoginRequest({email, code});
             if (res.success) {
-                set({pendingLoginEmail: null, isLoggedIn: true});
+                set({
+                    authState: AuthState.Authorized,
+                    email: email
+                })
             }
 
             return res;
         },
         logout: async() => {
-            let httpResponse = await fetch("/api/logout", {
-                method: "POST",
-            });
-
-            if (httpResponse.ok) {
-                set(initialState);
-            }
-        },
-        loadEvents: async () => {
-            let httpResponse = await fetch("/api/events");
-            if (httpResponse.status === 401) 
-            {
-                set({isLoggedIn: false});
-            }
-            else
-            {
-                set({
-                    isLoggedIn: true,
-                    events: await httpResponse.json()
-                });
-            }
-        },
-        createEvent: async (event_name: string, format: string, event_date: Date) => {
-            let httpResponse = await fetch("/api/events", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    event_name: event_name,
-                    format: format,
-                    event_date: event_date
-                })
-            }); 
-
-            await ThrowIfValidationErrors(httpResponse);
+            await logoutRequest();
+            set(initialState);
         },
         reset: () => {
             set(initialState)

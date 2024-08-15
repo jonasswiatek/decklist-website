@@ -1,9 +1,27 @@
+export type MeResponse = {
+    authorized: boolean;
+    email?: string;
+}
+
+export async function meRequest(): Promise<MeResponse> {
+    const httpResponse = await fetch("/api/me");
+    if (httpResponse.status === 401) 
+        return Promise.resolve<MeResponse>({authorized: false})
+    
+    if (httpResponse.ok) {
+        const me = await httpResponse.json() as MeResponse;
+        return me;
+    }
+
+    throw new Error("Http Exception");
+}
+
 export type StartLoginRequest = {
     email: string;
 }
 
 export async function startLoginRequest(data: StartLoginRequest) {
-    let httpResponse = await fetch("/api/login/start", {
+    const httpResponse = await fetch("/api/login/start", {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
@@ -16,7 +34,7 @@ export async function startLoginRequest(data: StartLoginRequest) {
     await ThrowIfValidationErrors(httpResponse);
 
     if (httpResponse.ok) {
-        let response = await httpResponse.json() as LoginStartResponse
+        const response = await httpResponse.json() as LoginStartResponse
         return response;
     }
 
@@ -29,7 +47,7 @@ export type ContinueLoginRequest = {
 }
 
 export async function continueLoginRequest(data: ContinueLoginRequest) {
-    let httpResponse = await fetch("/api/login/continue", {
+    const httpResponse = await fetch("/api/login/continue", {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
@@ -43,7 +61,7 @@ export async function continueLoginRequest(data: ContinueLoginRequest) {
     await ThrowIfValidationErrors(httpResponse);
     
     if(httpResponse.ok) {
-        let res = await httpResponse.json() as LoginContinueResponse;
+        const res = await httpResponse.json() as LoginContinueResponse;
         return res;
     }
 
@@ -51,11 +69,11 @@ export async function continueLoginRequest(data: ContinueLoginRequest) {
 }
 
 export async function logoutRequest() {
-    let httpResponse = await fetch("/api/logout", {
+    const httpResponse = await fetch("/api/logout", {
         method: "POST",
     });
 
-    if (!httpResponse.ok) {
+    if (httpResponse.ok) {
         return;
     }
 
@@ -63,12 +81,12 @@ export async function logoutRequest() {
 }
 
 export async function getAllEventsRequest() {
-    let httpResponse = await fetch("/api/events");
+    const httpResponse = await fetch("/api/events");
     if (httpResponse.status === 401) 
         throw new NotAuthenticatedError();
     
     if (httpResponse.ok) {
-        let events = await httpResponse.json() as Event[];
+        const events = await httpResponse.json() as Event[];
         return events;
     }
 
@@ -107,12 +125,12 @@ export type LoginContinueResponse = {
 export type ValidationErrorResponse = {
     title: string,
     status: number,
-    errors: any
+    errors: { [index:string] : string[] }
 }
 
 async function ThrowIfValidationErrors(response: Response) {
     if (response.status == 400 && response.headers.get("Content-Type") === "application/problem+json; charset=utf-8") {
-        var errors = await response.json() as ValidationErrorResponse;
+        const errors = await response.json() as ValidationErrorResponse;
         throw new ValidationError(errors);
     }
 }

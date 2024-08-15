@@ -1,5 +1,5 @@
 import './App.scss'
-import { useDecklistStore } from './store/deckliststore';
+import { AuthState, useDecklistStore } from './store/deckliststore';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -9,7 +9,6 @@ import { LoggedIn } from './Util/LoggedIn.tsx';
 import { ReactNode, useEffect } from 'react'
 import { LoginScreen } from './Components/Login/Login.tsx';
 import { EventView } from './Components/Events/Event.tsx'
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -33,16 +32,20 @@ const router = createBrowserRouter([
 ]);
 
 const Loader = (props: {children: ReactNode}) => {
-  const { isLoggedIn, loadEvents } = useDecklistStore();
-
+  const { authState, checkAuth } = useDecklistStore();
+  console.log(authState);
+  
   useEffect(() => {
-    if (isLoggedIn === null || isLoggedIn) {
-      loadEvents();
+    if (authState == AuthState.Loading) {
+      checkAuth();
     }
-  }, [isLoggedIn]);
+  }, [authState, checkAuth]);
 
-  if (isLoggedIn != null)
-    return props.children;
+  if (authState == AuthState.Loading) {
+    return (<p>Loading...</p>)
+  }
+
+  return props.children
 };
 
 

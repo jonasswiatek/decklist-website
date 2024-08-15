@@ -4,7 +4,7 @@ import { EventDetails } from '../../model/api/apimodel';
 import { useEffect, useState } from 'react';
 
 export function EventView() {
-    let { event_id } = useParams();
+    const { event_id } = useParams();
     const [event, setEvent] = useState<EventDetails | null>(null);
 
     useEffect(() => {

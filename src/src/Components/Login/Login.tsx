@@ -1,38 +1,45 @@
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useDecklistStore } from '../../store/deckliststore';
+import { AuthState, useDecklistStore } from '../../store/deckliststore';
 import { HandleValidation } from "../../Util/Validators";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import React from "react";
 
 export function LoginScreen() {
-  const { isLoggedIn, pendingLoginEmail, logout } = useDecklistStore();
-  
+  const { authState, logout } = useDecklistStore();
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null);
+
   let component;
-  if (isLoggedIn) {
+  if (authState == AuthState.Authorized) {
     component = <>
       <p>
-      <button onClick={() => logout()}> 
+        <button onClick={() => logout()}>
           Log out
         </button>
       </p>
     </>;
   }
   else {
-    if (pendingLoginEmail === null)
-      component = <StartLogin />
+    if (currentEmail === null)
+      component = <StartLogin onStarted={(email) => setCurrentEmail(email)} />
     else
-      component = <ContinueLogin />
+      component = <ContinueLogin email={currentEmail} />
   }
 
   return component
 }
 
-export function StartLogin() {
+type LoginProps = {
+  onStarted: (email: string) => void;
+}
+
+export const StartLogin: React.FC<LoginProps> = ({onStarted}) => {
   const { register, handleSubmit, setError, formState: { errors } } = useForm<Inputs>();
   const { startLogin } = useDecklistStore();
   
   const onSubmit: SubmitHandler<Inputs> = async data => {
     try {
       await startLogin(data.email);
+      onStarted(data.email);
     }
     catch(e) {
       HandleValidation(setError, e);
@@ -70,19 +77,21 @@ export function StartLogin() {
   )
 }
 
-export function ContinueLogin() {
+type ContinueLoginProps = {
+  email: string
+}
+
+export const ContinueLogin: React.FC<ContinueLoginProps> = ({email}) => {
   type Inputs = {
     code: string;
   };
   
   const { register, handleSubmit, setError, formState: { errors } } = useForm<Inputs>();
-  const { pendingLoginEmail, continueLogin } = useDecklistStore();
-  const navigate = useNavigate();
+  const { continueLogin } = useDecklistStore();
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
     try {
-      await continueLogin(pendingLoginEmail!, data.code);
-      navigate("/events");
+      await continueLogin(email, data.code);
     }
     catch(e) {
       HandleValidation(setError, e);

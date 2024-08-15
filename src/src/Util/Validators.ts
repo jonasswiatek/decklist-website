@@ -1,12 +1,17 @@
 import { FieldValues, UseFormSetError, Path } from "react-hook-form";
-import { ValidationError } from "../store/deckliststore";
+import { ValidationError } from "../model/api/apimodel";
 
-export function HandleValidation<T extends FieldValues>(setError: UseFormSetError<T>, e: any) {    
+export function HandleValidation<T extends FieldValues>(setError: UseFormSetError<T>, e: unknown) {    
     if (e instanceof ValidationError)
     {
-        for(let key in e.ValidationError.errors) {
-            const message = e.ValidationError.errors[key][0];
-            console.log(key, message);
+        const errors = e as ValidationError
+        for(const key in errors.ValidationError.errors) {
+            const val = errors.ValidationError.errors[key];
+            if (!val)
+                continue;
+
+            const message = val[0];
+            console.log(key, message, val);
             setError(key as Path<T>,  { type: 'custom', message: message })
         }
     }
