@@ -5,14 +5,21 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { EventList } from './Components/Events/Events.tsx'
-import { LoggedIn } from './Util/LoggedIn.tsx';
 import { ReactNode, useEffect } from 'react'
-import { LoginScreen } from './Components/Login/Login.tsx';
 import { EventView } from './Components/Events/Event.tsx'
+import { LoggedIn } from './Components/Login/LoggedIn.tsx';
+import { LandingPage } from './Components/LandingPage/LandingPage.tsx';
+import {
+  QueryClient,
+  QueryClientProvider
+} from 'react-query'
+
+const queryClient = new QueryClient()
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LoginScreen />,
+    element: <LandingPage />,
   },
   {
     path: "/events",
@@ -28,7 +35,6 @@ const router = createBrowserRouter([
         <EventView />
       </LoggedIn>,
   },
-
 ]);
 
 const Loader = (props: {children: ReactNode}) => {
@@ -51,9 +57,15 @@ const Loader = (props: {children: ReactNode}) => {
 
 function App() {
   return (
-    <Loader>
-      <RouterProvider router={router} />
-    </Loader>
+    <div className="py-3 py-md-5">
+      <div className='container'>
+        <Loader>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </Loader>
+      </div>
+    </div>
   );
 }
 

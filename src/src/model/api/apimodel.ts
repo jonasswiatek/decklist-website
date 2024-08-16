@@ -1,4 +1,4 @@
-export type MeResponse = {
+type MeResponse = {
     authorized: boolean;
     email?: string;
 }
@@ -16,7 +16,7 @@ export async function meRequest(): Promise<MeResponse> {
     throw new Error("Http Exception");
 }
 
-export type StartLoginRequest = {
+type StartLoginRequest = {
     email: string;
 }
 
@@ -41,7 +41,7 @@ export async function startLoginRequest(data: StartLoginRequest) {
     throw new Error("Http Exception");
 }
 
-export type ContinueLoginRequest = {
+type ContinueLoginRequest = {
     email: string;
     code: string;
 }
@@ -93,7 +93,41 @@ export async function getAllEventsRequest() {
     throw new Error("Http Exception");
 }
 
-export type Event = {
+type CreateEventRequest = {
+    event_name: string;
+    format: string;
+    event_date: Date;
+}
+
+type CreateEventResponse = {
+    success: boolean,
+    event_id: string
+}
+
+export async function createEventRequest(data: CreateEventRequest) {
+    const httpResponse = await fetch("/api/events", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            event_name: data.event_name,
+            format: data.format,
+            event_date: data.event_date
+        })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        const res = await httpResponse.json() as CreateEventResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
+export type EventListItem = {
     event_name: string;
     event_id: string;
     format: string;

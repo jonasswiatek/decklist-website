@@ -32,7 +32,7 @@ type LoginProps = {
   onStarted: (email: string) => void;
 }
 
-export const StartLogin: React.FC<LoginProps> = ({onStarted}) => {
+const StartLogin: React.FC<LoginProps> = ({onStarted}) => {
   const { register, handleSubmit, setError, formState: { errors } } = useForm<Inputs>();
   const { startLogin } = useDecklistStore();
   
@@ -81,7 +81,7 @@ type ContinueLoginProps = {
   email: string
 }
 
-export const ContinueLogin: React.FC<ContinueLoginProps> = ({email}) => {
+const ContinueLogin: React.FC<ContinueLoginProps> = ({email}) => {
   type Inputs = {
     code: string;
   };
