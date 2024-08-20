@@ -127,6 +127,24 @@ export async function createEventRequest(data: CreateEventRequest) {
     throw new Error("Http Exception");
 }
 
+type JoinEventRequest = {
+    event_id: string
+}
+
+export async function joinEventRequest(data: JoinEventRequest) {
+    const httpResponse = await fetch(`/api/events/${data.event_id}/join`, {
+        method: "POST",
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
+}
+
 export type EventListItem = {
     event_name: string;
     event_id: string;
@@ -143,8 +161,13 @@ export type EventDetails = {
     event_date: Date;
     status: string;
     joined: boolean;
+    participants: EventParticipant[]
 }
 
+type EventParticipant = {
+    email: string,
+    role: string
+}
 
 export type LoginStartResponse = {
     success: boolean,
