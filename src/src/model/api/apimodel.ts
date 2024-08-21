@@ -145,6 +145,34 @@ export async function joinEventRequest(data: JoinEventRequest) {
     throw new Error("Http Exception");
 }
 
+type UpdateEventUsersRequest = {
+    event_id: string,
+    email: string,
+    role: "judge" | "none"
+}
+
+export async function updateEventUsers(data: UpdateEventUsersRequest) {
+    const httpResponse = await fetch(`/api/events/${data.event_id}/users`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: data.email,
+            role: data.role
+        })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
+}
+
+
 export type EventListItem = {
     event_name: string;
     event_id: string;
