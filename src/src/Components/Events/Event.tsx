@@ -1,6 +1,6 @@
 
 import { useParams } from 'react-router-dom';
-import { EventDetails, joinEventRequest, updateEventUsers } from '../../model/api/apimodel';
+import { EventDetails, joinEventRequest, updateEventUsers, SubmitDecklistRequest, DecklistResponse } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
@@ -104,74 +104,117 @@ type EventViewProps = {
 }
 
 const DecklistEditor: React.FC<EventViewProps> = (e) => {
-    
+    type Inputs = {
+        decklist_text: string
+    };
+
+    const { data, error, isLoading, refetch } = useQuery({
+        queryKey: [`deck-${e.event.event_id}`],
+        retry: false,
+        refetchOnWindowFocus: false,
+        queryFn: () =>
+            fetch(`/api/decks/${e.event.event_id}`).then(async (res) => {
+                if (res.status === 404) {
+                    return null;
+                }
+
+                if (!res.ok) {
+                    throw "error";
+                }
+
+                return await res.json() as DecklistResponse;
+            }
+        ),
+    });
+
+    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
+    const onSubmit: SubmitHandler<Inputs> = async data => {
+        try {
+            await SubmitDecklistRequest({ event_id: e.event.event_id, player_name: "Jonas Swiatek", decklist_text: data.decklist_text });
+            refetch();
+        }
+        catch(e) {
+            HandleValidation(setError, e);
+        }
+    }
+
+    if (isLoading) {
+        return <p>Loading...</p>
+    }
+
+    if (error != null) {
+        return <p>Error, try later</p>
+    }
 
     return (
         <>
         <div className='row'>
             <div className='col'>
                 <p>Decklist view</p>
-                <div className='row'>
-                    <div className='col-md-auto'>
-                        ddddddddd
-                    </div>
-                    <div className='col col-lg-2'>
-                        <div className="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
-                            <div className="btn-group me-2" role="group" aria-label="First group">
-                                <button type="button" className="btn btn-outline-secondary">1</button>
-                                <button type="button" className="btn btn-outline-secondary">2</button>
-                                <button type="button" className="btn btn-outline-secondary">3</button>
-                                <button type="button" className="btn btn-outline-secondary">4</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col-md-auto'>
-                        ddddddddd
-                    </div>
-                    <div className='col col-lg-2'>
-                        <div className="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
-                            <div className="btn-group me-2" role="group" aria-label="First group">
-                                <button type="button" className="btn btn-outline-secondary">1</button>
-                                <button type="button" className="btn btn-outline-secondary">2</button>
-                                <button type="button" className="btn btn-outline-secondary">3</button>
-                                <button type="button" className="btn btn-outline-secondary">4</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col-md-auto'>
-                        ddddddddd
-                    </div>
-                    <div className='col col-lg-2'>
-                        <div className="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
-                            <div className="btn-group me-2" role="group" aria-label="First group">
-                                <button type="button" className="btn btn-outline-secondary">1</button>
-                                <button type="button" className="btn btn-outline-secondary">2</button>
-                                <button type="button" className="btn btn-outline-secondary">3</button>
-                                <button type="button" className="btn btn-outline-secondary">4</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col-md-auto'>
-                        ddddddddd
-                    </div>
-                    <div className='col col-lg-2'>
-                        <div className="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
-                            <div className="btn-group me-2" role="group" aria-label="First group">
-                                <button type="button" className="btn btn-outline-secondary">1</button>
-                                <button type="button" className="btn btn-outline-secondary">2</button>
-                                <button type="button" className="btn btn-outline-secondary">3</button>
-                                <button type="button" className="btn btn-outline-secondary">4</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
+                    <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text")} />
+                    {errors.decklist_text && <p>{errors.decklist_text?.message}</p>}
+                    <button type='submit' className='btn btn-primary'>Submit decklist</button>
+                </form>
+            </div>
+        </div>
+        <div className='row'>
+            <div className='col'>
+                <p>Name: {data?.player_name}</p>
+            </div>
+        </div>
+        <div className='row'>
+            <div className='col'>
+                <p>Main board</p>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Qty</th>
+                        <th>Card</th>
+                        <th>Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {data?.mainboard?.map((p) => {
+                        return (
+                            <>
+                                <tr>
+                                    <td>{p.quantity}</td>
+                                    <td>{p.card_name}</td>
+                                    <tr>{p.type}</tr>
+                                </tr>
+                            </>
+                        )
+                    })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div className='row'>
+            <div className='col'>
+                <p>Side board</p>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Qty</th>
+                        <th>Card</th>
+                        <th>Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {data?.sideboard?.map((p) => {
+                        return (
+                            <>
+                                <tr>
+                                    <td>{p.quantity}</td>
+                                    <td>{p.card_name}</td>
+                                    <tr>{p.type}</tr>
+                                </tr>
+                            </>
+                        )
+                    })}
+                    </tbody>
+                </table>
             </div>
         </div>
       </>

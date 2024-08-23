@@ -172,6 +172,49 @@ export async function updateEventUsers(data: UpdateEventUsersRequest) {
     throw new Error("Http Exception");
 }
 
+type SubmitDecklistRequest = {
+    event_id: string,
+    player_name: string,
+    decklist_text: string,
+}
+
+export async function SubmitDecklistRequest(data: SubmitDecklistRequest) {
+    const httpResponse = await fetch(`/api/decks/${data.event_id}`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            player_name: data.player_name,
+            decklist_text: data.decklist_text,
+            main_deck: {},
+            sideboard: {}
+        })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
+}
+
+export type DecklistResponse = {
+    player_name: string;
+    mainboard: DecklistCard[],
+    sideboard: DecklistCard[]
+}
+
+type DecklistCard = {
+    card_name: string,
+    quantity: number,
+    mana_cost: string,
+    mana_value: number,
+    type: string
+}
+
 
 export type EventListItem = {
     event_name: string;
