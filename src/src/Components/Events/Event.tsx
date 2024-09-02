@@ -127,7 +127,7 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
         ),
     });
 
-    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
+    const { register, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = async data => {
         try {
             await SubmitDecklistRequest({ event_id: e.event.event_id, player_name: "Jonas Swiatek", decklist_text: data.decklist_text });
