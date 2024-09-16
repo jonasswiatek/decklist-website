@@ -178,7 +178,7 @@ type SubmitDecklistRequest = {
     decklist_text: string,
 }
 
-export async function SubmitDecklistRequest(data: SubmitDecklistRequest) {
+export async function submitDecklistRequest(data: SubmitDecklistRequest) {
     const httpResponse = await fetch(`/api/decks/${data.event_id}`, {
         method: "POST",
         headers: {
@@ -190,6 +190,27 @@ export async function SubmitDecklistRequest(data: SubmitDecklistRequest) {
             main_deck: {},
             sideboard: {}
         })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
+}
+
+type DeleteEventRequest = {
+    event_id: string;
+}
+
+export async function deleteEvent(data: DeleteEventRequest) {
+    const httpResponse = await fetch(`/api/events/${data.event_id}`, {
+        method: "DELETE",
+        headers: {
+            'Content-Type': 'application/json'
+        }
     });
 
     await ThrowIfValidationErrors(httpResponse);

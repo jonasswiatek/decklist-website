@@ -1,6 +1,6 @@
 
-import { useParams } from 'react-router-dom';
-import { EventDetails, joinEventRequest, updateEventUsers, SubmitDecklistRequest, DecklistResponse } from '../../model/api/apimodel';
+import { useParams, useNavigate } from 'react-router-dom';
+import { EventDetails, joinEventRequest, updateEventUsers, submitDecklistRequest, deleteEvent, DecklistResponse } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
@@ -130,7 +130,7 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
     const { register, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = async data => {
         try {
-            await SubmitDecklistRequest({ event_id: e.event.event_id, player_name: "Jonas Swiatek", decklist_text: data.decklist_text });
+            await submitDecklistRequest({ event_id: e.event.event_id, player_name: "Jonas Swiatek", decklist_text: data.decklist_text });
             refetch();
         }
         catch(e) {
@@ -226,6 +226,7 @@ const OwnerView: React.FC<EventViewProps> = (e) => {
         email: string
     };
 
+    const navigate = useNavigate();
     const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = async data => {
         try {
@@ -243,6 +244,11 @@ const OwnerView: React.FC<EventViewProps> = (e) => {
         e.refetch!();
     }
     
+    const onDeleteEvent = async () => {
+        await deleteEvent({event_id: e.event.event_id});
+        navigate('/events');
+    }
+
     return (
         <>
             <div className='row'>
@@ -280,6 +286,11 @@ const OwnerView: React.FC<EventViewProps> = (e) => {
                         })}
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div className='row'>
+                <div className='row'>
+                    <button type="button" className="btn btn-danger" onClick={onDeleteEvent}>Delete Event</button>
                 </div>
             </div>
         </>
