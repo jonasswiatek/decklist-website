@@ -56,7 +56,7 @@ export function EventView() {
             <>
                 <div className='row'>
                     <div className='col'>
-                        <p>No such event.</p>
+                        <p>Can't find this event. Check that the code you entered is correct.</p>
                     </div>
                 </div>
             </>

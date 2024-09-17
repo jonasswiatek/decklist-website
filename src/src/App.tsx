@@ -14,6 +14,10 @@ import {
   QueryClientProvider
 } from 'react-query'
 
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+
 const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
@@ -31,15 +35,12 @@ const router = createBrowserRouter([
   {
     path: "/events/:event_id",
     element:
-      <LoggedIn>
-        <EventView />
-      </LoggedIn>,
+      <EventView />
   },
 ]);
 
 const Loader = (props: {children: ReactNode}) => {
   const { authState, checkAuth } = useDecklistStore();
-  console.log(authState);
   
   useEffect(() => {
     if (authState == AuthState.Loading) {
@@ -54,9 +55,35 @@ const Loader = (props: {children: ReactNode}) => {
   return props.children
 };
 
-
 function App() {
+  const { authState, logout } = useDecklistStore();
+
   return (
+    <>
+    <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
+      <Container>
+        <Navbar.Brand href="/">decklist.lol</Navbar.Brand>
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link href="/events">Joined Tournaments</Nav.Link>
+            <Nav.Link href="#features">My Tournaments</Nav.Link>
+          </Nav>
+          <Nav>
+          {authState === AuthState.Authorized ? (
+            <>
+              <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
+            </>
+            ) :
+            (
+              <>
+              </>
+            )}
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
+
     <div className="py-3 py-md-5">
       <div className='container'>
         <Loader>
@@ -66,6 +93,7 @@ function App() {
         </Loader>
       </div>
     </div>
+    </>
   );
 }
 

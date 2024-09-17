@@ -222,6 +222,28 @@ export async function deleteEvent(data: DeleteEventRequest) {
     throw new Error("Http Exception");
 }
 
+export async function getEvent(eventId: string) {
+    const httpResponse = await fetch(`/api/events/${eventId}`, {
+        method: "GET",
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (httpResponse.ok)
+    {
+        const res = await httpResponse.json() as EventDetails;
+        return res;
+    }
+
+    if (httpResponse.status === 404)
+    {
+        return null;
+    }
+
+    throw new Error("Http Exception");
+}
+
 export type DecklistResponse = {
     player_name: string;
     mainboard: DecklistCard[],

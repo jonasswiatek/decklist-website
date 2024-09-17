@@ -64,10 +64,12 @@ const StartLogin: React.FC<LoginProps> = ({onStarted}) => {
                     <input type="text" className="form-control" id="email" placeholder="name@example.com" required {...register("email")} />
                     {errors.email && <p>{errors.email?.message}</p>}
                   </div>
-                  <div className="col">
-                    <button className="btn btn-lg btn-primary" type="submit">Log in now</button>
-                  </div>
                 </div>
+                <div className='row'>
+                    <div className="col">
+                      <button className="btn btn-lg btn-primary" type="submit">Log in now</button>
+                    </div>
+                  </div>
               </form>
             </div>
           </div>
@@ -112,6 +114,8 @@ const ContinueLogin: React.FC<ContinueLoginProps> = ({email}) => {
                     <input type="number" className="form-control" id="code" placeholder="000000" required {...register("code")} />
                     {errors.code && <p>{errors.code?.message}</p>}
                   </div>
+                </div>
+                <div className='row'>
                   <div className="col">
                     <button className="btn btn-lg btn-primary" type="submit">Verify</button>
                   </div>
