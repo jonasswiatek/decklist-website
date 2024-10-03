@@ -4,9 +4,11 @@ import { HandleValidation } from '../../Util/Validators';
 import { createEventRequest, EventListItem } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
+import { ReactElement } from 'react';
 
-export function EventList() {
+export function EventList() : ReactElement {
   const { register, handleSubmit, setError, clearErrors, reset, formState: { errors } } = useForm<Inputs>();
+
   const { data, refetch } = useQuery({
     queryKey: ['my-events'],
     queryFn: () =>

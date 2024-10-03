@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { AuthState, useDecklistStore } from "../../store/deckliststore";
+import { useDecklistStore } from "../../store/deckliststore";
 import Button from 'react-bootstrap/Button';
 import { useState } from "react";
 import { getEvent } from '../../model/api/apimodel';
+import { useAuth } from "../Login/AuthContext";
 
 export function LandingPage() {
-    const { authState, logout } = useDecklistStore();
+    const { logout } = useDecklistStore();
+    const { login, authorized } = useAuth();
+
     const [joinCode, setJoinCode] = useState<string>('');
     const [showError, setShowError] = useState<boolean>(false);
 
@@ -30,12 +33,11 @@ export function LandingPage() {
         <>
             <div className="row">
                 <div className="col">
-                    <p>Welcome</p>
                     <p>
-                        To upload a decklist, scan the QR code provided by your tournament organiser or enter the code provided by the tournament below.
+                        Enter event code, or scan QR code provided by the tournament to upload your decklist.
                     </p>
                     <p>
-                        <input type='text'  value={joinCode} onChange={(e) => setJoinCode(e.target.value)} />
+                        <input type='text'  value={joinCode} onChange={(e) => setJoinCode(e.target.value)} /> <Button onClick={goToEvent}>Join Event</Button>
                     </p>
                     {showError ? (
                         <>
@@ -45,14 +47,11 @@ export function LandingPage() {
                         </>
                     ) : (<></>)}
                     <p>
-                        <Button onClick={goToEvent}>Join Event</Button>
-                    </p>
-                    <p>
-                        If you wish to collect decklists for your own event, choose "My Tournaments" in the menu at the top.
+                    <a onClick={() => login()}>Log in</a> to change or delete existing decklists.
                     </p>
                 </div>
             </div>
-            {authState === AuthState.Authorized ? (
+            {authorized ? (
                 <div className="row">
                     <div className="col">
                         <button onClick={() => logout()}>

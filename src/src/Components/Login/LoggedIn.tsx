@@ -1,15 +1,15 @@
-import { ReactNode } from 'react';
-import { AuthState, useDecklistStore } from '../../store/deckliststore';
-import { LoginScreen } from './Login';
+import { ReactNode, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 export const LoggedIn = (props: {children: ReactNode}) => {
-    const { authState } = useDecklistStore();
+    const { login, authorized } = useAuth();
 
-    switch (authState) {
-        case AuthState.Authorized:
-            return props.children;
+    useEffect(() => {
+        if (!authorized)
+            login();
+        
+    }, [login, authorized]);
 
-        case AuthState.Unauthorized:
-            return <LoginScreen />
-    }
+    if (authorized)
+        return props.children;
 };
