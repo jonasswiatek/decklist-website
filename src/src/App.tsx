@@ -4,7 +4,6 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import { EventList } from './Components/Events/Events.tsx'
 import { EventView } from './Components/Events/Event.tsx'
 import { LoggedIn } from './Components/Login/LoggedIn.tsx';
 import { LandingPage } from './Components/LandingPage/LandingPage.tsx';
@@ -17,6 +16,7 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { AuthProvider, useAuth } from './Components/Login/AuthContext.tsx';
+import { CreateEvent } from './Components/Events/CreateEvent.tsx';
 
 const queryClient = new QueryClient()
 
@@ -29,7 +29,7 @@ const router = createBrowserRouter([
     path: "/new-event",
     element:
       <LoggedIn>
-        <EventList />
+        <CreateEvent />
       </LoggedIn>,
   },
   {

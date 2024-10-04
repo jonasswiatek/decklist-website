@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { useDecklistStore } from "../../store/deckliststore";
 import Button from 'react-bootstrap/Button';
 import { useState } from "react";
 import { getEvent } from '../../model/api/apimodel';
 import { useAuth } from "../Login/AuthContext";
+import { EventList } from "../Events/EventList";
 
 export function LandingPage() {
-    const { logout } = useDecklistStore();
     const { login, authorized } = useAuth();
 
     const [joinCode, setJoinCode] = useState<string>('');
@@ -46,20 +45,23 @@ export function LandingPage() {
                             </p>
                         </>
                     ) : (<></>)}
+                </div>
+            </div>
+            <div className="row">
+                <div className="col">
                     <p>
-                    <a onClick={() => login()}>Log in</a> to change or delete existing decklists.
+                    {authorized ? (
+                        <>
+                            <EventList />
+                        </>
+                    ) : (
+                        <>
+                            <a onClick={() => login()}>Log in</a> to change or delete existing decklists.
+                        </>
+                    )}
                     </p>
                 </div>
             </div>
-            {authorized ? (
-                <div className="row">
-                    <div className="col">
-                        <button onClick={() => logout()}>
-                            Log out
-                        </button>
-                    </div>
-                </div>
-            ) : (<></>)}
         </>
     )
 }
