@@ -179,7 +179,7 @@ type SubmitDecklistRequest = {
 }
 
 export async function submitDecklistRequest(data: SubmitDecklistRequest) {
-    const httpResponse = await fetch(`/api/decks/${data.event_id}`, {
+    const httpResponse = await fetch(`/api/events/${data.event_id}/deck`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
@@ -300,7 +300,7 @@ export type ValidationErrorResponse = {
 }
 
 async function ThrowIfValidationErrors(response: Response) {
-    if (response.status == 400 && response.headers.get("Content-Type") === "application/problem+json; charset=utf-8") {
+    if (response.status == 400 && response.headers.get("Content-Type") === "application/problem+json") {
         const errors = await response.json() as ValidationErrorResponse;
         throw new ValidationError(errors);
     }

@@ -4,6 +4,7 @@ import { EventDetails, joinEventRequest, updateEventUsers, submitDecklistRequest
 import { useQuery } from 'react-query';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
+import { useAuth } from '../Login/AuthContext';
 
 export function EventView() {
     const { event_id } = useParams();
@@ -113,7 +114,7 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
         retry: false,
         refetchOnWindowFocus: false,
         queryFn: () =>
-            fetch(`/api/decks/${e.event.event_id}`).then(async (res) => {
+            fetch(`/api/events/${e.event.event_id}/deck`).then(async (res) => {
                 if (res.status === 404) {
                     return null;
                 }
@@ -134,6 +135,7 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
             refetch();
         }
         catch(e) {
+            console.log("handle val", e);
             HandleValidation(setError, e);
         }
     }
@@ -145,7 +147,7 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
     if (error != null) {
         return <p>Error, try later</p>
     }
-
+    console.log("errors", errors);
     return (
         <>
         <div className='row'>
@@ -336,6 +338,8 @@ const JudgeView: React.FC<EventViewProps> = (e) => {
 }
 
 const UnjoinedView: React.FC<EventViewProps> = (e) => {
+    const { login, authorized } = useAuth();
+
     const joinEvent = async () => {
         await joinEventRequest({event_id: e.event.event_id});
         e.refetch!();
@@ -346,14 +350,25 @@ const UnjoinedView: React.FC<EventViewProps> = (e) => {
           <div className='row'>
               <div className='col'>
                   <p>{e.event.event_name}</p>
-                  <p>Invite Link: https://decklist.lol/events/{e.event.event_id}</p>
               </div>
           </div>
-          <div className='row'>
-              <div className='col'>
-                <button type="button" className="btn btn-primary" onClick={joinEvent}>Join event</button>
-              </div>
-          </div>
+          {authorized ? 
+          (
+            <div className='row'>
+                <div className='col'>
+                    <button type="button" className="btn btn-primary" onClick={joinEvent}>Join event</button>
+                </div>
+            </div>
+          ) :
+          (
+            <div className='row'>
+                <div className='col'>
+                    <p>Log in to join this event</p>
+                    <button type="button" className="btn btn-primary" onClick={login}>Log in</button>
+                </div>
+            </div>
+          )
+        }
         </>
     )
 }

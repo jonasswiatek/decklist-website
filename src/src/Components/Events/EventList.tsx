@@ -2,8 +2,10 @@ import '../../App.scss'
 import { EventListItem } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { ReactElement } from 'react';
+import { Link } from 'react-router-dom';
 
 export function EventList() : ReactElement {
+
   const { data } = useQuery({
     queryKey: ['my-events'],
     queryFn: () =>
@@ -28,7 +30,7 @@ export function EventList() : ReactElement {
                 {data?.map(event =>
                   <tr>
                     <th scope='row'>{event.event_date.toString()}</th>
-                    <td>{event.event_name}</td>
+                    <td><Link to={'/events/' + event.event_id}>{event.event_name}</Link></td>
                     <td>{event.role}</td>
                   </tr>
                 )}
