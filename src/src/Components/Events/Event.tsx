@@ -154,7 +154,9 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
             <div className='col'>
                 <p>Decklist view</p>
                 <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
-                    <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text")} />
+                    <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text")}>
+                        {data?.decklist_text}
+                    </textarea>
                     {errors.decklist_text && <p>{errors.decklist_text?.message}</p>}
                     <button type='submit' className='btn btn-primary'>Submit decklist</button>
                 </form>
@@ -316,6 +318,7 @@ const JudgeView: React.FC<EventViewProps> = (e) => {
                     <tr>
                         <th>Email</th>
                         <th>Deck submitted</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -324,7 +327,8 @@ const JudgeView: React.FC<EventViewProps> = (e) => {
                             <>
                                 <tr>
                                     <td>{p.email}</td>
-                                    <td>No</td>
+                                    <td>{p.deck_submitted ? 'Yes' : 'No'}</td>
+                                    <td>{p.deck_submitted ? 'Show' : ''}</td>
                                 </tr>
                             </>
                         )

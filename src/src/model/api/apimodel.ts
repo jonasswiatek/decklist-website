@@ -247,7 +247,8 @@ export async function getEvent(eventId: string) {
 export type DecklistResponse = {
     player_name: string;
     mainboard: DecklistCard[],
-    sideboard: DecklistCard[]
+    sideboard: DecklistCard[],
+    decklist_text: string,
 }
 
 type DecklistCard = {
@@ -281,6 +282,8 @@ export type EventDetails = {
 type EventParticipant = {
     email: string,
     role: string
+    deck_submitted: boolean,
+    user_id: string,
 }
 
 export type LoginStartResponse = {
