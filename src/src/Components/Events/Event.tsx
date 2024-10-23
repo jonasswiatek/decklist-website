@@ -1,5 +1,5 @@
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { EventDetails, joinEventRequest, updateEventUsers, submitDecklistRequest, deleteEvent, DecklistResponse } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -328,7 +328,7 @@ const JudgeView: React.FC<EventViewProps> = (e) => {
                                 <tr>
                                     <td>{p.email}</td>
                                     <td>{p.deck_submitted ? 'Yes' : 'No'}</td>
-                                    <td>{p.deck_submitted ? 'Show' : ''}</td>
+                                    <td>{p.deck_submitted ? <Link to={'/events/' + e.event.event_id + '/deck?id=' + p.user_id}>Show</Link> : ''}</td>
                                 </tr>
                             </>
                         )

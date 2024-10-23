@@ -17,6 +17,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { AuthProvider, useAuth } from './Components/Login/AuthContext.tsx';
 import { CreateEvent } from './Components/Events/CreateEvent.tsx';
+import { DeckView } from './Components/Events/Deck.tsx';
 
 const queryClient = new QueryClient()
 
@@ -36,6 +37,13 @@ const router = createBrowserRouter([
     path: "/events/:event_id",
     element:
       <EventView />
+  },
+  {
+    path: "/events/:event_id/deck",
+    element:
+    <LoggedIn>
+      <DeckView />
+    </LoggedIn>,
   },
 ]);
 
