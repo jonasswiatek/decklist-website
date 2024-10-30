@@ -106,6 +106,7 @@ type EventViewProps = {
 
 const DecklistEditor: React.FC<EventViewProps> = (e) => {
     type Inputs = {
+        player_name: string,
         decklist_text: string
     };
 
@@ -131,7 +132,7 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
     const { register, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = async data => {
         try {
-            await submitDecklistRequest({ event_id: e.event.event_id, player_name: "Jonas Swiatek", decklist_text: data.decklist_text });
+            await submitDecklistRequest({ event_id: e.event.event_id, player_name: data.player_name, decklist_text: data.decklist_text });
             refetch();
         }
         catch(e) {
@@ -154,6 +155,7 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
             <div className='col'>
                 <p>Decklist view</p>
                 <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
+                    <input type='text' className='form-control' placeholder='Your name' required {...register("player_name", { value: data?.player_name })} />
                     <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text")}>
                         {data?.decklist_text}
                     </textarea>
