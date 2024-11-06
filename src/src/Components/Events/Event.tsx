@@ -1,10 +1,12 @@
-
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { EventDetails, joinEventRequest, updateEventUsers, submitDecklistRequest, deleteEvent, DecklistResponse } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
 import { useAuth } from '../Login/AuthContext';
+import { Collapse, Button } from 'react-bootstrap';
+import { useState } from 'react';
+import { DecklistTable } from './DecklistTable';
 
 export function EventView() {
     const { event_id } = useParams();
@@ -129,17 +131,20 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
         ),
     });
 
-    const { register, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
+    const { register, setError, handleSubmit, clearErrors, reset, formState: { errors, isDirty } } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = async data => {
         try {
             await submitDecklistRequest({ event_id: e.event.event_id, player_name: data.player_name, decklist_text: data.decklist_text });
             refetch();
+            reset(data);
         }
         catch(e) {
             console.log("handle val", e);
             HandleValidation(setError, e);
         }
     }
+
+    const [open, setOpen] = useState(false);
 
     if (isLoading) {
         return <p>Loading...</p>
@@ -148,79 +153,42 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
     if (error != null) {
         return <p>Error, try later</p>
     }
-    console.log("errors", errors);
+
+    const mainboardCount = data?.mainboard.reduce((acc, val) => acc + val.quantity, 0);
+    const sideboardCount = data?.sideboard.reduce((acc, val) => acc + val.quantity, 0);
+
     return (
         <>
         <div className='row'>
             <div className='col'>
-                <p>Decklist view</p>
                 <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
-                    <input type='text' className='form-control' placeholder='Your name' required {...register("player_name", { value: data?.player_name })} />
-                    <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text")}>
-                        {data?.decklist_text}
-                    </textarea>
+                    <div className="form-group d-flex align-items-center">
+                        <label htmlFor="player_name" className="me-2">Player Name:</label>
+                        <input type='text' id="player_name" className='form-control' placeholder='Your name' required {...register("player_name", { value: data?.player_name })} style={{ width: 'auto' }} />
+                    </div>
+                    <div className="form-group">
+                        <Button onClick={() => setOpen(!open)} aria-controls="example-collapse-text" aria-expanded={open}>click</Button>
+                        <Collapse in={open}>
+                            <div>
+                                <label htmlFor="decklist_text">Decklist:</label>
+                                <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text", { value: data?.decklist_text })} style={{ width: 'auto' }} />
+                            </div>
+                        </Collapse>
+                   </div>
                     {errors.decklist_text && <p>{errors.decklist_text?.message}</p>}
-                    <button type='submit' className='btn btn-primary'>Submit decklist</button>
+                    <div className="submit-button-wrapper float-bottom" id='bottom-bar'>
+                    <div>
+                        <span style={{margin: 5}}>Main: {mainboardCount}</span>
+                        <span style={{margin: 5}}>Side: {sideboardCount}</span>
+                    </div>
+                    {isDirty ? <button type='submit' className='btn btn-primary' id='submit-button'>Save</button> : <></>}
+                </div>
                 </form>
             </div>
         </div>
         <div className='row'>
-            <div className='col'>
-                <p>Name: {data?.player_name}</p>
-            </div>
-        </div>
-        <div className='row'>
-            <div className='col'>
-                <p>Main board</p>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Qty</th>
-                        <th>Card</th>
-                        <th>Type</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {data?.mainboard?.map((p) => {
-                        return (
-                            <>
-                                <tr>
-                                    <td>{p.quantity}</td>
-                                    <td>{p.card_name}</td>
-                                    <tr>{p.type}</tr>
-                                </tr>
-                            </>
-                        )
-                    })}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div className='row'>
-            <div className='col'>
-                <p>Side board</p>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Qty</th>
-                        <th>Card</th>
-                        <th>Type</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {data?.sideboard?.map((p) => {
-                        return (
-                            <>
-                                <tr>
-                                    <td>{p.quantity}</td>
-                                    <td>{p.card_name}</td>
-                                    <tr>{p.type}</tr>
-                                </tr>
-                            </>
-                        )
-                    })}
-                    </tbody>
-                </table>
+            <div className='col decklist-table-container'>
+                <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} />
             </div>
         </div>
       </>
@@ -285,7 +253,7 @@ const OwnerView: React.FC<EventViewProps> = (e) => {
                                     <tr>
                                         <td>{p.email}</td>
                                         <td>{p.role}</td>
-                                        <tr><button type="button" className="btn btn-danger" onClick={async () => onRemove(p.email)}>Remove</button></tr>
+                                        <td><button type="button" className="btn btn-danger" onClick={async () => onRemove(p.email)}>Remove</button></td>
                                     </tr>
                                 </>
                             )

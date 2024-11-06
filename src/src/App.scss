@@ -11,3 +11,42 @@
 .container {
   color: wheat;
 }
+
+body {
+  padding-bottom: 60px;
+}
+
+.float-bottom {
+  position: fixed;
+  bottom: 0px; /* Adjust this value as needed */
+  right: 0px;
+  z-index: 1000;
+}
+
+.submit-button-wrapper {
+  height: 55px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 10px;
+  background-color: darkred;
+  border: 2px solid red;
+  border-radius: 5px;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+}
+
+@media only screen {
+  .decklist-table-container {
+    column-count: 2;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .decklist-table-container {
+    column-count: 1;
+  }
+}

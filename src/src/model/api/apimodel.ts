@@ -251,7 +251,7 @@ export type DecklistResponse = {
     decklist_text: string,
 }
 
-type DecklistCard = {
+export type DecklistCard = {
     card_name: string,
     quantity: number,
     mana_cost: string,
