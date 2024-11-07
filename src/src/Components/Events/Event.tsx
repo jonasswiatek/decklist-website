@@ -4,9 +4,8 @@ import { useQuery } from 'react-query';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
 import { useAuth } from '../Login/AuthContext';
-import { Collapse, Button } from 'react-bootstrap';
-import { useState } from 'react';
 import { DecklistTable } from './DecklistTable';
+import { BsPerson } from 'react-icons/bs'; // Import the Bootstrap person icon from react-icons
 
 export function EventView() {
     const { event_id } = useParams();
@@ -93,10 +92,11 @@ export function EventView() {
       <>
         <div className='row'>
             <div className='col'>
-                <p>{data.event_name}</p>
+                <h1>{data.event_name}</h1>
+                <br></br>
             </div>
         </div>
-        <DecklistEditor event={data} />
+        <JoinedPlayerView event={data} />
       </>
     )
 }
@@ -106,7 +106,7 @@ type EventViewProps = {
     refetch?: () => void
 }
 
-const DecklistEditor: React.FC<EventViewProps> = (e) => {
+const JoinedPlayerView: React.FC<EventViewProps> = (e) => {
     type Inputs = {
         player_name: string,
         decklist_text: string
@@ -144,8 +144,6 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
         }
     }
 
-    const [open, setOpen] = useState(false);
-
     if (isLoading) {
         return <p>Loading...</p>
     }
@@ -159,39 +157,38 @@ const DecklistEditor: React.FC<EventViewProps> = (e) => {
 
     return (
         <>
-        <div className='row'>
-            <div className='col'>
-                <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
-                    <div className="form-group d-flex align-items-center">
-                        <label htmlFor="player_name" className="me-2">Player Name:</label>
-                        <input type='text' id="player_name" className='form-control' placeholder='Your name' required {...register("player_name", { value: data?.player_name })} style={{ width: 'auto' }} />
-                    </div>
+        <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
+            <div className='row'>
+                <div className='col-md-4 col-sm-12'>
                     <div className="form-group">
-                        <Button onClick={() => setOpen(!open)} aria-controls="example-collapse-text" aria-expanded={open}>click</Button>
-                        <Collapse in={open}>
-                            <div>
-                                <label htmlFor="decklist_text">Decklist:</label>
-                                <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text", { value: data?.decklist_text })} style={{ width: 'auto' }} />
-                            </div>
-                        </Collapse>
-                   </div>
-                    {errors.decklist_text && <p>{errors.decklist_text?.message}</p>}
-                    <div className="submit-button-wrapper float-bottom" id='bottom-bar'>
+                        <div className="input-group">
+                            <span className="input-group-text" id="basic-addon1">
+                                <BsPerson />
+                            </span>
+                            <input type='text' id="player_name" className='form-control' placeholder='Player Name' required {...register("player_name", { value: data?.player_name })} />
+                        </div>
+                    </div>
+                    <hr></hr>
+                    <div className="form-group">
+                        <div>
+                            <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text", { value: data?.decklist_text })} style={{ width: '100%', height: 400 }} />
+                            {errors.decklist_text && <p>{errors.decklist_text?.message}</p>}
+                        </div>
+                    </div>
+                </div>
+                <div className='col-md-8 col-sm-12 decklist-table-container'>
+                    <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} />
+                </div>
+                <div className="submit-button-wrapper float-bottom" id='bottom-bar'>
                     <div>
                         <span style={{margin: 5}}>Main: {mainboardCount}</span>
                         <span style={{margin: 5}}>Side: {sideboardCount}</span>
                     </div>
                     {isDirty ? <button type='submit' className='btn btn-primary' id='submit-button'>Save</button> : <></>}
                 </div>
-                </form>
             </div>
-        </div>
-        <div className='row'>
-            <div className='col decklist-table-container'>
-                <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} />
-            </div>
-        </div>
-      </>
+        </form>
+        </>
     )
 }
 

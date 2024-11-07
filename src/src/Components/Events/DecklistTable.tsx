@@ -21,9 +21,9 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                                 <td colSpan={3} style={{paddingTop:15}}><b>{p.type} ({typeCount})</b></td>
                             </tr>
                             <tr>
-                                <td>{p.quantity}</td>
-                                <td>{p.card_name}</td>
-                                <td>{p.mana_cost}</td>
+                                <td className='decklist-tbl-quantity'>{p.quantity}</td>
+                                <td className='decklist-tbl-card-name'>{p.card_name}</td>
+                                <td className='decklist-tbl-mana-cost'>{p.mana_cost}</td>
                             </tr>
                         </>
                     )
@@ -31,9 +31,9 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
 
                 return (
                     <tr>
-                        <td>{p.quantity}</td>
-                        <td>{p.card_name}</td>
-                        <td>{p.mana_cost}</td>
+                        <td className='decklist-tbl-quantity'>{p.quantity}</td>
+                        <td className='decklist-tbl-card-name'>{p.card_name}</td>
+                        <td className='decklist-tbl-mana-cost'>{p.mana_cost}</td>
                     </tr>
                 )
             })}
@@ -45,9 +45,9 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
             {props?.sideboard?.map((p) => {
                 return (
                     <tr>
-                        <td>{p.quantity}</td>
-                        <td>{p.card_name}</td>
-                        <td>{p.mana_cost}</td>
+                        <td className='decklist-tbl-quantity'>{p.quantity}</td>
+                        <td className='decklist-tbl-card-name'>{p.card_name}</td>
+                        <td className='decklist-tbl-mana-cost'>{p.mana_cost}</td>
                     </tr>
                 )
             })}
