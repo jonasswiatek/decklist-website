@@ -27,19 +27,19 @@ const router = createBrowserRouter([
     element: <LandingPage />,
   },
   {
-    path: "/new-event",
+    path: "/e/new",
     element:
       <LoggedIn>
         <CreateEvent />
       </LoggedIn>,
   },
   {
-    path: "/events/:event_id",
+    path: "/e/:event_id",
     element:
       <EventView />
   },
   {
-    path: "/events/:event_id/deck",
+    path: "/e/:event_id/deck",
     element:
     <LoggedIn>
       <DeckView />
@@ -75,7 +75,7 @@ function NavBar()
       <Navbar.Toggle aria-controls="responsive-navbar-nav" />
       <Navbar.Collapse id="responsive-navbar-nav">
         <Nav className="me-auto">
-          <Nav.Link href="/new-event">Create Event</Nav.Link>
+          <Nav.Link href="/e/new">Create Event</Nav.Link>
         </Nav>
         <Nav>
         {authorized ? (

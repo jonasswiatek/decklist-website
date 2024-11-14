@@ -5,7 +5,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
 import { useAuth } from '../Login/AuthContext';
 import { DecklistTable } from './DecklistTable';
-import { BsPerson } from 'react-icons/bs'; // Import the Bootstrap person icon from react-icons
+import { BsPerson, BsMailbox } from 'react-icons/bs'; // Import the Bootstrap person icon from react-icons
 
 export function EventView() {
     const { event_id } = useParams();
@@ -65,25 +65,40 @@ export function EventView() {
         )
     }
 
-
     if (!data.joined) {
         return <UnjoinedView event={data} refetch={refetch} />
     }
 
-    if (data.role === "owner") {
-        //Being viewed by the owner or a judge.
+    /*
+    if () {
+        //Being viewed by the owner.
         return (
             <>
+                <div className='row'>
+                    <div className='col'>
+                        <h1>{data.event_name}</h1>
+                        <br></br>
+                    </div>
+                </div>
                 <OwnerView event={data} refetch={refetch} />
                 <JudgeView event={data} />
             </>
         )
     }
+    */
 
-    if (data.role === "judge") {
-        //Being viewed by the owner or a judge.
+    if (data.role === "owner" || data.role === "judge") {
+        //Being viewed by a judge.
         return (
-            <JudgeView event={data} />
+            <>
+                <div className='row'>
+                    <div className='col'>
+                        <h1>{data.event_name}</h1>
+                        <br></br>
+                    </div>
+                </div>
+                <JudgeView event={data} refetch={refetch} />
+            </>
         )
     }
     
@@ -269,41 +284,93 @@ const OwnerView: React.FC<EventViewProps> = (e) => {
 }
 
 const JudgeView: React.FC<EventViewProps> = (e) => {
+    const players = e.event.participants.filter(a => a.role === "player");
+    const judges = e.event.participants.filter(a => a.role === "judge");
+    type Inputs = {
+        email: string
+    };
+
+    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
+    const onSubmit: SubmitHandler<Inputs> = async data => {
+        try {
+            await updateEventUsers({ event_id: e.event.event_id, email: data.email, role: 'judge' });
+            e.refetch!();
+            reset();
+        }
+        catch(e) {
+            HandleValidation(setError, e);
+        }
+    }
+
+    const onRemove = async (email: string) => {
+        await updateEventUsers({ event_id: e.event.event_id, email: email, role: 'none' });
+        e.refetch!();
+    }
+
     return (
         <>
-          <div className='row'>
-              <div className='col'>
-                  <p>{e.event.event_name}</p>
-                  <p>Invite Link: https://decklist.lol/events/{e.event.event_id}</p>
-              </div>
-          </div>
-          <div className='row'>
-              <div className='col'>
-                  <h2>Players</h2>
-                  <table>
-                    <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th>Deck submitted</th>
-                        <th></th>
-                    </tr>
-                    </thead>
+        <div className='row' style={{paddingBottom: 40}}>
+            <div className='col'>
+                <p>Invite Link: https://decklist.lol/e/{e.event.event_id}</p>
+            </div>
+        </div>
+        <div className='row'>
+            <div className='col'>
+                <h2>Decks</h2>
+                <table>
+                <thead>
+                <tr>
+                    <th>Player Name</th>
+                    <th>Deck submitted</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {players.map((p) => {
+                    return (
+                        <>
+                            <tr>
+                                <td style={{paddingRight:15}}>{p.email}</td>
+                                <td>{p.deck_submitted ? 'Yes' : 'No'}</td>
+                                <td>{p.deck_submitted ? <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id}>Show</Link> : ''}</td>
+                            </tr>
+                        </>
+                    )
+                })}
+                </tbody>
+                </table>
+            </div>
+            <div className='col'>
+                <h2>Judges</h2>
+                <table width={'100%'}>
                     <tbody>
-                    {e.event.participants?.filter(a => a.role == "player").map((p) => {
+                    {judges.map((p) => {
                         return (
                             <>
                                 <tr>
-                                    <td>{p.email}</td>
-                                    <td>{p.deck_submitted ? 'Yes' : 'No'}</td>
-                                    <td>{p.deck_submitted ? <Link to={'/events/' + e.event.event_id + '/deck?id=' + p.user_id}>Show</Link> : ''}</td>
+                                    <td width={'100%'}>{p.email}</td>
+                                    <td><button type="button" className="btn btn-danger" onClick={async () => onRemove(p.email)}>Remove</button></td>
                                 </tr>
                             </>
                         )
                     })}
                     </tbody>
-                  </table>
-              </div>
-          </div>
+                </table>
+
+                <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
+                    <div className="form-group">
+                        <div className="input-group">
+                            <span className="input-group-text" id="basic-addon1">
+                                <BsMailbox />
+                            </span>
+                            <input id='event_name' type="text" className="form-control" placeholder="Email Address" required {...register("email")} />
+                            <button type='submit' className='btn btn-primary'>Add judge</button>
+                        </div>
+                        {errors.email && <p>{errors.email?.message}</p>}
+                    </div>
+                </form>
+            </div>
+        </div>
         </>
     )
 }

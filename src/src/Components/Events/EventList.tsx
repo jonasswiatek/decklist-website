@@ -30,7 +30,7 @@ export function EventList() : ReactElement {
                 {data?.map(event =>
                   <tr>
                     <th scope='row'>{event.event_date.toString()}</th>
-                    <td><Link to={'/events/' + event.event_id}>{event.event_name}</Link></td>
+                    <td><Link to={'/e/' + event.event_id}>{event.event_name}</Link></td>
                     <td>{event.role}</td>
                   </tr>
                 )}
