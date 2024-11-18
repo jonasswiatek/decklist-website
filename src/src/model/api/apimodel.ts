@@ -281,6 +281,7 @@ export type EventDetails = {
 
 type EventParticipant = {
     email: string,
+    player_name?: string,
     role: string
     deck_submitted: boolean,
     user_id: string,

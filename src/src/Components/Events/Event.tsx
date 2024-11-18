@@ -1,5 +1,5 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { EventDetails, joinEventRequest, updateEventUsers, submitDecklistRequest, deleteEvent, DecklistResponse } from '../../model/api/apimodel';
+import { useParams, Link } from 'react-router-dom';
+import { EventDetails, joinEventRequest, updateEventUsers, submitDecklistRequest, DecklistResponse } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
@@ -207,6 +207,7 @@ const JoinedPlayerView: React.FC<EventViewProps> = (e) => {
     )
 }
 
+/*
 const OwnerView: React.FC<EventViewProps> = (e) => {
     type Inputs = {
         email: string
@@ -282,6 +283,7 @@ const OwnerView: React.FC<EventViewProps> = (e) => {
         </>
     )
 }
+*/
 
 const JudgeView: React.FC<EventViewProps> = (e) => {
     const players = e.event.participants.filter(a => a.role === "player");
@@ -330,7 +332,7 @@ const JudgeView: React.FC<EventViewProps> = (e) => {
                     return (
                         <>
                             <tr>
-                                <td style={{paddingRight:15}}>{p.email}</td>
+                                <td style={{paddingRight:15}}>{p.player_name ? p.player_name : p.email}</td>
                                 <td>{p.deck_submitted ? 'Yes' : 'No'}</td>
                                 <td>{p.deck_submitted ? <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id}>Show</Link> : ''}</td>
                             </tr>
