@@ -18,6 +18,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import { AuthProvider, useAuth } from './Components/Login/AuthContext.tsx';
 import { CreateEvent } from './Components/Events/CreateEvent.tsx';
 import { DeckView } from './Components/Events/Deck.tsx';
+import QRCodeView from './Components/Events/Views/QRCodeView';
 
 const queryClient = new QueryClient()
 
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
     <LoggedIn>
       <DeckView />
     </LoggedIn>,
+  },
+  {
+    path: "/e/:eventId/qr",
+    element: <QRCodeView />
   },
 ]);
 

@@ -28,25 +28,65 @@ export function CreateEvent() : ReactElement {
         
     return (
       <>
-        <div className='row'>
-            <div className='col'>
-                <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} > 
-                    <label htmlFor="event_name" className="form-label">Event name</label>
-                    <input id='event_name' type="text" className="form-control" placeholder="Modern RCQ" required {...register("event_name")} />
-                    <input type='date' className='form-control' required {...register("event_date")} />
-                    <select {...register("format")}>
-                        <option value="Modern">modern</option>
-                        <option value="Pioneer">pioneer</option>
-                        <option value="Standard">standard</option>
-                        <option value="Commander">commander</option>
-                        <option value="legacy">legacy</option>
-                        <option value="Vintage">vintage</option>
-                        <option value="Pauper">pauper</option>
-                    </select>
-                    {errors.event_name && <p>{errors.event_name?.message}</p>}
-                    {errors.format && <p>{errors.format?.message}</p>}
-                    <button type='submit' className='btn btn-primary'>Create event</button>
-                </form>
+        <div className='container mt-4'>
+            <div className='row justify-content-center'>
+                <div className='col-md-8 col-lg-6'>
+                    <div className="card border-0 shadow-sm mb-4">
+                        <div className="card-header py-3 bg-dark text-white">
+                            <h5 className="mb-0 fw-bold">Create New Event</h5>
+                        </div>
+                        <div className="card-body p-4">
+                            <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} > 
+                                <div className="mb-3">
+                                    <label htmlFor="event_name" className="form-label fw-bold">Event Name</label>
+                                    <input 
+                                        id='event_name' 
+                                        type="text" 
+                                        className={`form-control ${errors.event_name ? 'is-invalid' : ''}`} 
+                                        placeholder="Modern RCQ" 
+                                        required 
+                                        {...register("event_name")} 
+                                    />
+                                    {errors.event_name && <div className="invalid-feedback">{errors.event_name?.message}</div>}
+                                </div>
+                                
+                                <div className="mb-3">
+                                    <label htmlFor="event_date" className="form-label fw-bold">Event Date</label>
+                                    <input 
+                                        id="event_date"
+                                        type='date' 
+                                        className={`form-control ${errors.event_date ? 'is-invalid' : ''}`} 
+                                        required 
+                                        {...register("event_date")} 
+                                    />
+                                    {errors.event_date && <div className="invalid-feedback">{errors.event_date?.message}</div>}
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label htmlFor="format" className="form-label fw-bold">Format</label>
+                                    <select 
+                                        id="format"
+                                        className={`form-select ${errors.format ? 'is-invalid' : ''}`} 
+                                        {...register("format")}
+                                    >
+                                        <option value="Modern">Modern</option>
+                                        <option value="Pioneer">Pioneer</option>
+                                        <option value="Standard">Standard</option>
+                                        <option value="Commander">Commander</option>
+                                        <option value="Legacy">Legacy</option>
+                                        <option value="Vintage">Vintage</option>
+                                        <option value="Pauper">Pauper</option>
+                                    </select>
+                                    {errors.format && <div className="invalid-feedback">{errors.format?.message}</div>}
+                                </div>
+                                
+                                <div className="d-grid mt-4">
+                                    <button type='submit' className='btn btn-dark btn-lg'>Create Event</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
       </>
