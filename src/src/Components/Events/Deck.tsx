@@ -25,7 +25,7 @@ const DeckList: React.FC<DeckListProps> = (e: DeckListProps) => {
         retry: false,
         refetchOnWindowFocus: false,
         queryFn: () =>
-            fetch(`/api/events/${e.event_id}/deck?user_id=${e.user_id}`).then(async (res) => {
+            fetch(`/api/events/${e.event_id}/deck?user_id=${encodeURIComponent(e.user_id)}`).then(async (res) => {
                 if (res.status === 404) {
                     return null;
                 }
