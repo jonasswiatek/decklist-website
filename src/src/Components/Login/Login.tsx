@@ -8,24 +8,46 @@ export function LoginScreen() {
   const { authState, logout } = useDecklistStore();
   const [currentEmail, setCurrentEmail] = useState<string | null>(null);
 
-  let component;
   if (authState == AuthState.Authorized) {
-    component = <>
-      <p>
-        <button onClick={() => logout()}>
-          Log out
-        </button>
-      </p>
-    </>;
-  }
-  else {
-    if (currentEmail === null)
-      component = <StartLogin onStarted={(email) => setCurrentEmail(email)} />
-    else
-      component = <ContinueLogin email={currentEmail} />
+    return (
+      <div className="container py-4">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card shadow">
+              <div className="card-body">
+                <h3 className="card-title mb-4">Account</h3>
+                <p>You are currently logged in.</p>
+                <button 
+                  className="btn btn-outline-danger" 
+                  onClick={() => logout()}
+                >
+                  Log out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  return component
+  return (
+    <div className="container py-4">
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <div className="card shadow">
+            <div className="card-body">
+              {currentEmail === null ? (
+                <StartLogin onStarted={(email) => setCurrentEmail(email)} />
+              ) : (
+                <ContinueLogin email={currentEmail} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 type LoginProps = {
@@ -35,6 +57,10 @@ type LoginProps = {
 const StartLogin: React.FC<LoginProps> = ({onStarted}) => {
   const { register, handleSubmit, setError, formState: { errors } } = useForm<Inputs>();
   const { startLogin } = useDecklistStore();
+  
+  type Inputs = {
+    email: string
+  };
   
   const onSubmit: SubmitHandler<Inputs> = async data => {
     try {
@@ -46,35 +72,26 @@ const StartLogin: React.FC<LoginProps> = ({onStarted}) => {
     }
   }
 
-  type Inputs = {
-    email: string
-  };
-
   return (
-    <> 
-      <div className="py-3 py-md-5">
-        <div className="container">
-          <div className="row">
-            <div className="col">
-              <h3>Log in</h3>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="row">
-                  <div className="col">
-                    <label htmlFor="email" className="form-label">Email <span className="text-danger">*</span></label>
-                    <input type="text" className="form-control" id="email" placeholder="name@example.com" required {...register("email")} />
-                    {errors.email && <p>{errors.email?.message}</p>}
-                  </div>
-                </div>
-                <div className='row'>
-                    <div className="col">
-                      <button className="btn btn-lg btn-primary" type="submit">Log in now</button>
-                    </div>
-                  </div>
-              </form>
-            </div>
-          </div>
+    <>
+      <h3 className="card-title mb-4">Log in</h3>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">Email <span className="text-danger">*</span></label>
+          <input 
+            type="email" 
+            className={`form-control ${errors.email ? 'is-invalid' : ''}`} 
+            id="email" 
+            placeholder="name@example.com" 
+            required 
+            {...register("email")} 
+          />
+          {errors.email && <div className="invalid-feedback">{errors.email?.message}</div>}
         </div>
-      </div>
+        <div className="d-grid gap-2">
+          <button className="btn btn-primary" type="submit">Continue</button>
+        </div>
+      </form>
     </>
   )
 }
@@ -102,29 +119,27 @@ const ContinueLogin: React.FC<ContinueLoginProps> = ({email}) => {
 
   return (
     <>
-      <div className="py-3 py-md-5">
-        <div className="container">
-          <div className="row">
-            <div className="col">
-              <h3>Verify</h3>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="row">
-                  <div className="col">
-                    <label htmlFor="code" className="form-label">Enter code sent to your email</label>
-                    <input type="number" className="form-control" id="code" placeholder="000000" required {...register("code")} />
-                    {errors.code && <p>{errors.code?.message}</p>}
-                  </div>
-                </div>
-                <div className='row'>
-                  <div className="col">
-                    <button className="btn btn-lg btn-primary" type="submit">Verify</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
+      <h3 className="card-title mb-4">Verify Your Email</h3>
+      <p className="text-muted mb-4">A verification code has been sent to <strong>{email}</strong></p>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="mb-3">
+          <label htmlFor="code" className="form-label">Verification Code</label>
+          <input 
+            type="text" 
+            inputMode="numeric" 
+            pattern="[0-9]*" 
+            className={`form-control ${errors.code ? 'is-invalid' : ''}`} 
+            id="code" 
+            placeholder="000000" 
+            required 
+            {...register("code")} 
+          />
+          {errors.code && <div className="invalid-feedback">{errors.code?.message}</div>}
         </div>
-      </div>
+        <div className="d-grid gap-2">
+          <button className="btn btn-primary" type="submit">Verify</button>
+        </div>
+      </form>
     </>
   )
 }
