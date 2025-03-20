@@ -68,6 +68,33 @@ export async function continueLoginRequest(data: ContinueLoginRequest) {
     throw new Error("Http Exception");
 }
 
+type GoogleLoginRequest = {
+    token: string;
+    clientId: string;
+}
+
+export async function googleLoginRequest(data: GoogleLoginRequest) {
+    const httpResponse = await fetch("/api/login/google", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            token: data.token,
+            clientId: data.clientId
+        })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        const res = await httpResponse.json() as LoginContinueResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
 export async function logoutRequest() {
     const httpResponse = await fetch("/api/logout", {
         method: "POST",
@@ -294,7 +321,8 @@ export type LoginStartResponse = {
 
 export type LoginContinueResponse = {
     success: boolean,
-    error_type: string
+    error_type: string,
+    email: string
 }
 
 export type ValidationErrorResponse = {

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { LoginContinueResponse, startLoginRequest, continueLoginRequest, logoutRequest, meRequest } from '../model/api/apimodel';
+import { LoginContinueResponse, startLoginRequest, continueLoginRequest, logoutRequest, meRequest, googleLoginRequest } from '../model/api/apimodel';
 
 export enum AuthState {
     Loading,
@@ -16,6 +16,7 @@ type Actions = {
     checkAuth: () => Promise<void>;
     startLogin: (email: string) => Promise<void>;
     continueLogin: (email: string, code: string) => Promise<LoginContinueResponse>;
+    googleLogin: (clientId: string, token: string) => Promise<LoginContinueResponse>;
     logout: () => Promise<void>;
     reset: () => void
 }
@@ -58,6 +59,18 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
 
             return res;
         },
+        googleLogin: async (clientId, token) => 
+        {
+            const res = await googleLoginRequest({clientId, token});
+            if (res.success) {
+                set({
+                    authState: AuthState.Authorized,
+                    email: res.email
+                })
+            }
+
+            return res;
+        },    
         logout: async() => {
             await logoutRequest();
             set(initialState);

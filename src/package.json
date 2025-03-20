@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "@react-oauth/google": "^0.12.1",
     "@tanstack/react-query": "^5.51.21",
     "bootstrap": "^5.3.3",
     "http-proxy-middleware": "^3.0.0",
+    "qrcode.react": "^3.1.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
     "react-bootstrap-icons": "^1.11.4",
@@ -25,8 +27,7 @@
     "react-query": "^3.39.3",
     "react-router": "^6.26.0",
     "react-router-dom": "^6.26.0",
-    "zustand": "^4.5.4",
-    "qrcode.react": "^3.1.0"
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.10",

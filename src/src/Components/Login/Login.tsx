@@ -3,9 +3,10 @@ import { AuthState, useDecklistStore } from '../../store/deckliststore';
 import { HandleValidation } from "../../Util/Validators";
 import { useState } from "react";
 import React from "react";
+import { GoogleLogin } from "@react-oauth/google";
 
 export function LoginScreen() {
-  const { authState, logout } = useDecklistStore();
+  const { authState, logout, googleLogin } = useDecklistStore();
   const [currentEmail, setCurrentEmail] = useState<string | null>(null);
 
   if (authState == AuthState.Authorized) {
@@ -38,7 +39,33 @@ export function LoginScreen() {
           <div className="card shadow">
             <div className="card-body">
               {currentEmail === null ? (
-                <StartLogin onStarted={(email) => setCurrentEmail(email)} />
+                <>
+                  <StartLogin onStarted={(email) => setCurrentEmail(email)} />
+                  
+                  <div className="d-flex align-items-center my-4">
+                    <hr className="flex-grow-1" />
+                    <span className="mx-3 text-muted">OR</span>
+                    <hr className="flex-grow-1" />
+                  </div>
+                  
+                  <div className="d-grid gap-2">
+                    <div className="d-flex justify-content-center">
+                      <GoogleLogin
+                        onSuccess={credentialResponse => {
+                          googleLogin(credentialResponse.clientId!, credentialResponse.credential!);
+                          console.log(credentialResponse);
+                        }}
+                        onError={() => {
+                          console.log('Login Failed');
+                        }}
+                        useOneTap
+                        shape="rectangular"
+                        text="signin_with"
+                        locale="en"
+                      />
+                    </div>
+                  </div>
+                </>
               ) : (
                 <ContinueLogin email={currentEmail} />
               )}
