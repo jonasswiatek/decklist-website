@@ -50,7 +50,9 @@ const DeckList: React.FC<DeckListProps> = (e: DeckListProps) => {
     if (!data) {
         return <p>Deck not found</p>
     }
-    
+    const mainboardCount = data?.mainboard.reduce((acc, val) => acc + val.quantity, 0);
+    const sideboardCount = data?.sideboard.reduce((acc, val) => acc + val.quantity, 0);
+
     return (
         <div className="container-fluid">
             <div className='row mb-3'>
@@ -63,9 +65,24 @@ const DeckList: React.FC<DeckListProps> = (e: DeckListProps) => {
             </div>
             <div className='row'>
                 <div className='col-md-8 col-sm-12 decklist-table-container'>
-                    <DecklistTable mainboard={data.mainboard} sideboard={data.sideboard} />
+                    <DecklistTable mainboard={data.mainboard} sideboard={data.sideboard} allowChecklist={true} />
+                </div>
+            </div>
+            <div className={getSubmitButtonClass(mainboardCount!, sideboardCount!)}>
+                <div>
+                    <span style={{margin: 5}}>Main: {mainboardCount}</span>
+                    <span style={{margin: 5}}>Side: {sideboardCount}</span>
                 </div>
             </div>
         </div>
     );
 }
+
+function getSubmitButtonClass(mainDeckCount: number, sideboardCount: number) {
+    if (mainDeckCount < 60 || sideboardCount > 15) {
+      return "float-bottom submit-button-wrapper submit-button-warning";
+    } else {
+      return "float-bottom submit-button-wrapper submit-button-ok";
+    }
+  }
+  

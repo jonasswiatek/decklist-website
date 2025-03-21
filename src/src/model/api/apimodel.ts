@@ -281,7 +281,8 @@ export type DecklistCard = {
     quantity: number,
     mana_cost: string,
     mana_value: number,
-    type: string
+    type: string,
+    has_warning: boolean
 }
 
 

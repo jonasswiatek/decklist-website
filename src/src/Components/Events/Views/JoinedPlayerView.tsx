@@ -78,10 +78,10 @@ export const JoinedPlayerView: React.FC<EventViewProps> = (e) => {
                     </div>
                 </div>
                 <div className='col-md-8 col-sm-12 decklist-table-container'>
-                    <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} />
+                    <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} allowChecklist={false} />
                 </div>
-                <div className="submit-button-wrapper float-bottom" id='bottom-bar'>
-                    <div>
+                <div className={getSubmitButtonClass(mainboardCount!, sideboardCount!)}>
+                <div>
                         <span style={{margin: 5}}>Main: {mainboardCount}</span>
                         <span style={{margin: 5}}>Side: {sideboardCount}</span>
                     </div>
@@ -92,3 +92,12 @@ export const JoinedPlayerView: React.FC<EventViewProps> = (e) => {
         </>
     )
 }
+
+function getSubmitButtonClass(mainDeckCount: number, sideboardCount: number) {
+    if (mainDeckCount < 60 || sideboardCount > 15) {
+      return "float-bottom submit-button-wrapper submit-button-warning";
+    } else {
+      return "float-bottom submit-button-wrapper submit-button-ok";
+    }
+  }
+  

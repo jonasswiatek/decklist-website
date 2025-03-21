@@ -29,14 +29,24 @@ body {
   bottom: 0;
   width: 100%;
   padding: 10px;
-  background-color: darkred;
-  border: 2px solid red;
   border-radius: 5px;
   box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
+}
+
+.submit-button-warning {
+  background-color: darkred;
+  border: 2px solid red;
+  transition: all 0.3s ease;
+}
+
+.submit-button-ok {
+  background-color: darkgreen;
+  border: 2px solid green;
+  transition: all 0.3s ease;
 }
 
 @media only screen {

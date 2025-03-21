@@ -79,9 +79,9 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 <table className="table table-striped table-hover">
                 <thead className="table-dark">
                 <tr>
-                    <th>Player Name</th>
-                    <th>Deck submitted</th>
-                    <th>Actions</th>
+                    <th>Player</th>
+                    <th>Submitted</th>
+                    <th className="text-end">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -94,9 +94,10 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     <span className="badge bg-success">Yes</span> : 
                                     <span className="badge bg-warning text-dark">No</span>}
                             </td>
-                            <td>{p.deck_submitted ? 
+                            <td className="text-end">
+                                {p.deck_submitted ? 
                                 <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id} className="btn btn-sm btn-primary">
-                                    View Deck
+                                    View
                                 </Link> : ''}
                             </td>
                         </tr>
@@ -111,7 +112,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                     <thead className="table-dark">
                         <tr>
                             <th>Email</th>
-                            <th>Actions</th>
+                            <th className="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -119,7 +120,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         return (
                             <tr key={p.user_id}>
                                 <td>{p.email}</td>
-                                <td>
+                                <td className="text-end">
                                     <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemove(p.email)}>
                                         Remove
                                     </button>
