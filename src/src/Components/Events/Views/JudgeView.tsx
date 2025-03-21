@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { BsMailbox } from 'react-icons/bs';
-import { BsQrCode, BsClipboard, BsCheck } from 'react-icons/bs'; 
-import { updateEventUsers } from '../../../model/api/apimodel';
+import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill } from 'react-icons/bs'; 
+import { updateEventUsers, updateEvent, deleteEvent } from '../../../model/api/apimodel';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
 
@@ -12,6 +12,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const judges = e.event.participants.filter(a => a.role === "judge");
     const [copied, setCopied] = useState(false);
     const inviteLink = `https://decklist.lol/e/${e.event.event_id}`;
+    const navigate = useNavigate();
 
     const copyToClipboard = async () => {
         try {
@@ -21,6 +22,26 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         } catch (err) {
             console.error('Failed to copy:', err);
         }
+    };
+
+    const toggleEventState = async () => {
+        const isOpen = e.event.status != "open";
+        await updateEvent(e.event.event_id, { 
+            event_status: isOpen ? "open" : "closed"
+        });
+
+        if (e.refetch) {
+            e.refetch();
+        }
+    };
+
+    const handleDeleteEvent = async () => {
+        const confirmed = window.confirm("Are you sure you want to delete this event? This action cannot be undone.");
+        if (confirmed) {
+            await deleteEvent({ event_id: e.event.event_id });
+            // Navigate back to the events list using React Router
+            navigate('/');
+    }
     };
 
     type Inputs = {
@@ -39,9 +60,14 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         }
     }
 
-    const onRemove = async (email: string) => {
-        await updateEventUsers({ event_id: e.event.event_id, email: email, role: 'none' });
-        e.refetch!();
+    const onRemove = async (email: string, playerName?: string) => {
+        const displayName = playerName || email;
+        const confirmed = window.confirm(`Are you sure you want to remove ${displayName} from the event?`);
+        
+        if (confirmed) {
+            await updateEventUsers({ event_id: e.event.event_id, email: email, role: 'none' });
+            e.refetch!();
+        }
     }
 
     return (
@@ -52,7 +78,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                     <div>
                         <strong>Invite Link:</strong> {inviteLink}
                     </div>
-                    <div>
+                    <div className="d-flex align-items-center">
                         {/* Show on mobile only (xs, sm) */}
                         <button 
                             onClick={copyToClipboard} 
@@ -95,10 +121,15 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     <span className="badge bg-warning text-dark">No</span>}
                             </td>
                             <td className="text-end">
-                                {p.deck_submitted ? 
-                                <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id} className="btn btn-sm btn-primary">
-                                    View
-                                </Link> : ''}
+                                <div className="d-flex justify-content-end">
+                                    {p.deck_submitted ? 
+                                    <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id} className="btn btn-sm btn-primary me-2">
+                                        View
+                                    </Link> : ''}
+                                    <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemove(p.email, p.player_name)}>
+                                        Remove
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     )
@@ -107,6 +138,58 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 </table>
             </div>
             <div className='col-12 col-lg-6'>
+                <h2 className="mb-3">Event</h2>
+                <div className="card mb-4">
+                    <div className="card-header">
+                        <strong>Event Status</strong>
+                    </div>
+                    <div className="card-body">
+                        <div className="d-flex align-items-center">
+                            <div className="form-check form-switch me-3">
+                                <input 
+                                    className="form-check-input" 
+                                    type="checkbox" 
+                                    id="eventToggle" 
+                                    checked={e.event.status == "open"} 
+                                    onChange={toggleEventState}
+                                />
+                                <label className="form-check-label" htmlFor="eventToggle">
+                                    {e.event.status == "open" ? 
+                                        <span className="text-success d-flex align-items-center">
+                                            <BsUnlockFill className="me-1" /> Open
+                                        </span> : 
+                                        <span className="text-danger d-flex align-items-center">
+                                            <BsLockFill className="me-1" /> Closed
+                                        </span>
+                                    }
+                                </label>
+                            </div>
+                        </div>
+                        <p className="mb-0 mt-2 text-muted">
+                            {e.event.status == "open" ? 
+                                "Players can submit and modify decks when the event is open." : 
+                                "Players cannot submit or modify decks when the event is closed."}
+                        </p>
+                    </div>
+                </div>
+                
+                <div className="card mb-4">
+                    <div className="card-header">
+                        <strong>Danger Zone</strong>
+                    </div>
+                    <div className="card-body">
+                        <p className="text-muted mb-3">
+                            Deleting an event will permanently remove all related data including decks and user registrations.
+                        </p>
+                        <button 
+                            type="button" 
+                            className="btn btn-danger"
+                            onClick={handleDeleteEvent}>
+                            Delete Event
+                        </button>
+                    </div>
+                </div>
+                
                 <h2 className="mb-3">Judges</h2>
                 <table className="table table-striped table-hover">
                     <thead className="table-dark">

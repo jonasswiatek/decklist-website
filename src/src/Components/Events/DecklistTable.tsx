@@ -37,7 +37,7 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
     };
     
     const checkedStyle = {
-        backgroundColor: 'rgba(220, 220, 220, 0.2)', // Very subtle gray that's close to typical page backgrounds
+        backgroundColor: 'rgba(220, 220, 220, 0.1)', // Very subtle gray that's close to typical page backgrounds
         textDecoration: 'line-through'
     };
     

@@ -23,7 +23,7 @@ export function LandingPage() {
                 setShowError(true)
             }
             else {
-                navigate(`/events/${joinCode}`);
+                navigate(`/e/${joinCode}`);
             }
         }
     };

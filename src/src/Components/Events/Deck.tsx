@@ -50,8 +50,8 @@ const DeckList: React.FC<DeckListProps> = (e: DeckListProps) => {
     if (!data) {
         return <p>Deck not found</p>
     }
-    const mainboardCount = data?.mainboard.reduce((acc, val) => acc + val.quantity, 0);
-    const sideboardCount = data?.sideboard.reduce((acc, val) => acc + val.quantity, 0);
+    const mainboardCount = data?.mainboard.reduce((acc, val) => acc + val.quantity, 0) ?? 0;
+    const sideboardCount = data?.sideboard.reduce((acc, val) => acc + val.quantity, 0) ?? 0;
 
     return (
         <div className="container-fluid">

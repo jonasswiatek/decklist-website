@@ -247,6 +247,30 @@ export async function deleteEvent(data: DeleteEventRequest) {
     throw new Error("Http Exception");
 }
 
+type UpdateEventRequest = {
+    event_status: "open" | "closed";
+}
+
+export async function updateEvent(eventId: string, data: UpdateEventRequest) {
+    const httpResponse = await fetch(`/api/events/${eventId}`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            event_status: data.event_status,
+        })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
+}
+
 export async function getEvent(eventId: string) {
     const httpResponse = await fetch(`/api/events/${eventId}`, {
         method: "GET",
