@@ -1,4 +1,26 @@
 import { DecklistCard } from "../../model/api/apimodel";
+import { ReactElement } from 'react';
+
+interface ManaCostProps {
+    cost: string;
+}
+  
+export function ManaCost({ cost }: ManaCostProps): ReactElement {
+    // Parse the cost string to extract individual mana symbols
+    // For example, "{2}{U}" should give ["2", "U"]
+    if (!cost)
+        return <></>;
+
+    const symbols = cost.match(/\{([^}]+)\}/g)?.map(match => match.substring(1, match.length - 1).replace('/','')) || [];
+
+    return (
+        <>
+        {symbols.map((symbol, index) => (
+            <i key={index} style={{ fontSize: '0.85em' }} className={`ms ms-cost ms-${symbol.toLowerCase()}`} />
+        ))}
+        </>
+    );
+}
 
 type DecklistTableProps = {
     mainboard?: DecklistCard[],
@@ -23,7 +45,7 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                             <tr>
                                 <td className='decklist-tbl-quantity'>{p.quantity}</td>
                                 <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                                <td className='decklist-tbl-mana-cost'>{p.mana_cost}</td>
+                                <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
                             </tr>
                         </>
                     )
@@ -33,7 +55,7 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                     <tr>
                         <td className='decklist-tbl-quantity'>{p.quantity}</td>
                         <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                        <td className='decklist-tbl-mana-cost'>{p.mana_cost}</td>
+                        <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
                     </tr>
                 )
             })}
@@ -47,7 +69,7 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                     <tr>
                         <td className='decklist-tbl-quantity'>{p.quantity}</td>
                         <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                        <td className='decklist-tbl-mana-cost'>{p.mana_cost}</td>
+                        <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
                     </tr>
                 )
             })}
