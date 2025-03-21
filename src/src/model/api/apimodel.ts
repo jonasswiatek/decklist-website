@@ -70,7 +70,6 @@ export async function continueLoginRequest(data: ContinueLoginRequest) {
 
 type GoogleLoginRequest = {
     token: string;
-    clientId: string;
 }
 
 export async function googleLoginRequest(data: GoogleLoginRequest) {
@@ -81,7 +80,6 @@ export async function googleLoginRequest(data: GoogleLoginRequest) {
         },
         body: JSON.stringify({
             token: data.token,
-            clientId: data.clientId
         })
     });
 

@@ -52,7 +52,7 @@ export function LoginScreen() {
                     <div className="d-flex justify-content-center">
                       <GoogleLogin
                         onSuccess={credentialResponse => {
-                          googleLogin(credentialResponse.clientId!, credentialResponse.credential!);
+                          googleLogin(credentialResponse.credential!);
                           console.log(credentialResponse);
                         }}
                         onError={() => {

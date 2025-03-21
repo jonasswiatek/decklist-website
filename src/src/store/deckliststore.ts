@@ -16,7 +16,7 @@ type Actions = {
     checkAuth: () => Promise<void>;
     startLogin: (email: string) => Promise<void>;
     continueLogin: (email: string, code: string) => Promise<LoginContinueResponse>;
-    googleLogin: (clientId: string, token: string) => Promise<LoginContinueResponse>;
+    googleLogin: (token: string) => Promise<LoginContinueResponse>;
     logout: () => Promise<void>;
     reset: () => void
 }
@@ -59,9 +59,9 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
 
             return res;
         },
-        googleLogin: async (clientId, token) => 
+        googleLogin: async (token) => 
         {
-            const res = await googleLoginRequest({clientId, token});
+            const res = await googleLoginRequest({token});
             if (res.success) {
                 set({
                     authState: AuthState.Authorized,
