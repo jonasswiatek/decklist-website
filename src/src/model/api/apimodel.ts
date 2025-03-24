@@ -230,6 +230,25 @@ export async function submitDecklistRequest(data: SubmitDecklistRequest) {
     throw new Error("Http Exception");
 }
 
+
+export async function deleteDeckRequest(eventId: string) {
+    const httpResponse = await fetch(`/api/events/${eventId}/deck`, {
+        method: "DELETE",
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
+}
+
+
 type DeleteEventRequest = {
     event_id: string;
 }

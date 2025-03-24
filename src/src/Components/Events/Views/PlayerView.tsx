@@ -2,7 +2,7 @@ import React from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useQuery } from 'react-query';
 import { BsPerson } from 'react-icons/bs';
-import { DecklistResponse, submitDecklistRequest } from '../../../model/api/apimodel';
+import { DecklistResponse, submitDecklistRequest, deleteDeckRequest } from '../../../model/api/apimodel';
 import { HandleValidation } from '../../../Util/Validators';
 import { DecklistTable } from '../DecklistTable';
 import { EventViewProps } from '../EventTypes';
@@ -47,6 +47,14 @@ export const PlayerView: React.FC<EventViewProps> = (props) => {
             HandleValidation(setError, e);
         }
     }
+
+    const handleDeleteDeck = async () => {
+        if (window.confirm("Are you sure you want to delete this deck? This action cannot be undone.")) {
+            await deleteDeckRequest(props.event.event_id);
+            refetch();
+            reset({ player_name: '', decklist_text: '' });
+        }
+    };
 
     if (isLoading) {
         return <p>Loading...</p>
@@ -99,6 +107,19 @@ export const PlayerView: React.FC<EventViewProps> = (props) => {
                 <div className='col-md-8 col-sm-12 decklist-table-container'>
                     <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} allowChecklist={false} />
                 </div>
+                {isOpen && data && (
+                    <div className="col-12 mt-3">
+                        <div className="d-flex justify-content-end">
+                            <button 
+                                type="button" 
+                                className="btn btn-danger" 
+                                onClick={handleDeleteDeck}
+                            >
+                                Delete Deck
+                            </button>
+                        </div>
+                    </div>
+                )}
                 <div className={getSubmitButtonClass(mainboardCount!, sideboardCount!)}>
                     <div>
                         <span style={{margin: 5}}>Main: {mainboardCount}</span>
