@@ -152,27 +152,10 @@ export async function createEventRequest(data: CreateEventRequest) {
     throw new Error("Http Exception");
 }
 
-type JoinEventRequest = {
-    event_id: string
-}
-
-export async function joinEventRequest(data: JoinEventRequest) {
-    const httpResponse = await fetch(`/api/events/${data.event_id}/join`, {
-        method: "POST",
-    });
-
-    await ThrowIfValidationErrors(httpResponse);
-    
-    if(httpResponse.ok) {
-        return;
-    }
-
-    throw new Error("Http Exception");
-}
-
 type UpdateEventUsersRequest = {
     event_id: string,
     email: string,
+    player_name: string,
     role: "judge" | "none"
 }
 
@@ -184,7 +167,28 @@ export async function updateEventUsers(data: UpdateEventUsersRequest) {
         },
         body: JSON.stringify({
             email: data.email,
+            player_name: data.player_name,
             role: data.role
+        })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
+}
+
+export async function deleteEventUser(event_id: string, user_id: string) {
+    const httpResponse = await fetch(`/api/events/${event_id}/users`, {
+        method: "DELETE",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_id: user_id,
         })
     });
 
@@ -325,15 +329,12 @@ export type EventDetails = {
     role: string;
     event_date: Date;
     status: string;
-    joined: boolean;
     participants: EventParticipant[]
 }
 
 type EventParticipant = {
-    email: string,
-    player_name?: string,
+    player_name: string,
     role: string
-    deck_submitted: boolean,
     user_id: string,
 }
 

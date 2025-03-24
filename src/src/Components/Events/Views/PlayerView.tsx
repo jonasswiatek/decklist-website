@@ -6,19 +6,20 @@ import { DecklistResponse, submitDecklistRequest } from '../../../model/api/apim
 import { HandleValidation } from '../../../Util/Validators';
 import { DecklistTable } from '../DecklistTable';
 import { EventViewProps } from '../EventTypes';
+import { useAuth } from '../../Login/AuthContext';
 
-export const JoinedPlayerView: React.FC<EventViewProps> = (e) => {
-    type Inputs = {
-        player_name: string,
-        decklist_text: string
-    };
+type Inputs = {
+    player_name: string,
+    decklist_text: string
+};
 
+export const PlayerView: React.FC<EventViewProps> = (props) => {
     const { data, error, isLoading, refetch } = useQuery({
-        queryKey: [`deck-${e.event.event_id}`],
+        queryKey: [`deck-${props.event.event_id}`],
         retry: false,
         refetchOnWindowFocus: false,
         queryFn: () =>
-            fetch(`/api/events/${e.event.event_id}/deck`).then(async (res) => {
+            fetch(`/api/events/${props.event.event_id}/deck`).then(async (res) => {
                 if (res.status === 404) {
                     return null;
                 }
@@ -32,12 +33,12 @@ export const JoinedPlayerView: React.FC<EventViewProps> = (e) => {
         ),
     });
 
-    const isOpen = e.event.status === "open";
+    const isOpen = props.event.status === "open";
 
     const { register, setError, handleSubmit, clearErrors, reset, formState: { errors, isDirty } } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = async data => {
         try {
-            await submitDecklistRequest({ event_id: e.event.event_id, player_name: data.player_name, decklist_text: data.decklist_text });
+            await submitDecklistRequest({ event_id: props.event.event_id, player_name: data.player_name, decklist_text: data.decklist_text });
             refetch();
             reset(data);
         }
@@ -63,6 +64,9 @@ export const JoinedPlayerView: React.FC<EventViewProps> = (e) => {
         <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
             <div className='row'>
                 <div className='col-md-4 col-sm-12'>
+                    <div className="event-info mb-3">
+                        <p><strong>Format:</strong> {props.event.format}</p>
+                    </div>
                     {!isOpen && (
                         <div className="alert alert-info mb-3">The event is closed. Decklist cannot be modified.</div>
                     )}
@@ -114,4 +118,42 @@ function getSubmitButtonClass(mainDeckCount: number, sideboardCount: number) {
     } else {
       return "float-bottom submit-button-wrapper submit-button-ok";
     }
-  }
+}
+
+
+export const UnauthedView: React.FC<EventViewProps> = (props) => {
+    const { login } = useAuth();
+
+    const isEventOpen = props.event.status === 'open';
+
+    return (
+        <div className="container py-4">
+            <div className="row justify-content-center">
+                <div className="col-md-6">
+                    <div className="text-center py-3">
+                        {!isEventOpen ? (
+                            <div className="alert alert-warning">
+                                <p className="mb-0">
+                                    This event has been closed for registration. If you need to participate, please contact your Tournament Organiser or Judge.
+                                </p>
+                            </div>
+                        ) :  (
+                            <>
+                                <p className="mb-3">
+                                    You need to log in to submit your decklist.
+                                </p>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-outline-primary" 
+                                    onClick={login}
+                                >
+                                    Log in
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

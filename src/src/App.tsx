@@ -1,10 +1,11 @@
 import './App.scss'
+import React from 'react';
 import { useDecklistStore } from './store/deckliststore';
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import { EventView } from './Components/Events/Event.tsx'
+import { EventView } from './Components/Events/EventView.tsx'
 import { LoggedIn } from './Components/Login/LoggedIn.tsx';
 import { LandingPage } from './Components/LandingPage/LandingPage.tsx';
 import {

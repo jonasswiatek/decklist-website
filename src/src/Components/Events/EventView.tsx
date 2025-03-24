@@ -1,12 +1,14 @@
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { EventDetails } from '../../model/api/apimodel';
-import { JoinedPlayerView } from './Views/JoinedPlayerView';
+import { PlayerView, UnauthedView } from './Views/PlayerView';
 import { JudgeView } from './Views/JudgeView';
-import { UnjoinedView } from './Views/UnjoinedView';
+import { useAuth } from '../Login/AuthContext';
 
 export function EventView() {
     const { event_id } = useParams();
+    const { authorized } = useAuth();
 
     const { data, error, isLoading, refetch } = useQuery({
         queryKey: [`event-${event_id}`],
@@ -63,10 +65,6 @@ export function EventView() {
         )
     }
 
-    if (!data.joined) {
-        return <UnjoinedView event={data} refetch={refetch} />
-    }
-
     if (data.role === "owner" || data.role === "judge") {
         //Being viewed by a judge.
         return (
@@ -82,7 +80,6 @@ export function EventView() {
         )
     }
     
-    //Joined player - show the decklist editor.
     return (
       <>
         <div className='row'>
@@ -91,7 +88,7 @@ export function EventView() {
                 <br></br>
             </div>
         </div>
-        <JoinedPlayerView event={data} />
+        { authorized ? <PlayerView event={data} /> : <UnauthedView event={data} /> }
       </>
     )
 }

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { BsMailbox } from 'react-icons/bs';
 import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill } from 'react-icons/bs'; 
-import { updateEventUsers, updateEvent, deleteEvent } from '../../../model/api/apimodel';
+import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent } from '../../../model/api/apimodel';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
 
@@ -45,13 +45,14 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     };
 
     type Inputs = {
-        email: string
+        email: string,
+        playerName: string
     };
 
     const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = async data => {
         try {
-            await updateEventUsers({ event_id: e.event.event_id, email: data.email, role: 'judge' });
+            await updateEventUsers({ event_id: e.event.event_id, email: data.email, player_name: data.playerName, role: 'judge' });
             e.refetch!();
             reset();
         }
@@ -60,12 +61,12 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         }
     }
 
-    const onRemove = async (email: string, playerName?: string) => {
-        const displayName = playerName || email;
+    const onRemove = async (userId: string, playerName: string) => {
+        const displayName = playerName;
         const confirmed = window.confirm(`Are you sure you want to remove ${displayName} from the event?`);
         
         if (confirmed) {
-            await updateEventUsers({ event_id: e.event.event_id, email: email, role: 'none' });
+            await deleteEventUser(e.event.event_id, userId);
             e.refetch!();
         }
     }
@@ -106,7 +107,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 <thead className="table-dark">
                 <tr>
                     <th>Player</th>
-                    <th>Submitted</th>
                     <th className="text-end">Actions</th>
                 </tr>
                 </thead>
@@ -114,19 +114,13 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 {players.map((p) => {
                     return (
                         <tr key={p.user_id}>
-                            <td>{p.player_name ? p.player_name : p.email}</td>
-                            <td>
-                                {p.deck_submitted ? 
-                                    <span className="badge bg-success">Yes</span> : 
-                                    <span className="badge bg-warning text-dark">No</span>}
-                            </td>
+                            <td>{p.player_name}</td>
                             <td className="text-end">
                                 <div className="d-flex justify-content-end">
-                                    {p.deck_submitted ? 
                                     <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id} className="btn btn-sm btn-primary me-2">
                                         View
-                                    </Link> : ''}
-                                    <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemove(p.email, p.player_name)}>
+                                    </Link>
+                                    <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemove(p.user_id, p.player_name)}>
                                         Remove
                                     </button>
                                 </div>
@@ -173,66 +167,72 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                     </div>
                 </div>
                 
-                <div className="card mb-4">
-                    <div className="card-header">
-                        <strong>Danger Zone</strong>
-                    </div>
-                    <div className="card-body">
-                        <p className="text-muted mb-3">
-                            Deleting an event will permanently remove all related data including decks and user registrations.
-                        </p>
-                        <button 
-                            type="button" 
-                            className="btn btn-danger"
-                            onClick={handleDeleteEvent}>
-                            Delete Event
-                        </button>
-                    </div>
-                </div>
-                
-                <h2 className="mb-3">Judges</h2>
-                <table className="table table-striped table-hover">
-                    <thead className="table-dark">
-                        <tr>
-                            <th>Email</th>
-                            <th className="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {judges.map((p) => {
-                        return (
-                            <tr key={p.user_id}>
-                                <td>{p.email}</td>
-                                <td className="text-end">
-                                    <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemove(p.email)}>
-                                        Remove
-                                    </button>
-                                </td>
-                            </tr>
-                        )
-                    })}
-                    </tbody>
-                </table>
-
-                <div className="card mt-4">
-                    <div className="card-header">
-                        <strong>Add Judge</strong>
-                    </div>
-                    <div className="card-body">
-                        <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
-                            <div className="form-group">
-                                <div className="input-group">
-                                    <span className="input-group-text" id="basic-addon1">
-                                        <BsMailbox />
-                                    </span>
-                                    <input id='event_name' type="text" className="form-control" placeholder="Email Address" required {...register("email")} />
-                                    <button type='submit' className='btn btn-success'>Add Judge</button>
-                                </div>
-                                {errors.email && <p className="text-danger mt-2">{errors.email?.message}</p>}
+                {(e.event.role === "owner") && (
+                    <>
+                        <div className="card mb-4">
+                            <div className="card-header">
+                                <strong>Danger Zone</strong>
                             </div>
-                        </form>
-                    </div>
-                </div>
+                            <div className="card-body">
+                                <p className="text-muted mb-3">
+                                    Deleting an event will permanently remove all related data including decks and user registrations.
+                                </p>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-danger"
+                                    onClick={handleDeleteEvent}>
+                                    Delete Event
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <h2 className="mb-3">Judges</h2>
+                        <table className="table table-striped table-hover">
+                            <thead className="table-dark">
+                                <tr>
+                                    <th>Name</th>          
+                                    <th className="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {judges.map((p) => {
+                                return (
+                                    <tr key={p.user_id}>
+                                        <td>{p.player_name}</td>
+                                        <td className="text-end">
+                                            <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemove(p.user_id, p.player_name)}>
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+                            </tbody>
+                        </table>
+
+                        <div className="card mt-4">
+                            <div className="card-header">
+                                <strong>Add Judge</strong>
+                            </div>
+                            <div className="card-body">
+                                <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
+                                    <div className="form-group">
+                                        <div className="input-group">
+                                            <span className="input-group-text" id="basic-addon1">
+                                                <BsMailbox />
+                                            </span>
+                                            <input id='email' type="text" className="form-control" placeholder="Email Address" required {...register("email")} />
+                                            <input id='player_name' type="text" className="form-control" placeholder="Name" required {...register("playerName")} />
+
+                                            <button type='submit' className='btn btn-success'>Add Judge</button>
+                                        </div>
+                                        {errors.email && <p className="text-danger mt-2">{errors.email?.message}</p>}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
         </>
