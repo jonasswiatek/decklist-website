@@ -329,7 +329,7 @@ export type DecklistCard = {
     mana_cost: string,
     mana_value: number,
     type: string,
-    has_warning: boolean
+    warnings: string[],
 }
 
 

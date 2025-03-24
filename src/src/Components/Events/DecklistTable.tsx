@@ -42,6 +42,13 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
         textDecoration: 'line-through'
     };
     
+    const warningRowStyle = {
+        backgroundColor: 'rgba(255, 243, 205, 0.05)', // Even lighter yellow for warning messages
+        color: '#d63939', // Brighter red warning text color for better visibility
+        fontSize: '0.9em',
+        fontStyle: 'italic'
+    };
+    
     // Create a unique ID for each row based on card and position
     const getRowId = (card: DecklistCard, isSideboard: boolean, index: number) => {
         return `${isSideboard ? 'sb' : 'mb'}-${index}-${card.card_name}`;
@@ -63,9 +70,23 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
     
     const getRowStyle = (rowId: string, card: DecklistCard) => {
         if (checkedRows.has(rowId)) {
-            return { ...card.has_warning ? warningStyle : {}, ...checkedStyle };
+            return { ...card.warnings.length > 0 ? warningStyle : {}, ...checkedStyle };
         }
-        return card.has_warning ? warningStyle : {};
+        return card.warnings.length > 0 ? warningStyle : {};
+    };
+    
+    // Render warning rows for a card
+    const renderWarningRows = (card: DecklistCard) => {
+        if (!card.warnings || card.warnings.length === 0) return null;
+        
+        return card.warnings.map((warning, idx) => (
+            <tr key={`warning-${idx}`} style={warningRowStyle}>
+                <td></td>
+                <td colSpan={2} className='decklist-tbl-warning'>
+                    {warning}
+                </td>
+            </tr>
+        ));
     };
     
     return (
@@ -79,7 +100,7 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                     const typeCount = props?.mainboard?.filter(x => x.type == p.type).reduce((a, b) => a + b.quantity, 0);
 
                     return (
-                        <>
+                        <React.Fragment key={`type-${p.type}-${index}`}>
                             <tr>
                                 <td colSpan={3} style={{paddingTop:15}}><b>{p.type} ({typeCount})</b></td>
                             </tr>
@@ -92,20 +113,24 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                                 <td className='decklist-tbl-card-name'>{p.card_name}</td>
                                 <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
                             </tr>
-                        </>
+                            {renderWarningRows(p)}
+                        </React.Fragment>
                     )
                 }
 
                 return (
-                    <tr 
-                        style={getRowStyle(rowId, p)}
-                        onClick={() => handleCardClick(rowId)}
-                        className={props.allowChecklist ? 'checklist-enabled' : ''}
-                    >
-                        <td className='decklist-tbl-quantity'>{p.quantity}</td>
-                        <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                        <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
-                    </tr>
+                    <React.Fragment key={`card-${index}`}>
+                        <tr 
+                            style={getRowStyle(rowId, p)}
+                            onClick={() => handleCardClick(rowId)}
+                            className={props.allowChecklist ? 'checklist-enabled' : ''}
+                        >
+                            <td className='decklist-tbl-quantity'>{p.quantity}</td>
+                            <td className='decklist-tbl-card-name'>{p.card_name}</td>
+                            <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
+                        </tr>
+                        {renderWarningRows(p)}
+                    </React.Fragment>
                 )
             })}
 
@@ -117,15 +142,18 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                 const rowId = getRowId(p, true, index);
                 
                 return (
-                    <tr 
-                        style={getRowStyle(rowId, p)}
-                        onClick={() => handleCardClick(rowId)}
-                        className={props.allowChecklist ? 'checklist-enabled' : ''}
-                    >
-                        <td className='decklist-tbl-quantity'>{p.quantity}</td>
-                        <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                        <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
-                    </tr>
+                    <React.Fragment key={`sideboard-${index}`}>
+                        <tr 
+                            style={getRowStyle(rowId, p)}
+                            onClick={() => handleCardClick(rowId)}
+                            className={props.allowChecklist ? 'checklist-enabled' : ''}
+                        >
+                            <td className='decklist-tbl-quantity'>{p.quantity}</td>
+                            <td className='decklist-tbl-card-name'>{p.card_name}</td>
+                            <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
+                        </tr>
+                        {renderWarningRows(p)}
+                    </React.Fragment>
                 )
             })}
             </tbody>
