@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { BsMailbox } from 'react-icons/bs';
-import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill } from 'react-icons/bs'; 
+import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch } from 'react-icons/bs'; 
 import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent } from '../../../model/api/apimodel';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
@@ -11,8 +11,14 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const players = e.event.participants.filter(a => a.role === "player");
     const judges = e.event.participants.filter(a => a.role === "judge");
     const [copied, setCopied] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const inviteLink = `https://decklist.lol/e/${e.event.event_id}`;
     const navigate = useNavigate();
+
+    // Filtered players based on search term
+    const filteredPlayers = players.filter(player => 
+        player.player_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const copyToClipboard = async () => {
         try {
@@ -103,15 +109,36 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         <div className='row'>
             <div className='col-12 col-lg-6 mb-4'>
                 <h2 className="mb-3">Decks</h2>
+                <div className="input-group mb-3">
+                    <span className="input-group-text">
+                        <BsSearch />
+                    </span>
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by player name"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                        <button 
+                            className="btn btn-outline-secondary" 
+                            type="button"
+                            onClick={() => setSearchTerm('')}
+                        >
+                            Clear
+                        </button>
+                    )}
+                </div>
                 <table className="table table-striped table-hover">
                 <thead className="table-dark">
                 <tr>
-                    <th>Player</th>
+                    <th>Players ({players.length})</th>
                     <th className="text-end">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                {players.map((p) => {
+                {filteredPlayers.map((p) => {
                     return (
                         <tr key={p.user_id}>
                             <td>{p.player_name}</td>
@@ -128,6 +155,13 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         </tr>
                     )
                 })}
+                {filteredPlayers.length === 0 && (
+                    <tr>
+                        <td colSpan={2} className="text-center py-3">
+                            {searchTerm ? "No players match your search" : "No players have joined this event yet"}
+                        </td>
+                    </tr>
+                )}
                 </tbody>
                 </table>
             </div>

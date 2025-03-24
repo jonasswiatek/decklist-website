@@ -90,7 +90,12 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
     };
     
     return (
-        <table>
+        <table style={{ width: '100%', tableLayout: 'auto', borderCollapse: 'collapse' }}>
+            <colgroup>
+                <col style={{ width: '1%', whiteSpace: 'nowrap' }} /> {/* Quantity column - minimal width */}
+                <col /> {/* Card name column - takes remaining space by default */}
+                <col style={{ width: '1%' }} /> {/* Mana cost column - minimal width */}
+            </colgroup>
             <tbody>
                 {props?.mainboard?.map((p, index) => {
                 const rowId = getRowId(p, false, index);
@@ -111,7 +116,7 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                             >
                                 <td className='decklist-tbl-quantity'>{p.quantity}</td>
                                 <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                                <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
+                                <td className='decklist-tbl-mana-cost' style={{textAlign: 'right', whiteSpace: 'nowrap', minWidth: '40px'}}><ManaCost cost={p.mana_cost} /></td>
                             </tr>
                             {renderWarningRows(p)}
                         </React.Fragment>
@@ -127,7 +132,7 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                         >
                             <td className='decklist-tbl-quantity'>{p.quantity}</td>
                             <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                            <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
+                            <td className='decklist-tbl-mana-cost' style={{textAlign: 'right', whiteSpace: 'nowrap', minWidth: '40px'}}><ManaCost cost={p.mana_cost} /></td>
                         </tr>
                         {renderWarningRows(p)}
                     </React.Fragment>
@@ -150,7 +155,7 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                         >
                             <td className='decklist-tbl-quantity'>{p.quantity}</td>
                             <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                            <td className='decklist-tbl-mana-cost' style={{textAlign: 'right'}}><ManaCost cost={p.mana_cost} /></td>
+                            <td className='decklist-tbl-mana-cost' style={{textAlign: 'right', whiteSpace: 'nowrap', minWidth: '40px'}}><ManaCost cost={p.mana_cost} /></td>
                         </tr>
                         {renderWarningRows(p)}
                     </React.Fragment>
