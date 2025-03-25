@@ -316,6 +316,31 @@ export async function getEvent(eventId: string) {
     throw new Error("Http Exception");
 }
 
+export async function getFormatsRequest(): Promise<FormatResponse> {
+    const httpResponse = await fetch(`/api/events/formats`, {
+        method: "GET",
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (httpResponse.ok) {
+        const res = await httpResponse.json() as FormatResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
+export type FormatResponse = {
+    formats: Format[];
+}
+
+export type Format = {
+    name: string;
+    format: string;
+}
+
 export type DecklistResponse = {
     player_name: string;
     mainboard: DecklistCard[],

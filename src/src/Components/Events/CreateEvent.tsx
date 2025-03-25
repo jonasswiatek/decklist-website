@@ -1,15 +1,21 @@
 import '../../App.scss'
 import { useForm, SubmitHandler } from "react-hook-form";
 import { HandleValidation } from '../../Util/Validators';
-import { createEventRequest } from '../../model/api/apimodel';
+import { createEventRequest, getFormatsRequest, FormatResponse } from '../../model/api/apimodel';
 import { useNavigate } from "react-router-dom";
 import { ReactElement } from 'react';
+import { useQuery } from 'react-query';
 
 
 export function CreateEvent() : ReactElement {
     const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm<Inputs>();
     const navigate = useNavigate();
 
+    const { data: formats, isLoading: formatsLoading, error: formatsError } = useQuery<FormatResponse>(
+        'formats', 
+        getFormatsRequest
+    );
+    
     const onSubmit: SubmitHandler<Inputs> = async data => {
       try {
         await createEventRequest({ event_name: data.event_name, format: data.format, event_date: data.event_date });
@@ -68,14 +74,15 @@ export function CreateEvent() : ReactElement {
                                         id="format"
                                         className={`form-select ${errors.format ? 'is-invalid' : ''}`} 
                                         {...register("format")}
+                                        disabled={formatsLoading}
                                     >
-                                        <option value="Modern">Modern</option>
-                                        <option value="Pioneer">Pioneer</option>
-                                        <option value="Standard">Standard</option>
-                                        <option value="Commander">Commander</option>
-                                        <option value="Legacy">Legacy</option>
-                                        <option value="Vintage">Vintage</option>
-                                        <option value="Pauper">Pauper</option>
+                                        {formatsLoading ? (
+                                            <option>Loading formats...</option>
+                                        ) : formatsError ? (
+                                            <option>Error loading formats</option>
+                                        ) : formats?.formats.map(format => (
+                                            <option key={format.format} value={format.format}>{format.name}</option>
+                                        ))}
                                     </select>
                                     {errors.format && <div className="invalid-feedback">{errors.format?.message}</div>}
                                 </div>
