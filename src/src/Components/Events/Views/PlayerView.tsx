@@ -56,6 +56,10 @@ export const PlayerView: React.FC<EventViewProps> = (props) => {
         }
     };
 
+    const getSubmitButtonWrapperClass = (isValid: boolean): string => {
+        return isValid ? "submit-button-ok" : "submit-button-warning";
+    };
+
     if (isLoading) {
         return <p>Loading...</p>
     }
@@ -66,14 +70,32 @@ export const PlayerView: React.FC<EventViewProps> = (props) => {
 
     const mainboardCount = data?.mainboard.reduce((acc, val) => acc + val.quantity, 0) ?? 0;
     const sideboardCount = data?.sideboard.reduce((acc, val) => acc + val.quantity, 0) ?? 0;
+    
+    // Check if the deck is valid:
+    // 1. deck_warnings should be empty
+    // 2. No card in mainboard or sideboard should have warnings
+    const isValid = (
+        (!data?.deck_warnings || data.deck_warnings.length === 0) &&
+        (!data?.mainboard || !data.mainboard.some(card => card.warnings && card.warnings.length > 0)) &&
+        (!data?.sideboard || !data.sideboard.some(card => card.warnings && card.warnings.length > 0))
+    );
 
     return (
         <>
         <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
             <div className='row'>
                 <div className='col-md-4 col-sm-12'>
-                    <div className="event-info mb-3">
-                        <p><strong>Format:</strong> {props.event.format}</p>
+                    <div className="event-info mb-3 d-flex justify-content-between align-items-center">
+                        <p className="mb-0"><strong>Format:</strong> {props.event.format}</p>
+                        {isOpen && data && (
+                            <button 
+                                type="button" 
+                                className="btn btn-danger btn-sm" 
+                                onClick={handleDeleteDeck}
+                            >
+                                Delete Deck
+                            </button>
+                        )}
                     </div>
                     {!isOpen && (
                         <div className="alert alert-info mb-3">The event is closed. Decklist cannot be modified.</div>
@@ -103,44 +125,42 @@ export const PlayerView: React.FC<EventViewProps> = (props) => {
                             )}
                         </div>
                     </div>
+                    
+                    {data?.deck_warnings && data.deck_warnings.length > 0 && (
+                        <div className="mt-3">
+                            <div className="alert alert-warning">
+                                <h5 className="alert-heading">Deck Warnings</h5>
+                                <ul className="mb-0">
+                                    {data.deck_warnings.map((warning, index) => (
+                                        <li key={index}>{warning}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className='col-md-8 col-sm-12 decklist-table-container'>
                     <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} allowChecklist={false} />
                 </div>
-                {isOpen && data && (
-                    <div className="col-12 mt-3">
-                        <div className="d-flex justify-content-end">
-                            <button 
-                                type="button" 
-                                className="btn btn-danger" 
-                                onClick={handleDeleteDeck}
-                            >
-                                Delete Deck
-                            </button>
+                {isOpen && (
+                    <div className={`float-bottom submit-button-wrapper ${getSubmitButtonWrapperClass(isValid)}`}>
+                        <div>
+                            {isDirty && (<span>You have unsaved changes</span>)}
+                            {!isDirty && (
+                                <div>
+                                    <span style={{margin: 5}}>Main: {mainboardCount}</span>
+                                    <span style={{margin: 5}}>Side: {sideboardCount}</span>
+                                </div>
+                            )}
                         </div>
+                        {isDirty ? <button type='submit' className='btn btn-primary' id='submit-button'>Save</button> : <></>}
                     </div>
                 )}
-                <div className={getSubmitButtonClass(mainboardCount!, sideboardCount!)}>
-                    <div>
-                        <span style={{margin: 5}}>Main: {mainboardCount}</span>
-                        <span style={{margin: 5}}>Side: {sideboardCount}</span>
-                    </div>
-                    {isOpen && isDirty ? <button type='submit' className='btn btn-primary' id='submit-button'>Save</button> : <></>}
-                </div>
             </div>
         </form>
         </>
     )
 }
-
-function getSubmitButtonClass(mainDeckCount: number, sideboardCount: number) {
-    if (mainDeckCount < 60 || sideboardCount > 15) {
-      return "float-bottom submit-button-wrapper submit-button-warning";
-    } else {
-      return "float-bottom submit-button-wrapper submit-button-ok";
-    }
-}
-
 
 export const UnauthedView: React.FC<EventViewProps> = (props) => {
     const { login } = useAuth();

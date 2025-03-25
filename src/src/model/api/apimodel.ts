@@ -320,6 +320,7 @@ export type DecklistResponse = {
     player_name: string;
     mainboard: DecklistCard[],
     sideboard: DecklistCard[],
+    deck_warnings: string[],
     decklist_text: string,
 }
 

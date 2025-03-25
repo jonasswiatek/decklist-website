@@ -139,28 +139,32 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
                 )
             })}
 
-            <tr>
-                <td colSpan={3} style={{paddingTop:15}}><b>Sideboard</b></td>
-            </tr>
+            {props?.sideboard && props.sideboard.length > 0 && (
+                <>
+                    <tr>
+                        <td colSpan={3} style={{paddingTop:15}}><b>Sideboard ({props.sideboard.reduce((acc, val) => acc + val.quantity, 0)})</b></td>
+                    </tr>
 
-            {props?.sideboard?.map((p, index) => {
-                const rowId = getRowId(p, true, index);
-                
-                return (
-                    <React.Fragment key={`sideboard-${index}`}>
-                        <tr 
-                            style={getRowStyle(rowId, p)}
-                            onClick={() => handleCardClick(rowId)}
-                            className={props.allowChecklist ? 'checklist-enabled' : ''}
-                        >
-                            <td className='decklist-tbl-quantity'>{p.quantity}</td>
-                            <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                            <td className='decklist-tbl-mana-cost' style={{textAlign: 'right', whiteSpace: 'nowrap', minWidth: '40px'}}><ManaCost cost={p.mana_cost} /></td>
-                        </tr>
-                        {renderWarningRows(p)}
-                    </React.Fragment>
-                )
-            })}
+                    {props.sideboard.map((p, index) => {
+                        const rowId = getRowId(p, true, index);
+                        
+                        return (
+                            <React.Fragment key={`sideboard-${index}`}>
+                                <tr 
+                                    style={getRowStyle(rowId, p)}
+                                    onClick={() => handleCardClick(rowId)}
+                                    className={props.allowChecklist ? 'checklist-enabled' : ''}
+                                >
+                                    <td className='decklist-tbl-quantity'>{p.quantity}</td>
+                                    <td className='decklist-tbl-card-name'>{p.card_name}</td>
+                                    <td className='decklist-tbl-mana-cost' style={{textAlign: 'right', whiteSpace: 'nowrap', minWidth: '40px'}}><ManaCost cost={p.mana_cost} /></td>
+                                </tr>
+                                {renderWarningRows(p)}
+                            </React.Fragment>
+                        )
+                    })}
+                </>
+            )}
             </tbody>
         </table>
     );
