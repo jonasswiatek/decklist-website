@@ -1,10 +1,10 @@
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { EventDetails } from '../../model/api/apimodel';
-import { PlayerView, UnauthedView } from './Views/PlayerView';
 import { JudgeView } from './Views/JudgeView';
 import { useAuth } from '../Login/AuthContext';
+import { DeckEditor } from './DeckView';
+import { EventViewProps } from './EventTypes';
 
 export function EventView() {
     const { event_id } = useParams();
@@ -88,7 +88,45 @@ export function EventView() {
                 <br></br>
             </div>
         </div>
-        { authorized ? <PlayerView event={data} /> : <UnauthedView event={data} /> }
+        { authorized ? <DeckEditor event={data} user_id={null} /> : <UnauthedView event={data} /> }
       </>
     )
+}
+
+
+const UnauthedView: React.FC<EventViewProps> = (props) => {
+    const { login } = useAuth();
+
+    const isEventOpen = props.event.status === 'open';
+
+    return (
+        <div className="container py-4">
+            <div className="row justify-content-center">
+                <div className="col-md-6">
+                    <div className="text-center py-3">
+                        {!isEventOpen ? (
+                            <div className="alert alert-warning">
+                                <p className="mb-0">
+                                    This event has been closed for registration. If you need to participate, please contact your Tournament Organiser or Judge.
+                                </p>
+                            </div>
+                        ) :  (
+                            <>
+                                <p className="mb-3">
+                                    You need to log in to submit your decklist.
+                                </p>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-outline-primary" 
+                                    onClick={login}
+                                >
+                                    Log in
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }

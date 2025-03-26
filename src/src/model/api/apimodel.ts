@@ -201,8 +201,27 @@ export async function deleteEventUser(event_id: string, user_id: string) {
     throw new Error("Http Exception");
 }
 
+export async function getDecklistRequest(eventId: string, userId: string | null) {
+    let url = `/api/events/${eventId}/deck`;
+    if (userId) {
+        url += `?user_id=${encodeURIComponent(userId)}`;
+    }
+
+    const httpResponse = await fetch(url);
+    if (httpResponse.status === 401) 
+        throw new NotAuthenticatedError();
+    
+    if (httpResponse.ok) {
+        const res = await httpResponse.json() as DecklistResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
 type SubmitDecklistRequest = {
     event_id: string,
+    user_id?: string | null,
     player_name: string,
     decklist_text: string,
 }
@@ -214,10 +233,9 @@ export async function submitDecklistRequest(data: SubmitDecklistRequest) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+            user_id: data.user_id,
             player_name: data.player_name,
             decklist_text: data.decklist_text,
-            main_deck: {},
-            sideboard: {}
         })
     });
 
@@ -294,7 +312,7 @@ export async function updateEvent(eventId: string, data: UpdateEventRequest) {
     throw new Error("Http Exception");
 }
 
-export async function getEvent(eventId: string) {
+export async function getEvent(eventId: string) : Promise<EventDetails> {
     const httpResponse = await fetch(`/api/events/${eventId}`, {
         method: "GET",
         headers: {
@@ -306,11 +324,6 @@ export async function getEvent(eventId: string) {
     {
         const res = await httpResponse.json() as EventDetails;
         return res;
-    }
-
-    if (httpResponse.status === 404)
-    {
-        return null;
     }
 
     throw new Error("Http Exception");

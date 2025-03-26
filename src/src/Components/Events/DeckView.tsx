@@ -1,44 +1,78 @@
 import React from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
 import { useQuery } from 'react-query';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest } from '../../model/api/apimodel';
+import { DecklistTable } from './DecklistTable';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { HandleValidation } from '../../Util/Validators';
 import { BsPerson } from 'react-icons/bs';
-import { DecklistResponse, submitDecklistRequest, deleteDeckRequest } from '../../../model/api/apimodel';
-import { HandleValidation } from '../../../Util/Validators';
-import { DecklistTable } from '../DecklistTable';
-import { EventViewProps } from '../EventTypes';
-import { useAuth } from '../../Login/AuthContext';
 
-type Inputs = {
-    player_name: string,
-    decklist_text: string
-};
+export function DeckView() {
+    const { event_id } = useParams();
+    const [ searchParams ] = useSearchParams();
+    const id = searchParams.get('id');
 
-export const PlayerView: React.FC<EventViewProps> = (props) => {
-    const { data, error, isLoading, refetch } = useQuery({
-        queryKey: [`deck-${props.event.event_id}`],
+    const { data, error, isLoading } = useQuery<EventDetails>({
+        queryKey: [`event-${event_id}`],
         retry: false,
         refetchOnWindowFocus: false,
-        queryFn: () =>
-            fetch(`/api/events/${props.event.event_id}/deck`).then(async (res) => {
-                if (res.status === 404) {
-                    return null;
-                }
+        queryFn: () => getEvent(event_id!)
+    });
+    
+    if (isLoading) {
+        return (
+            <>
+                <div className='row'>
+                    <div className='col'>
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </>
+        )
+    }
 
-                if (!res.ok) {
-                    throw "error";
-                }
+    if(error) {
+        return (
+            <>
+                <div className='row'>
+                    <div className='col'>
+                        <p>Error. Try again later.</p>
+                    </div>
+                </div>
+            </>
+        )
+    }
+    
+    return (<DeckEditor event={data!} user_id={id} />)
+}
 
-                return await res.json() as DecklistResponse;
-            }
-        ),
+type DeckEditorProps = {
+    event: EventDetails,
+    user_id: string | null,
+}
+
+export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
+    const isJudge = props.user_id != null;
+
+    const { data, error, isLoading, refetch } = useQuery<DecklistResponse>({
+        queryKey: [`deck-${props.event.event_id}-${props.user_id}`],
+        retry: false,
+        refetchOnWindowFocus: false,
+        queryFn: () => getDecklistRequest(props.event.event_id, props.user_id),
     });
 
     const isOpen = props.event.status === "open";
 
+    type Inputs = {
+        user_id?: string,
+        player_name: string,
+        decklist_text: string
+    };
+ 
     const { register, setError, handleSubmit, clearErrors, reset, formState: { errors, isDirty } } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = async data => {
         try {
-            await submitDecklistRequest({ event_id: props.event.event_id, player_name: data.player_name, decklist_text: data.decklist_text });
+            await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, decklist_text: data.decklist_text });
             refetch();
             reset(data);
         }
@@ -87,7 +121,7 @@ export const PlayerView: React.FC<EventViewProps> = (props) => {
                 <div className='col-md-4 col-sm-12'>
                     <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                         <p className="mb-0"><strong>Format:</strong> {props.event.format}</p>
-                        {isOpen && data && (
+                        {isOpen && data && !isJudge && (
                             <button 
                                 type="button" 
                                 className="btn btn-danger btn-sm" 
@@ -140,7 +174,7 @@ export const PlayerView: React.FC<EventViewProps> = (props) => {
                     )}
                 </div>
                 <div className='col-md-8 col-sm-12 decklist-table-container'>
-                    <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} allowChecklist={false} />
+                    <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} allowChecklist={isJudge} />
                 </div>
                 {isOpen && (
                     <div className={`float-bottom submit-button-wrapper ${getSubmitButtonWrapperClass(isValid)}`}>
@@ -160,41 +194,4 @@ export const PlayerView: React.FC<EventViewProps> = (props) => {
         </form>
         </>
     )
-}
-
-export const UnauthedView: React.FC<EventViewProps> = (props) => {
-    const { login } = useAuth();
-
-    const isEventOpen = props.event.status === 'open';
-
-    return (
-        <div className="container py-4">
-            <div className="row justify-content-center">
-                <div className="col-md-6">
-                    <div className="text-center py-3">
-                        {!isEventOpen ? (
-                            <div className="alert alert-warning">
-                                <p className="mb-0">
-                                    This event has been closed for registration. If you need to participate, please contact your Tournament Organiser or Judge.
-                                </p>
-                            </div>
-                        ) :  (
-                            <>
-                                <p className="mb-3">
-                                    You need to log in to submit your decklist.
-                                </p>
-                                <button 
-                                    type="button" 
-                                    className="btn btn-outline-primary" 
-                                    onClick={login}
-                                >
-                                    Log in
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
 }

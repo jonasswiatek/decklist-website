@@ -1,5 +1,4 @@
 import './App.scss'
-import React from 'react';
 import { useDecklistStore } from './store/deckliststore';
 import {
   createBrowserRouter,
@@ -18,7 +17,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { AuthProvider, useAuth } from './Components/Login/AuthContext.tsx';
 import { CreateEvent } from './Components/Events/CreateEvent.tsx';
-import { DeckView } from './Components/Events/Deck.tsx';
+import { DeckView } from './Components/Events/DeckView.tsx';
 import QRCodeView from './Components/Events/Views/QRCodeView';
 
 const queryClient = new QueryClient()
