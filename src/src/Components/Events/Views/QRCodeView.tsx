@@ -1,11 +1,11 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import QRCode from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { BsArrowLeft } from 'react-icons/bs';
 
 const QRCodeView: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
-  const inviteUrl = `https://decklist.lol/e/${eventId}`;
+  const inviteUrl = `${window.location.origin}/e/${eventId}`;
   
   return (
     <div className="container mt-4">
@@ -23,7 +23,7 @@ const QRCodeView: React.FC = () => {
             <p className="lead">Scan this QR code to join the event:</p>
             <div className="d-flex justify-content-center">
               <div style={{ background: 'white', padding: '20px', border: '1px solid #ddd' }}>
-                <QRCode 
+                <QRCodeCanvas 
                   value={inviteUrl} 
                   size={256}
                   level="H"
