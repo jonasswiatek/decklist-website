@@ -113,16 +113,28 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         return <p>No decklist found</p>
     }
 
-    const mainboardCount = data?.mainboard.reduce((acc, val) => acc + val.quantity, 0) ?? 0;
-    const sideboardCount = data?.sideboard.reduce((acc, val) => acc + val.quantity, 0) ?? 0;
-    
+    // Calculate mainboard and sideboard counts
+    const mainboardCount = data?.groups
+        ? data.groups
+            .filter(group => group.group_name !== "Sideboard")
+            .flatMap(group => group.cards)
+            .reduce((sum, card) => sum + card.quantity, 0)
+        : 0;
+
+    const sideboardCount = data?.groups
+        ? data.groups
+            .find(group => group.group_name === "Sideboard")?.cards
+            .reduce((sum, card) => sum + card.quantity, 0) || 0
+        : 0;
+
     // Check if the deck is valid:
     // 1. deck_warnings should be empty
-    // 2. No card in mainboard or sideboard should have warnings
+    // 2. No card in any group should have warnings
     const isValid = (
         (!data?.deck_warnings || data.deck_warnings.length === 0) &&
-        (!data?.mainboard || !data.mainboard.some(card => card.warnings && card.warnings.length > 0)) &&
-        (!data?.sideboard || !data.sideboard.some(card => card.warnings && card.warnings.length > 0))
+        (!data?.groups || !data.groups.some(group => 
+            group.cards.some(card => card.warnings && card.warnings.length > 0)
+        ))
     );
 
     return (
@@ -203,8 +215,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 
                 {/* Always display the decklist table, but adjust width based on edit mode */}
                 <div className={(!isJudge || showJudgeEditForm) ? 'col-md-8 col-sm-12 decklist-table-container' : 'col-12 decklist-table-container'}>
-                  
-                    <DecklistTable mainboard={data?.mainboard} sideboard={data?.sideboard} allowChecklist={isJudge} />
+                    {data && <DecklistTable decklistData={data} allowChecklist={isJudge} />}
                 </div>
                 
                 {isOpen && (

@@ -1,5 +1,5 @@
 import React from "react";
-import { DecklistCard } from "../../model/api/apimodel";
+import { DecklistCard, DecklistGroup, DecklistResponse } from "../../model/api/apimodel";
 import { ReactElement, useState } from 'react';
 
 interface ManaCostProps {
@@ -24,9 +24,8 @@ export function ManaCost({ cost }: ManaCostProps): ReactElement {
 }
 
 type DecklistTableProps = {
-    mainboard?: DecklistCard[],
-    sideboard?: DecklistCard[],
-    allowChecklist: boolean
+    decklistData: DecklistResponse,
+    allowChecklist: boolean,
 }
 
 export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
@@ -49,8 +48,8 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
     };
     
     // Create a unique ID for each row based on card and position
-    const getRowId = (card: DecklistCard, isSideboard: boolean, index: number) => {
-        return `${isSideboard ? 'sb' : 'mb'}-${index}-${card.card_name}`;
+    const getRowId = (card: DecklistCard, index: number, groupName: string) => {
+        return `${groupName}-${index}-${card.card_name}`;
     };
     
     const handleCardClick = (rowId: string) => {
@@ -74,20 +73,6 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
         return card.warnings.length > 0 ? warningStyle : {};
     };
     
-    // Group cards by type for better organization and page break control
-    const groupCardsByType = (cards: DecklistCard[] | undefined) => {
-        if (!cards || cards.length === 0) return {};
-        
-        const groups: { [key: string]: DecklistCard[] } = {};
-        cards.forEach(card => {
-            if (!groups[card.type]) {
-                groups[card.type] = [];
-            }
-            groups[card.type].push(card);
-        });
-        return groups;
-    };
-
     // Render a card row
     const renderCardRow = (card: DecklistCard, rowId: string) => {
         return (
@@ -130,31 +115,31 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
         ));
     };
 
-    // Render a section of cards with the same type
-    const renderCardSection = (type: string, cards: DecklistCard[], isSideboard: boolean = false) => {
-        if (!cards || cards.length === 0) return null;
+    // Render a section of cards
+    const renderCardSection = (group: DecklistGroup) => {
+        if (!group.cards || group.cards.length === 0) return null;
         
-        const typeCount = cards.reduce((a, b) => a + b.quantity, 0);
+        const cardCount = group.cards.reduce((a, b) => a + b.quantity, 0);
         
         return (
             <div className="card-section" style={{ 
                 pageBreakInside: 'avoid',
                 marginBottom: '15px',
                 maxWidth: '500px'
-            }} key={`section-${isSideboard ? 'sb-' : ''}${type}`}>
+            }} key={`section-${group.group_name}`}>
                 <div className="section-header" style={{ 
                     fontWeight: 'bold', 
                     marginBottom: '8px'
                 }}>
-                    {type} ({typeCount})
+                    {group.group_name} ({cardCount})
                 </div>
                 
                 <div className="section-cards">
-                    {cards.map((card, index) => {
-                        const rowId = getRowId(card, isSideboard, index);
+                    {group.cards.map((card, index) => {
+                        const rowId = getRowId(card, index, group.group_name);
                         
                         return (
-                            <React.Fragment key={`${isSideboard ? 'sb-' : ''}card-${type}-${index}`}>
+                            <React.Fragment key={`card-${group.group_name}-${index}`}>
                                 {renderCardRow(card, rowId)}
                                 {renderCardWarnings(card)}
                             </React.Fragment>
@@ -165,44 +150,11 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
         );
     };
     
-    // Group cards by type
-    const mainboardGroups = groupCardsByType(props.mainboard);
-    
     return (
         <div className="decklist-container" style={{ width: '100%' }}>
-            {/* Render mainboard cards by type sections */}
-            {Object.keys(mainboardGroups).map(type => 
-                renderCardSection(type, mainboardGroups[type])
-            )}
-
-            {/* Render sideboard as its own section */}
-            {props?.sideboard && props.sideboard.length > 0 && (
-                <div className="card-section" style={{ 
-                    pageBreakInside: 'avoid', 
-                    marginTop: '50px',
-                    maxWidth: '500px' 
-                }}>
-                    <div className="section-header" style={{ 
-                        fontWeight: 'bold', 
-                        marginTop: '15px',
-                        marginBottom: '8px'
-                    }}>
-                        Sideboard ({props.sideboard.reduce((acc, val) => acc + val.quantity, 0)})
-                    </div>
-                    
-                    <div className="section-cards">
-                        {props.sideboard.map((card, index) => {
-                            const rowId = getRowId(card, true, index);
-                            
-                            return (
-                                <React.Fragment key={`sideboard-${index}`}>
-                                    {renderCardRow(card, rowId)}
-                                    {renderCardWarnings(card)}
-                                </React.Fragment>
-                            );
-                        })}
-                    </div>
-                </div>
+            {/* Render all card groups */}
+            {props.decklistData.groups.map(group => 
+                renderCardSection(group)
             )}
         </div>
     );

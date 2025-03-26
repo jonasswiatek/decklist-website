@@ -203,10 +203,23 @@ export async function deleteEventUser(event_id: string, user_id: string) {
 
 export type DecklistResponse = {
     player_name: string;
-    mainboard: DecklistCard[],
-    sideboard: DecklistCard[],
+    groups: DecklistGroup[],
     deck_warnings: string[],
     decklist_text: string,
+}
+
+export type DecklistGroup = {
+    group_name: string,
+    cards: DecklistCard[],
+}
+
+export type DecklistCard = {
+    card_name: string,
+    quantity: number,
+    mana_cost: string,
+    mana_value: number,
+    type: string,
+    warnings: string[],
 }
 
 export async function getDecklistRequest(eventId: string, userId: string | null) {
@@ -366,14 +379,6 @@ export type Format = {
 }
 
 
-export type DecklistCard = {
-    card_name: string,
-    quantity: number,
-    mana_cost: string,
-    mana_value: number,
-    type: string,
-    warnings: string[],
-}
 
 
 export type EventListItem = {
