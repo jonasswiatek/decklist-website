@@ -1,5 +1,4 @@
 import '../../App.scss'
-import React from 'react';
 import { EventListItem } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { ReactElement } from 'react';
