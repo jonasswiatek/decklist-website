@@ -30,7 +30,6 @@ type DecklistTableProps = {
 }
 
 export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
-    let currentType = '';
     const [checkedRows, setCheckedRows] = useState<Set<string>>(new Set());
     
     const warningStyle = {
@@ -75,97 +74,131 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
         return card.warnings.length > 0 ? warningStyle : {};
     };
     
-    // Render warning rows for a card
-    const renderWarningRows = (card: DecklistCard) => {
+    // Group cards by type for better organization and page break control
+    const groupCardsByType = (cards: DecklistCard[] | undefined) => {
+        if (!cards || cards.length === 0) return {};
+        
+        const groups: { [key: string]: DecklistCard[] } = {};
+        cards.forEach(card => {
+            if (!groups[card.type]) {
+                groups[card.type] = [];
+            }
+            groups[card.type].push(card);
+        });
+        return groups;
+    };
+
+    // Render a card row
+    const renderCardRow = (card: DecklistCard, rowId: string) => {
+        return (
+            <div 
+                className={`decklist-row ${props.allowChecklist ? 'checklist-enabled' : ''}`}
+                style={{
+                    display: 'flex', 
+                    width: '100%',
+                    cursor: props.allowChecklist ? 'pointer' : 'default',
+                    ...getRowStyle(rowId, card)
+                }}
+                onClick={() => handleCardClick(rowId)}
+            >
+                <div className='decklist-quantity' style={{ width: '20px', flexShrink: 0, textAlign: 'left' }}>
+                    {card.quantity}
+                </div>
+                <div className='decklist-card-name' style={{ flex: 1 }}>
+                    {card.card_name}
+                </div>
+                <div className='decklist-mana-cost' style={{ minWidth: '40px', textAlign: 'right', flexShrink: 0 }}>
+                    <ManaCost cost={card.mana_cost} />
+                </div>
+            </div>
+        );
+    };
+
+    // Render warning for a card
+    const renderCardWarnings = (card: DecklistCard) => {
         if (!card.warnings || card.warnings.length === 0) return null;
         
         return card.warnings.map((warning, idx) => (
-            <tr key={`warning-${idx}`} style={warningRowStyle}>
-                <td></td>
-                <td colSpan={2} className='decklist-tbl-warning'>
-                    {warning}
-                </td>
-            </tr>
+            <div key={`warning-${idx}`} className="decklist-warning" style={{
+                ...warningRowStyle,
+                display: 'flex',
+                paddingLeft: '30px',
+                marginBottom: '5px'
+            }}>
+                {warning}
+            </div>
         ));
     };
-    
-    return (
-        <table style={{ width: '100%', tableLayout: 'auto', borderCollapse: 'collapse' }}>
-            <colgroup>
-                <col style={{ width: '1%', whiteSpace: 'nowrap' }} /> {/* Quantity column - minimal width */}
-                <col /> {/* Card name column - takes remaining space by default */}
-                <col style={{ width: '1%' }} /> {/* Mana cost column - minimal width */}
-            </colgroup>
-            <tbody>
-                {props?.mainboard?.map((p, index) => {
-                const rowId = getRowId(p, false, index);
+
+    // Render a section of cards with the same type
+    const renderCardSection = (type: string, cards: DecklistCard[], isSideboard: boolean = false) => {
+        if (!cards || cards.length === 0) return null;
+        
+        const typeCount = cards.reduce((a, b) => a + b.quantity, 0);
+        
+        return (
+            <div className="card-section" style={{ 
+                pageBreakInside: 'avoid',
+                marginBottom: '15px'
+            }} key={`section-${isSideboard ? 'sb-' : ''}${type}`}>
+                <div className="section-header" style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '8px'
+                }}>
+                    {type} ({typeCount})
+                </div>
                 
-                if (currentType != p.type) {
-                    currentType = p.type;
-                    const typeCount = props?.mainboard?.filter(x => x.type == p.type).reduce((a, b) => a + b.quantity, 0);
-
-                    return (
-                        <React.Fragment key={`type-${p.type}-${index}`}>
-                            <tr>
-                                <td colSpan={3} style={{paddingTop:15}}><b>{p.type} ({typeCount})</b></td>
-                            </tr>
-                            <tr 
-                                style={getRowStyle(rowId, p)}
-                                onClick={() => handleCardClick(rowId)}
-                                className={props.allowChecklist ? 'checklist-enabled' : ''}
-                            >
-                                <td className='decklist-tbl-quantity'>{p.quantity}</td>
-                                <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                                <td className='decklist-tbl-mana-cost' style={{textAlign: 'right', whiteSpace: 'nowrap', minWidth: '40px'}}><ManaCost cost={p.mana_cost} /></td>
-                            </tr>
-                            {renderWarningRows(p)}
-                        </React.Fragment>
-                    )
-                }
-
-                return (
-                    <React.Fragment key={`card-${index}`}>
-                        <tr 
-                            style={getRowStyle(rowId, p)}
-                            onClick={() => handleCardClick(rowId)}
-                            className={props.allowChecklist ? 'checklist-enabled' : ''}
-                        >
-                            <td className='decklist-tbl-quantity'>{p.quantity}</td>
-                            <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                            <td className='decklist-tbl-mana-cost' style={{textAlign: 'right', whiteSpace: 'nowrap', minWidth: '40px'}}><ManaCost cost={p.mana_cost} /></td>
-                        </tr>
-                        {renderWarningRows(p)}
-                    </React.Fragment>
-                )
-            })}
-
-            {props?.sideboard && props.sideboard.length > 0 && (
-                <>
-                    <tr>
-                        <td colSpan={3} style={{paddingTop:15}}><b>Sideboard ({props.sideboard.reduce((acc, val) => acc + val.quantity, 0)})</b></td>
-                    </tr>
-
-                    {props.sideboard.map((p, index) => {
-                        const rowId = getRowId(p, true, index);
+                <div className="section-cards">
+                    {cards.map((card, index) => {
+                        const rowId = getRowId(card, isSideboard, index);
                         
                         return (
-                            <React.Fragment key={`sideboard-${index}`}>
-                                <tr 
-                                    style={getRowStyle(rowId, p)}
-                                    onClick={() => handleCardClick(rowId)}
-                                    className={props.allowChecklist ? 'checklist-enabled' : ''}
-                                >
-                                    <td className='decklist-tbl-quantity'>{p.quantity}</td>
-                                    <td className='decklist-tbl-card-name'>{p.card_name}</td>
-                                    <td className='decklist-tbl-mana-cost' style={{textAlign: 'right', whiteSpace: 'nowrap', minWidth: '40px'}}><ManaCost cost={p.mana_cost} /></td>
-                                </tr>
-                                {renderWarningRows(p)}
+                            <React.Fragment key={`${isSideboard ? 'sb-' : ''}card-${type}-${index}`}>
+                                {renderCardRow(card, rowId)}
+                                {renderCardWarnings(card)}
                             </React.Fragment>
-                        )
+                        );
                     })}
-                </>
+                </div>
+            </div>
+        );
+    };
+    
+    // Group cards by type
+    const mainboardGroups = groupCardsByType(props.mainboard);
+    
+    return (
+        <div className="decklist-container" style={{ width: '100%' }}>
+            {/* Render mainboard cards by type sections */}
+            {Object.keys(mainboardGroups).map(type => 
+                renderCardSection(type, mainboardGroups[type])
             )}
-            </tbody>
-        </table>
+
+            {/* Render sideboard as its own section */}
+            {props?.sideboard && props.sideboard.length > 0 && (
+                <div className="card-section" style={{ pageBreakInside: 'avoid', marginTop: '50px' }}>
+                    <div className="section-header" style={{ 
+                        fontWeight: 'bold', 
+                        marginTop: '15px',
+                        marginBottom: '8px'
+                    }}>
+                        Sideboard ({props.sideboard.reduce((acc, val) => acc + val.quantity, 0)})
+                    </div>
+                    
+                    <div className="section-cards">
+                        {props.sideboard.map((card, index) => {
+                            const rowId = getRowId(card, true, index);
+                            
+                            return (
+                                <React.Fragment key={`sideboard-${index}`}>
+                                    {renderCardRow(card, rowId)}
+                                    {renderCardWarnings(card)}
+                                </React.Fragment>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

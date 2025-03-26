@@ -201,6 +201,14 @@ export async function deleteEventUser(event_id: string, user_id: string) {
     throw new Error("Http Exception");
 }
 
+export type DecklistResponse = {
+    player_name: string;
+    mainboard: DecklistCard[],
+    sideboard: DecklistCard[],
+    deck_warnings: string[],
+    decklist_text: string,
+}
+
 export async function getDecklistRequest(eventId: string, userId: string | null) {
     let url = `/api/events/${eventId}/deck`;
     if (userId) {
@@ -210,6 +218,9 @@ export async function getDecklistRequest(eventId: string, userId: string | null)
     const httpResponse = await fetch(url);
     if (httpResponse.status === 401) 
         throw new NotAuthenticatedError();
+
+    if (httpResponse.status === 404) 
+        return null;
     
     if (httpResponse.ok) {
         const res = await httpResponse.json() as DecklistResponse;
@@ -354,13 +365,6 @@ export type Format = {
     format: string;
 }
 
-export type DecklistResponse = {
-    player_name: string;
-    mainboard: DecklistCard[],
-    sideboard: DecklistCard[],
-    deck_warnings: string[],
-    decklist_text: string,
-}
 
 export type DecklistCard = {
     card_name: string,

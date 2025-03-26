@@ -53,17 +53,18 @@ type DeckEditorProps = {
 
 export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isJudge = props.user_id != null;
+    const isOpen = props.event.status === "open" || isJudge;
+
     const [showJudgeEditForm, setShowJudgeEditForm] = useState(false);
     const navigate = useNavigate();
 
-    const { data, error, isLoading, refetch } = useQuery<DecklistResponse>({
+    const { data, error, isLoading, refetch } = useQuery<DecklistResponse | null>({
         queryKey: [`deck-${props.event.event_id}-${props.user_id}`],
         retry: false,
         refetchOnWindowFocus: false,
         queryFn: () => getDecklistRequest(props.event.event_id, props.user_id),
     });
 
-    const isOpen = props.event.status === "open";
 
     type Inputs = {
         user_id?: string,
@@ -106,6 +107,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     if (error != null) {
         return <p>Error, try later</p>
+    }
+
+    if (isJudge && !data) {
+        return <p>No decklist found</p>
     }
 
     const mainboardCount = data?.mainboard.reduce((acc, val) => acc + val.quantity, 0) ?? 0;
