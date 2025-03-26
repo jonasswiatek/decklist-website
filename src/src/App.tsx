@@ -56,13 +56,15 @@ function App() {
   return (
     <>
     <AuthProvider>
-      <NavBar />
-      <div className="py-3 py-md-5">
-        <div className='container'>
-          <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
-          </QueryClientProvider>
-      </div>
+      <div className="d-flex flex-column min-vh-100">
+        <NavBar />
+        <div className="py-3 py-md-5 flex-grow-1">
+          <div className='container'>
+            <QueryClientProvider client={queryClient}>
+              <RouterProvider router={router} />
+            </QueryClientProvider>
+          </div>
+        </div>
       </div>
     </AuthProvider>
     </>

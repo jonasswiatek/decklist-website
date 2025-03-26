@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getEvent } from '../../model/api/apimodel';
 import { useAuth } from "../Login/AuthContext";
 import { EventList } from "../Events/EventList";
+import { Footer } from '../Footer/Footer';
 
 export function LandingPage() {
     const { login, authorized } = useAuth();
@@ -29,8 +30,8 @@ export function LandingPage() {
     };
 
     return (
-        <>
-            <div className="row">
+        <div className="d-flex flex-column">
+            <div className="row mb-4">
                 <div className="col">
                     <p>
                         Enter event code, or scan QR code provided by the tournament to upload your decklist.
@@ -47,7 +48,7 @@ export function LandingPage() {
                     ) : (<></>)}
                 </div>
             </div>
-            <div className="row">
+            <div className="row mb-4">
                 <div className="col">
                     <p>
                     {authorized ? (
@@ -62,6 +63,10 @@ export function LandingPage() {
                     </p>
                 </div>
             </div>
-        </>
+            {/* Footer without mt-auto to show it immediately after content */}
+            <div className="mb-4">
+                <Footer />
+            </div>
+        </div>
     )
 }
