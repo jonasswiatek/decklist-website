@@ -139,7 +139,8 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
         return (
             <div className="card-section" style={{ 
                 pageBreakInside: 'avoid',
-                marginBottom: '15px'
+                marginBottom: '15px',
+                maxWidth: '500px'
             }} key={`section-${isSideboard ? 'sb-' : ''}${type}`}>
                 <div className="section-header" style={{ 
                     fontWeight: 'bold', 
@@ -176,7 +177,11 @@ export const DecklistTable: React.FC<DecklistTableProps> = (props) => {
 
             {/* Render sideboard as its own section */}
             {props?.sideboard && props.sideboard.length > 0 && (
-                <div className="card-section" style={{ pageBreakInside: 'avoid', marginTop: '50px' }}>
+                <div className="card-section" style={{ 
+                    pageBreakInside: 'avoid', 
+                    marginTop: '50px',
+                    maxWidth: '500px' 
+                }}>
                     <div className="section-header" style={{ 
                         fontWeight: 'bold', 
                         marginTop: '15px',
