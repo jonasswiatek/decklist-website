@@ -19,6 +19,7 @@ import { AuthProvider, useAuth } from './Components/Login/AuthContext.tsx';
 import { CreateEvent } from './Components/Events/CreateEvent.tsx';
 import { DeckView } from './Components/Events/DeckView.tsx';
 import QRCodeView from './Components/Events/Views/QRCodeView';
+import { DecklistHelp } from './Components/Help/DecklistHelp';
 
 const queryClient = new QueryClient()
 
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
   {
     path: "/e/:eventId/qr",
     element: <QRCodeView />
+  },
+  {
+    path: "/help",
+    element: <DecklistHelp />
   },
 ]);
 

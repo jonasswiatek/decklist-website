@@ -393,9 +393,11 @@ export type EventDetails = {
     event_name: string;
     event_id: string;
     format: string;
+    format_name: string;
     role: string;
     event_date: Date;
     status: string;
+    decklist_style: 'commander' | 'sixty';
     participants: EventParticipant[]
 }
 

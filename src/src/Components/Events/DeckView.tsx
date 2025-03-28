@@ -6,6 +6,7 @@ import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
 import { BsPerson } from 'react-icons/bs';
+import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 
 export function DeckView() {
     const { event_id } = useParams();
@@ -155,7 +156,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 {(!isJudge || showJudgeEditForm) && (
                     <div className='col-md-4 col-sm-12'>
                         <div className="event-info mb-3 d-flex justify-content-between align-items-center">
-                            <p className="mb-0"><strong>Format:</strong> {props.event.format}</p>
+                            <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
                             {isOpen && data && !isJudge && (
                                 <button 
                                     type="button" 
@@ -179,13 +180,32 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     <input type='text' id="player_name" className='form-control' placeholder='Player Name' required {...register("player_name", { value: data?.player_name })} />
                                 </div>
                             </div>
-                            <hr></hr>
                             <div className="form-group">
                                 <div>
                                     {isOpen ? (
                                         <>
-                                            <textarea id='decklist_text' className="form-control" placeholder="3 Sheoldred, the Apocalypse" required {...register("decklist_text", { value: data?.decklist_text })} style={{ width: '100%', height: 400 }} />
-                                            {errors.decklist_text && <p>{errors.decklist_text?.message}</p>}
+                                            <div className="form-group mb-1">
+                                                {!isJudge && (
+                                                    <div className="text-end">
+                                                        <a href={`/help#${props.event.decklist_style.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
+                                                            See formatting guide
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <textarea 
+                                                id='decklist_text' 
+                                                className="form-control" 
+                                                placeholder={getDecklistPlaceholder(props.event.decklist_style)} 
+                                                required 
+                                                {...register("decklist_text", { value: data?.decklist_text })} 
+                                                style={{ width: '100%', height: 400 }} 
+                                            />
+                                            {errors.decklist_text && (
+                                                <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                                                    <span>{errors.decklist_text.message}</span>
+                                                </div>
+                                            )}
                                         </>
                                     ) : (
                                         <div className="decklist-readonly">
@@ -214,18 +234,18 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 )}
                 
                 {/* Always display the decklist table, but adjust width based on edit mode */}
-                <div className={(!isJudge || showJudgeEditForm) ? 'col-md-8 col-sm-12 decklist-table-container' : 'col-12 decklist-table-container'}>
+                <div className={(!isJudge || showJudgeEditForm) ? 'col-md-8 col-sm-12 decklist-table-container' : 'col-12 decklist-table-container'} style={{ marginTop: '10px' }}>
                     {data && <DecklistTable decklistData={data} allowChecklist={isJudge} />}
                 </div>
                 
                 {isOpen && (
                     <div className={`float-bottom submit-button-wrapper ${getSubmitButtonWrapperClass(isValid)}`}>
                         <div>
-                            {isDirty && (<span>You have unsaved changes</span>)}
+                            {isDirty && (<span className="no-wrap-text">You have unsaved changes</span>)}
                             {!isDirty && (
-                                <div>
-                                    <span style={{margin: 5}}>Main: {mainboardCount}</span>
-                                    <span style={{margin: 5}}>Side: {sideboardCount}</span>
+                                <div style={{ display: 'flex', minWidth: 0, flexShrink: 1 }}>
+                                    <span style={{margin: 5}} className="no-wrap-text">Main: {mainboardCount}</span>
+                                    <span style={{margin: 5}} className="no-wrap-text">Side: {sideboardCount}</span>
                                 </div>
                             )}
                         </div>
@@ -240,7 +260,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             </button>
                         )}
                         {/* Show Save button when form is dirty */}
-                        {isDirty ? <button type='submit' className='btn btn-primary' id='submit-button'>Save</button> : <></>}
+                        {isDirty ? <button type='submit' className='btn btn-primary no-wrap-text' id='submit-button'>{data ? 'Resubmit Decklist' : 'Submit Decklist'}</button> : <></>}
                     </div>
                 )}
             </div>
