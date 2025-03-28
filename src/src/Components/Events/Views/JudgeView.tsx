@@ -12,7 +12,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const judges = e.event.participants.filter(a => a.role === "judge");
     const [copied, setCopied] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const inviteLink = `https://decklist.lol/e/${e.event.event_id}`;
+    const inviteLink = `${window.location.origin}/e/${e.event.event_id}`;
     const navigate = useNavigate();
 
     // Filtered players based on search term
@@ -95,33 +95,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
 
     return (
         <>
-        <div className='row' style={{paddingBottom: 40}}>
-            <div className='col'>
-                <div className="alert alert-info d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>Invite Link:</strong> {inviteLink}
-                    </div>
-                    <div className="d-flex align-items-center">
-                        {/* Show on mobile only (xs, sm) */}
-                        <button 
-                            onClick={copyToClipboard} 
-                            className="btn btn-primary d-flex align-items-center d-md-none"
-                        >
-                            {copied ? <BsCheck className="me-2" /> : <BsClipboard className="me-2" />}
-                            {copied ? "Copied!" : "Copy"}
-                        </button>
-                        
-                        {/* Show on tablets and larger (md and up) */}
-                        <Link 
-                            to={`/e/${e.event.event_id}/qr`} 
-                            className="btn btn-primary d-none d-md-flex align-items-center"
-                        >
-                            <BsQrCode className="me-2" /> Show QR Code
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div className='row'>
             <div className='col-12 col-lg-6 mb-4'>
                 <h2 className="mb-3">Decks</h2>
@@ -183,6 +156,30 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
             </div>
             <div className='col-12 col-lg-6'>
                 <h2 className="mb-3">Event</h2>
+                
+                <div className="alert alert-info d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <strong>Invite Link:</strong> {inviteLink}
+                    </div>
+                    <div className="d-flex align-items-center">
+                        <button 
+                            onClick={copyToClipboard} 
+                            className="btn btn-primary d-flex align-items-center me-2"
+                            title="Copy to clipboard"
+                        >
+                            {copied ? <BsCheck /> : <BsClipboard />}
+                        </button>
+                        
+                        <Link 
+                            to={`/e/${e.event.event_id}/qr`} 
+                            className="btn btn-primary d-flex align-items-center"
+                            title="Show QR code"
+                        >
+                            <BsQrCode />
+                        </Link>
+                    </div>
+                </div>
+                
                 <div className="card mb-4">
                     <div className="card-header">
                         <strong>Event Status</strong>

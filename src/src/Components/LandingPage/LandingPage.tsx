@@ -18,13 +18,13 @@ export function LandingPage() {
         setShowError(false);
         if (joinCode && joinCode.length > 0)
         {
-            const eventDetails = await getEvent(joinCode);
+            const eventDetails = await getEvent(joinCode.toLowerCase());
             if (!eventDetails) {
                 //Show alert
                 setShowError(true)
             }
             else {
-                navigate(`/e/${joinCode}`);
+                navigate(`/e/${joinCode.toLowerCase()}`);
             }
         }
     };
@@ -37,7 +37,7 @@ export function LandingPage() {
                         Enter event code, or scan QR code provided by the tournament to upload your decklist.
                     </p>
                     <p>
-                        <input type='text'  value={joinCode} onChange={(e) => setJoinCode(e.target.value)} /> <Button onClick={goToEvent}>Join Event</Button>
+                        <input type='text' value={joinCode} onChange={(e) => setJoinCode(e.target.value)} /> <Button onClick={goToEvent}>Join Event</Button>
                     </p>
                     {showError ? (
                         <>

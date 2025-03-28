@@ -6,6 +6,27 @@ import { useAuth } from '../Login/AuthContext';
 import { DeckEditor } from './DeckView';
 import { EventViewProps } from './EventTypes';
 
+// New EventHeader component
+const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string }> = ({ eventName, eventId, role }) => {
+    const showEventId = role === "owner" || role === "judge";
+    
+    return (
+        <div className='row'>
+            <div className='col'>
+                <h1>
+                    {eventName} 
+                    {showEventId && (
+                        <small className="text-muted float-end d-none d-md-inline">
+                            <span className="badge bg-primary">{eventId.toUpperCase()}</span>
+                        </small>
+                    )}
+                </h1>
+                <br></br>
+            </div>
+        </div>
+    );
+};
+
 export function EventView() {
     const { event_id } = useParams();
     const { authorized } = useAuth();
@@ -69,12 +90,7 @@ export function EventView() {
         //Being viewed by a judge.
         return (
             <>
-                <div className='row'>
-                    <div className='col'>
-                        <h1>{data.event_name}</h1>
-                        <br></br>
-                    </div>
-                </div>
+                <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
                 <JudgeView event={data} refetch={refetch} />
             </>
         )
@@ -82,12 +98,7 @@ export function EventView() {
     
     return (
       <>
-        <div className='row'>
-            <div className='col'>
-                <h1>{data.event_name}</h1>
-                <br></br>
-            </div>
-        </div>
+        <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
         { authorized ? <DeckEditor event={data} user_id={null} /> : <UnauthedView event={data} /> }
       </>
     )
