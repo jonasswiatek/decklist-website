@@ -31,13 +31,29 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     };
 
     const toggleEventState = async () => {
-        const isOpen = e.event.status != "open";
-        await updateEvent(e.event.event_id, { 
-            event_status: isOpen ? "open" : "closed"
-        });
+        const isOpen = e.event.status === "open";
+        
+        // Judges can only close events, not reopen them
+        if (e.event.role === "judge" && isOpen) {
+            const confirmed = window.confirm(
+                "As a judge, you can close this event but cannot reopen it.\n\n" +
+                "Only the event owner can reopen a closed event.\n\n" +
+                "Are you sure you want to close this event?"
+            );
 
-        if (e.refetch) {
-            e.refetch();
+            console.log(confirmed);
+            if (!confirmed) return;
+        }
+        
+        // Only proceed if owner (who can do both) or judge closing the event
+        if (e.event.role === "owner" || isOpen) {
+            await updateEvent(e.event.event_id, { 
+                event_status: isOpen ? "closed" : "open"
+            });
+
+            if (e.refetch) {
+                e.refetch();
+            }
         }
     };
 
@@ -180,6 +196,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     id="eventToggle" 
                                     checked={e.event.status == "open"} 
                                     onChange={toggleEventState}
+                                    disabled={e.event.role === "judge" && e.event.status != "open"}
                                 />
                                 <label className="form-check-label" htmlFor="eventToggle">
                                     {e.event.status == "open" ? 
@@ -198,6 +215,13 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                 "Players can submit and modify decks when the event is open." : 
                                 "Players cannot submit or modify decks when the event is closed."}
                         </p>
+                        {e.event.role === "judge" && e.event.status != "open" && (
+                            <div className="alert alert-warning mt-3 mb-0">
+                                <small>
+                                    Only the event owner can reopen this event.
+                                </small>
+                            </div>
+                        )}
                     </div>
                 </div>
                 
