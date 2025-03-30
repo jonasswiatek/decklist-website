@@ -152,6 +152,37 @@ export async function createEventRequest(data: CreateEventRequest) {
     throw new Error("Http Exception");
 }
 
+type AddUserRequest = {
+    eventId: string,
+    email?: string,
+    playerName: string
+}
+
+type AddUserResponse = {
+    user_id: string;
+}
+
+export async function addUserToEvent(data: AddUserRequest) : Promise<AddUserResponse> {
+    const httpResponse = await fetch(`/api/events/${data.eventId}/players`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: data.email,
+            player_name: data.playerName
+        })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return await httpResponse.json() as AddUserResponse;
+    }
+
+    throw new Error("Http Exception");
+}
+
 type UpdateEventUsersRequest = {
     event_id: string,
     email: string,
@@ -272,7 +303,6 @@ export async function submitDecklistRequest(data: SubmitDecklistRequest) {
     throw new Error("Http Exception");
 }
 
-
 export async function deleteDeckRequest(eventId: string) {
     const httpResponse = await fetch(`/api/events/${eventId}/deck`, {
         method: "DELETE",
@@ -289,7 +319,6 @@ export async function deleteDeckRequest(eventId: string) {
 
     throw new Error("Http Exception");
 }
-
 
 type DeleteEventRequest = {
     event_id: string;
@@ -377,9 +406,6 @@ export type Format = {
     name: string;
     format: string;
 }
-
-
-
 
 export type EventListItem = {
     event_name: string;

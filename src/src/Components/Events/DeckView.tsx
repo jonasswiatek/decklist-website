@@ -12,6 +12,7 @@ export function DeckView() {
     const { event_id } = useParams();
     const [ searchParams ] = useSearchParams();
     const id = searchParams.get('id');
+    const showEditor = searchParams.get('showEditor');
 
     const { data, error, isLoading } = useQuery<EventDetails>({
         queryKey: [`event-${event_id}`],
@@ -44,19 +45,20 @@ export function DeckView() {
         )
     }
     
-    return (<DeckEditor event={data!} user_id={id} />)
+    return (<DeckEditor event={data!} user_id={id} showEditor={showEditor === 'true'} />)
 }
 
 type DeckEditorProps = {
     event: EventDetails,
     user_id: string | null,
+    showEditor: boolean | null
 }
 
 export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isJudge = props.user_id != null;
     const isOpen = props.event.status === "open" || isJudge;
 
-    const [showJudgeEditForm, setShowJudgeEditForm] = useState(false);
+    const [showJudgeEditForm, setShowJudgeEditForm] = useState(props.showEditor);
     const navigate = useNavigate();
 
     const { data, error, isLoading, refetch } = useQuery<DecklistResponse | null>({
@@ -65,7 +67,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         refetchOnWindowFocus: false,
         queryFn: () => getDecklistRequest(props.event.event_id, props.user_id),
     });
-
 
     type Inputs = {
         user_id?: string,
@@ -143,21 +144,31 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
             <div className='row'>
                 {isJudge && (
-                    <div className='col-12 mb-3'>
-                        <button 
-                            type="button" 
-                            className="btn btn-secondary" 
-                            onClick={handleBackToEvent}
-                        >
-                            Back to Event
-                        </button>
-                    </div>
+                    <>
+                        <div className='col-12 mb-3'>
+                            <button 
+                                type="button" 
+                                className="btn btn-secondary" 
+                                onClick={handleBackToEvent}
+                            >
+                                Back to Event
+                            </button>
+                        </div>
+                        {data?.player_name && (
+                            <div className='col-12 mb-3'>
+                                <h3 className="deck-player-name">
+                                    <BsPerson className="me-2" />
+                                    {data.player_name}
+                                </h3>
+                            </div>
+                        )}
+                    </>
                 )}
                 {(!isJudge || showJudgeEditForm) && (
                     <div className='col-md-4 col-sm-12'>
                         <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                             <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
-                            {isOpen && data && !isJudge && (
+                            {data && !isJudge && (
                                 <button 
                                     type="button" 
                                     className="btn btn-danger btn-sm" 
@@ -171,52 +182,50 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             <div className="alert alert-info mb-3">The event is closed. Decklist cannot be modified.</div>
                         )}
                         
-                        <>
-                            <div className="form-group">
-                                <div className="input-group">
-                                    <span className="input-group-text" id="basic-addon1">
-                                        <BsPerson />
-                                    </span>
-                                    <input type='text' id="player_name" className='form-control' placeholder='Player Name' required {...register("player_name", { value: data?.player_name })} />
-                                </div>
+                        <div className="form-group">
+                            <div className="input-group">
+                                <span className="input-group-text" id="basic-addon1">
+                                    <BsPerson />
+                                </span>
+                                <input type='text' id="player_name" className='form-control' placeholder='Player Name' required {...register("player_name", { value: data?.player_name })} />
                             </div>
-                            <div className="form-group">
-                                <div>
-                                    {isOpen ? (
-                                        <>
-                                            <div className="form-group mb-1">
-                                                {!isJudge && (
-                                                    <div className="text-end">
-                                                        <a href={`/help#${props.event.decklist_style.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
-                                                            See formatting guide
-                                                        </a>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <textarea 
-                                                id='decklist_text' 
-                                                className="form-control" 
-                                                placeholder={getDecklistPlaceholder(props.event.decklist_style)} 
-                                                required 
-                                                {...register("decklist_text", { value: data?.decklist_text })} 
-                                                style={{ width: '100%', height: 400 }} 
-                                            />
-                                            {errors.decklist_text && (
-                                                <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                                    <span>{errors.decklist_text.message}</span>
+                        </div>
+                        <div className="form-group">
+                            <div>
+                                {isOpen ? (
+                                    <>
+                                        <div className="form-group mb-1">
+                                            {!isJudge && (
+                                                <div className="text-end">
+                                                    <a href={`/help/decklist#${props.event.decklist_style.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
+                                                        See formatting guide
+                                                    </a>
                                                 </div>
                                             )}
-                                        </>
-                                    ) : (
-                                        <div className="decklist-readonly">
-                                            <pre className="form-control" style={{ width: '100%', height: 400, whiteSpace: 'pre-wrap', overflowY: 'auto' }}>
-                                                {data?.decklist_text || 'No decklist submitted'}
-                                            </pre>
                                         </div>
-                                    )}
-                                </div>
+                                        <textarea 
+                                            id='decklist_text' 
+                                            className="form-control" 
+                                            placeholder={getDecklistPlaceholder(props.event.decklist_style)} 
+                                            required 
+                                            {...register("decklist_text", { value: data?.decklist_text })} 
+                                            style={{ width: '100%', height: 400 }} 
+                                        />
+                                        {errors.decklist_text && (
+                                            <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                                                <span>{errors.decklist_text.message}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="decklist-readonly">
+                                        <pre className="form-control" style={{ marginTop: '10px', width: '100%', height: 400, whiteSpace: 'pre-wrap', overflowY: 'auto' }}>
+                                            {data?.decklist_text || 'No decklist submitted'}
+                                        </pre>
+                                    </div>
+                                )}
                             </div>
-                        </>
+                        </div>
                         
                         {data?.deck_warnings && data.deck_warnings.length > 0 && (
                             <div className="mt-3">

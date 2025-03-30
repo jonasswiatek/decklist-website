@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { BsMailbox } from 'react-icons/bs';
-import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch } from 'react-icons/bs'; 
-import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent } from '../../../model/api/apimodel';
+import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp } from 'react-icons/bs'; 
+import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent, addUserToEvent } from '../../../model/api/apimodel';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
 
@@ -12,8 +11,13 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const judges = e.event.participants.filter(a => a.role === "judge");
     const [copied, setCopied] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showAddDeckForm, setShowAddDeckForm] = useState(false);
+    const [showAddJudgeForm, setShowAddJudgeForm] = useState(false);
     const inviteLink = `${window.location.origin}/e/${e.event.event_id}`;
     const navigate = useNavigate();
+
+    // Form states for adding player
+    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors } } = useForm<{playerName: string, email: string}>();
 
     // Filtered players based on search term
     const filteredPlayers = players.filter(player => 
@@ -63,7 +67,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
             await deleteEvent({ event_id: e.event.event_id });
             // Navigate back to the events list using React Router
             navigate('/');
-    }
+        }
     };
 
     type Inputs = {
@@ -93,32 +97,77 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         }
     }
 
+    // Handler for adding a player
+    const onAddPlayer: SubmitHandler<{playerName: string, email: string}> = async data => {
+        try {
+            const response = await addUserToEvent({ 
+                eventId: e.event.event_id, 
+                email: data.email || undefined, 
+                playerName: data.playerName, 
+            });
+            
+            resetPlayer();
+            
+            if (response && response.user_id) {
+                // Navigate to the player's deck page
+                navigate(`/e/${e.event.event_id}/deck?id=${response.user_id}&showEditor=true`);
+            } else {
+                e.refetch?.();
+            }
+        } catch(err) {
+            HandleValidation(setPlayerError, err);
+        }
+    }
+
     return (
         <>
         <div className='row'>
             <div className='col-12 col-lg-6 mb-4'>
                 <h2 className="mb-3">Decks</h2>
-                <div className="input-group mb-3">
-                    <span className="input-group-text">
-                        <BsSearch />
-                    </span>
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search by player name"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    {searchTerm && (
-                        <button 
-                            className="btn btn-outline-secondary" 
-                            type="button"
-                            onClick={() => setSearchTerm('')}
-                        >
-                            Clear
-                        </button>
+                
+                {/* Add Player Form */}
+                <div className="card mb-3">
+                    <div 
+                        className="card-header d-flex align-items-center justify-content-between cursor-pointer" 
+                        onClick={() => setShowAddDeckForm(!showAddDeckForm)}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        <div className="d-flex align-items-center">
+                            <BsPersonPlus className="me-2" />
+                            <strong>Manually Add Deck</strong>
+                        </div>
+                        {showAddDeckForm ? <BsChevronUp /> : <BsChevronDown />}
+                    </div>
+                    {showAddDeckForm && (
+                        <div className="card-body">
+                            <form onSubmit={(e) => { clearPlayerErrors(); handleSubmitPlayer(onAddPlayer)(e); }}>
+                                <div className="mb-3">
+                                    <input 
+                                        type="text" 
+                                        className="form-control" 
+                                        placeholder="Player Name *" 
+                                        required
+                                        {...registerPlayer("playerName")} 
+                                    />
+                                    {playerErrors.playerName && <div className="text-danger mt-1">{playerErrors.playerName.message}</div>}
+                                </div>
+                                <div className="mb-3">
+                                    <input 
+                                        type="email" 
+                                        className="form-control" 
+                                        placeholder="Email (optional)" 
+                                        {...registerPlayer("email")} 
+                                    />
+                                    {playerErrors.email && <div className="text-danger mt-1">{playerErrors.email.message}</div>}
+                                </div>
+                                <div>
+                                    <button type="submit" className="btn btn-success">Add Deck</button>
+                                </div>
+                            </form>
+                        </div>
                     )}
                 </div>
+
                 <table className="table table-striped table-hover">
                 <thead className="table-dark">
                 <tr>
@@ -127,6 +176,31 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 </tr>
                 </thead>
                 <tbody>
+                <tr className="bg-light">
+                    <td colSpan={2}>
+                        <div className="input-group my-2">
+                            <span className="input-group-text">
+                                <BsSearch />
+                            </span>
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search by player name"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            {searchTerm && (
+                                <button 
+                                    className="btn btn-outline-secondary" 
+                                    type="button"
+                                    onClick={() => setSearchTerm('')}
+                                >
+                                    Clear
+                                </button>
+                            )}
+                        </div>
+                    </td>
+                </tr>
                 {filteredPlayers.map((p) => {
                     return (
                         <tr key={p.user_id}>
@@ -242,6 +316,32 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         </div>
                         
                         <h2 className="mb-3">Judges</h2>
+
+                        <div className="card mt-4">
+                            <div 
+                                className="card-header d-flex align-items-center justify-content-between"
+                                onClick={() => setShowAddJudgeForm(!showAddJudgeForm)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <strong>Add Judge</strong>
+                                {showAddJudgeForm ? <BsChevronUp /> : <BsChevronDown />}
+                            </div>
+                            {showAddJudgeForm && (
+                                <div className="card-body">
+                                    <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
+                                        <div className="mb-3">
+                                            <input id='player_name' type="text" className="form-control" placeholder="Judge Name" required {...register("playerName")} />
+                                            {errors.playerName && <p className="text-danger mt-2">{errors.playerName?.message}</p>}
+                                        </div>
+                                        <div className="mb-3">
+                                            <input id='email' type="text" className="form-control" placeholder="Email Address" required {...register("email")} />
+                                            {errors.email && <p className="text-danger mt-2">{errors.email?.message}</p>}
+                                        </div>
+                                        <button type='submit' className='btn btn-success'>Add Judge</button>
+                                    </form>
+                                </div>
+                            )}
+                        </div>
                         <table className="table table-striped table-hover">
                             <thead className="table-dark">
                                 <tr>
@@ -265,27 +365,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                             </tbody>
                         </table>
 
-                        <div className="card mt-4">
-                            <div className="card-header">
-                                <strong>Add Judge</strong>
-                            </div>
-                            <div className="card-body">
-                                <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
-                                    <div className="form-group">
-                                        <div className="input-group">
-                                            <span className="input-group-text" id="basic-addon1">
-                                                <BsMailbox />
-                                            </span>
-                                            <input id='email' type="text" className="form-control" placeholder="Email Address" required {...register("email")} />
-                                            <input id='player_name' type="text" className="form-control" placeholder="Name" required {...register("playerName")} />
-
-                                            <button type='submit' className='btn btn-success'>Add Judge</button>
-                                        </div>
-                                        {errors.email && <p className="text-danger mt-2">{errors.email?.message}</p>}
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
                     </>
                 )}
             </div>

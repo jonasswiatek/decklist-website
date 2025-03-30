@@ -20,6 +20,7 @@ import { CreateEvent } from './Components/Events/CreateEvent.tsx';
 import { DeckView } from './Components/Events/DeckView.tsx';
 import QRCodeView from './Components/Events/Views/QRCodeView';
 import { DecklistHelp } from './Components/Help/DecklistHelp';
+import { PrivacyHelp } from './Components/Help/PrivacyPolicy';
 
 const queryClient = new QueryClient()
 
@@ -52,8 +53,12 @@ const router = createBrowserRouter([
     element: <QRCodeView />
   },
   {
-    path: "/help",
+    path: "/help/decklist",
     element: <DecklistHelp />
+  },
+  {
+    path: "/help/privacy",
+    element: <PrivacyHelp />
   },
 ]);
 

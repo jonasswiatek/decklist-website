@@ -39,6 +39,10 @@ export function LoginScreen() {
             <div className="card-body">
               <LoginForm />
               
+              <p className="small text-muted text-center mt-3 mb-0">
+                By logging in, you agree to our <a href="/help/privacy">Privacy Policy</a>
+              </p>
+              
               <div className="d-flex align-items-center my-4">
                 <hr className="flex-grow-1" />
                 <span className="mx-3 text-muted">OR</span>
@@ -71,7 +75,7 @@ export function LoginScreen() {
             <div className="card-body">
               <h5 className="card-title">Please consider Google Login</h5>
               <p className="card-text">
-                Sending emails isn't free, so you absolutely can't make yourself do it, pleaes use Google Login.
+                Sending emails isn't free, so unless you absolutely can't make yourself do it, pleaes use Google Login.
               </p>
             </div>
           </div>
