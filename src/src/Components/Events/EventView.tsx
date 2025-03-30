@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { EventDetails } from '../../model/api/apimodel';
+import { EventDetails, getEvent } from '../../model/api/apimodel';
 import { JudgeView } from './Views/JudgeView';
 import { useAuth } from '../Login/AuthContext';
 import { DeckEditor } from './DeckView';
@@ -31,23 +31,11 @@ export function EventView() {
     const { event_id } = useParams();
     const { authorized } = useAuth();
 
-    const { data, error, isLoading, refetch } = useQuery({
+    const { data, error, isLoading, refetch } = useQuery<EventDetails>({
         queryKey: [`event-${event_id}`],
         retry: false,
         refetchOnWindowFocus: false,
-        queryFn: () =>
-            fetch(`/api/events/${event_id}`).then(async (res) => {
-                if (res.status === 404) {
-                    return null;
-                }
-
-                if (!res.ok) {
-                    throw "error";
-                }
-
-                return await res.json() as EventDetails;
-            }
-        ),
+        queryFn: () => getEvent(event_id!),
     });
     
     if (isLoading) {

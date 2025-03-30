@@ -35,22 +35,27 @@ export function EventList() : ReactElement {
             <Table hover responsive>
               <thead>
                 <tr>
-                  <th scope='col'>Date</th>
                   <th scope='col'>Tournament</th>
-                  <th scope='col'>Role</th>
+                  <th scope='col'>Date</th>
                 </tr>
               </thead>
               <tbody>
                 {data?.map(event => (
                   <tr key={event.event_id}>
+                    <td>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <Link to={'/e/' + event.event_id} className="fw-semibold text-decoration-none">
+                          {event.event_name}
+                        </Link>
+                        <span className="badge bg-primary">{event.role}</span>
+                      </div>
+                    </td>
                     <td>{new Date(event.event_date).toLocaleDateString()}</td>
-                    <td><Link to={'/e/' + event.event_id} className="fw-semibold text-decoration-none">{event.event_name}</Link></td>
-                    <td><span className="badge bg-primary">{event.role}</span></td>
                   </tr>
                 ))}
                 {data?.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="text-center py-4">No events found</td>
+                    <td colSpan={2} className="text-center py-4">No events found</td>
                   </tr>
                 )}
               </tbody>

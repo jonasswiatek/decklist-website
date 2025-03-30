@@ -248,6 +248,8 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                             to={`/e/${e.event.event_id}/qr`} 
                             className="btn btn-primary d-flex align-items-center"
                             title="Show QR code"
+                            target="_blank" // Add this to open in a new window
+                            rel="noopener noreferrer" // Add this for security best practices
                         >
                             <BsQrCode />
                         </Link>

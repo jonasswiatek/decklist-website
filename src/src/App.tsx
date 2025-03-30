@@ -18,7 +18,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import { AuthProvider, useAuth } from './Components/Login/AuthContext.tsx';
 import { CreateEvent } from './Components/Events/CreateEvent.tsx';
 import { DeckView } from './Components/Events/DeckView.tsx';
-import QRCodeView from './Components/Events/Views/QRCodeView';
+import { QRCodeView } from './Components/Events/Views/QRCodeView';
 import { DecklistHelp } from './Components/Help/DecklistHelp';
 import { PrivacyHelp } from './Components/Help/PrivacyPolicy';
 
@@ -95,16 +95,17 @@ function NavBar()
           <Nav.Link href="/e/new">Create Event</Nav.Link>
         </Nav>
         <Nav>
-        {authorized ? (
-          <>
-            <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
-          </>
-          ) :
-          (
+          <Nav.Link href="/help/privacy">Privacy Policy</Nav.Link>
+          {authorized ? (
             <>
-              <Nav.Link onClick={() => login()}>Log in</Nav.Link>
+              <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
             </>
-          )}
+            ) :
+            (
+              <>
+                <Nav.Link onClick={() => login()}>Log in</Nav.Link>
+              </>
+            )}
         </Nav>
       </Navbar.Collapse>
     </Container>
