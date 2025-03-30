@@ -99,7 +99,7 @@ export function EventView() {
     return (
       <>
         <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
-        { authorized ? <DeckEditor event={data} user_id={null} /> : <UnauthedView event={data} /> }
+        { authorized ? <DeckEditor event={data} user_id={null} showEditor={false} /> : <UnauthedView event={data} /> }
       </>
     )
 }
