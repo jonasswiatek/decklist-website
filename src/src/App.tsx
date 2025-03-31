@@ -22,6 +22,7 @@ import { QRCodeView } from './Components/Events/Views/QRCodeView';
 import { DecklistHelp } from './Components/Help/DecklistHelp';
 import { PrivacyHelp } from './Components/Help/PrivacyPolicy';
 import { TermsAndServicesHelp } from './Components/Help/TermsAndServices';
+import { MutliEventView } from './Components/Events/MultiEventView.tsx';
 
 const queryClient = new QueryClient()
 
@@ -29,6 +30,11 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
+  },
+  {
+    path: "/multi/:hub_name",
+    element:
+      <MutliEventView/>
   },
   {
     path: "/e/new",
