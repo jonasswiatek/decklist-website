@@ -1,6 +1,6 @@
-import { useQueries, useQuery } from "react-query";
+import { useQuery } from "react-query";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { getEvent, getMultipleEventsRequest } from "../../model/api/apimodel";
+import { getMultipleEventsRequest } from "../../model/api/apimodel";
 import { Card, Spinner, Table } from "react-bootstrap";
 
 export function MutliEventView() {
