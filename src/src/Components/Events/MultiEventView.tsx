@@ -18,6 +18,8 @@ export function MutliEventView() {
     })
   );
 
+
+  //example 
   return (
     <div className="container mt-4">
       <div className="row mb-4">
