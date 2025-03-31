@@ -1,4 +1,3 @@
-
 export function PrivacyHelp() {
   return (
     <div className="container mx-auto px-4 py-8">
@@ -46,6 +45,28 @@ export function PrivacyHelp() {
           </a>.
         </p>
         
+        <h2 className="text-2xl font-semibold mt-6 mb-4">Amazon Web Services (AWS)</h2>
+        <p>
+          Our service is hosted on Amazon Web Services (AWS) in the Frankfurt region (EU-Central-1). We use the following AWS services to operate our platform:
+        </p>
+        <ul className="list-disc pl-6 mb-4">
+          <li>AWS Lambda - For serverless computing to run our application code</li>
+          <li>Amazon DynamoDB - For database storage of decklists and event information</li>
+          <li>Amazon SES (Simple Email Service) - For processing email communications</li>
+          <li>Amazon CloudFront - For content delivery and distribution</li>
+        </ul>
+        <p className="mt-2">
+          All data is stored within the European Union. For more information about how AWS handles your data, please refer to their{" "}
+          <a 
+            href="https://aws.amazon.com/privacy/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            Privacy Policy
+          </a>.
+        </p>
+        
         <h2 className="text-2xl font-semibold mt-6 mb-4">Your Data Rights</h2>
         <p>
           As a user based in the European Union, you have certain rights regarding your personal data, including the right to access, correct, or delete any information we hold about you.
@@ -54,20 +75,20 @@ export function PrivacyHelp() {
           Only the name you provide on your decklist is stored in our database, and you can delete that data yourself by deleting your decklist.
         </p>
         <p>
-          Frankly I don't want to pay to store data about you, so I don't keep any data around for events in the past. I don't gather statistics about what you play, because I don't give two shits. I made this website because I'm tired of reading your crumpled up decklists written on napkins, with your shitty handwriting and your inability to locate the upper right corner on a decklist when you're being asked to write your table number on it.
+          We prioritize data minimization and do not retain data from past events. We don't collect statistics about your gameplay habits or preferences. This website was created to simplify the decklist submission process and avoid common issues with paper submissions such as illegible handwriting or missing information.
         </p>
         <p>
-          Want your data deleted? Do it yourself then. If you forgot the email you used to log in with, I can't help you. I encrypt all the data to shit in the database so even I can't fucking tell which of the entries in the database belongs to you. I do it like that because if some nerd manages to run away with the content of the database, it's all just a garbled mess containing no emails, no password, no birthdays, sexual orientations, skincolors, what you had for dinner or whatever the fuck else people want to know.
+          If you wish to delete your data, you can do so by removing your decklist. If you've forgotten the email you used to log in with, we may not be able to assist you as all data in our database is strongly encrypted. This encryption ensures that even in the unlikely event of a data breach, your information remains protected. We do not store emails, passwords, personal identifiers, or any sensitive personal information in our database.
         </p>
         <p>
-          All decklists and information about events are deleted within a week after the event ends. Irrecoverably so, because I don't want to pay to keep that shit around.
+          All decklists and information about events are automatically deleted within a week after the event ends to maintain data minimization principles.
         </p>
         <p>
-          If you really need me for anything, then you can reach me on jonas DOT swiatek AT gmail DOT com
+          If you need to contact me for some reason, you can reach me at: jonas DOT swiatek AT gmail DOT com
         </p>
         
         <p className="mt-8 text-sm text-gray-600">
-          Last updated: {new Date().toISOString().split('T')[0]}
+          Last updated: 31st of March 2025
         </p>
       </div>
     </div>

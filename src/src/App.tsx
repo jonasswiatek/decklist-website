@@ -21,6 +21,7 @@ import { DeckView } from './Components/Events/DeckView.tsx';
 import { QRCodeView } from './Components/Events/Views/QRCodeView';
 import { DecklistHelp } from './Components/Help/DecklistHelp';
 import { PrivacyHelp } from './Components/Help/PrivacyPolicy';
+import { TermsAndServicesHelp } from './Components/Help/TermsAndServices';
 
 const queryClient = new QueryClient()
 
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
     path: "/help/privacy",
     element: <PrivacyHelp />
   },
+  {
+    path: "/help/terms-and-services",
+    element: <TermsAndServicesHelp />
+  },
 ]);
 
 function App() {
@@ -96,6 +101,7 @@ function NavBar()
         </Nav>
         <Nav>
           <Nav.Link href="/help/privacy">Privacy Policy</Nav.Link>
+          <Nav.Link href="/help/terms-and-services">Terms of Service</Nav.Link>
           {authorized ? (
             <>
               <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
