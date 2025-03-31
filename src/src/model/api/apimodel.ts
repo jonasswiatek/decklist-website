@@ -105,13 +105,29 @@ export async function logoutRequest() {
     throw new Error("Http Exception");
 }
 
-export async function getAllEventsRequest() {
+export async function getAllEventsRequest() : Promise<EventDetails[]> {
     const httpResponse = await fetch("/api/events");
     if (httpResponse.status === 401) 
         throw new NotAuthenticatedError();
     
     if (httpResponse.ok) {
-        const events = await httpResponse.json() as Event[];
+        const events = await httpResponse.json() as EventDetails[];
+        return events;
+    }
+
+    throw new Error("Http Exception");
+}
+
+export async function getMultipleEventsRequest(eventId: string[]) : Promise<EventDetails[]> {
+    const params = new URLSearchParams();
+    eventId.forEach(id => params.append('eventId', id));
+    
+    const httpResponse = await fetch(`/api/events/batch?${params.toString()}`);
+    if (httpResponse.status === 401) 
+        throw new NotAuthenticatedError();
+    
+    if (httpResponse.ok) {
+        const events = await httpResponse.json() as EventDetails[];
         return events;
     }
 
