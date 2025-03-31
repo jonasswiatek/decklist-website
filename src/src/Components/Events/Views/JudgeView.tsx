@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp } from 'react-icons/bs'; 
+import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp, BsDownload } from 'react-icons/bs'; 
 import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent, addUserToEvent } from '../../../model/api/apimodel';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
@@ -68,6 +68,11 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
             // Navigate back to the events list using React Router
             navigate('/');
         }
+    };
+
+    const handleDownloadDecklists = () => {
+        // Simply open the URL in a new tab, browser will handle the download
+        window.open(`/api/events/${e.event.event_id}/decks/all`, '_blank');
     };
 
     type Inputs = {
@@ -295,6 +300,24 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                 </small>
                             </div>
                         )}
+                    </div>
+                </div>
+                
+                <div className="card mb-4">
+                    <div className="card-header">
+                        <strong>Utilities</strong>
+                    </div>
+                    <div className="card-body">
+                        <button 
+                            type="button" 
+                            className="btn btn-primary d-flex align-items-center"
+                            onClick={handleDownloadDecklists}
+                        >
+                            <BsDownload className="me-2" /> Download All Decklists
+                        </button>
+                        <p className="mt-2 mb-0 small text-muted">
+                            Download all decklists as a single text file for offline use or printing.
+                        </p>
                     </div>
                 </div>
                 
