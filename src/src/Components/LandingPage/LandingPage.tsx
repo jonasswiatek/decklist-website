@@ -4,7 +4,6 @@ import { useState } from "react";
 import { getEvent } from '../../model/api/apimodel';
 import { useAuth } from "../Login/AuthContext";
 import { EventList } from "../Events/EventList";
-import { Footer } from '../Footer/Footer';
 
 export function LandingPage() {
     const { login, authorized } = useAuth();
