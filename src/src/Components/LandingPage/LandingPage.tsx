@@ -17,13 +17,14 @@ export function LandingPage() {
         setShowError(false);
         if (joinCode && joinCode.length > 0)
         {
-            const eventDetails = await getEvent(joinCode.toLowerCase());
-            if (!eventDetails) {
-                //Show alert
-                setShowError(true)
+            try
+            {
+                const eventDetails = await getEvent(joinCode.toLowerCase());
+                navigate(`/e/${eventDetails.event_id.toLowerCase()}`);
             }
-            else {
-                navigate(`/e/${joinCode.toLowerCase()}`);
+            catch (e)
+            {
+                setShowError(true);
             }
         }
     };
