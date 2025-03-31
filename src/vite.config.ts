@@ -13,8 +13,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        //target: 'https://decklist.lol',
-        target: 'http://localhost:5290',
+        target: 'https://decklist.lol',
+        //target: 'http://localhost:5290',
         changeOrigin: true,
       },
     },
