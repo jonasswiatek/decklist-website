@@ -63,10 +63,6 @@ export function LandingPage() {
                     </p>
                 </div>
             </div>
-            {/* Footer without mt-auto to show it immediately after content */}
-            <div className="mb-4">
-                <Footer />
-            </div>
         </div>
     )
 }

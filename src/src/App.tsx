@@ -80,6 +80,7 @@ function App() {
             </QueryClientProvider>
           </div>
         </div>
+        <Footer />
       </div>
     </AuthProvider>
     </>
@@ -100,8 +101,6 @@ function NavBar()
           <Nav.Link href="/e/new">Create Event</Nav.Link>
         </Nav>
         <Nav>
-          <Nav.Link href="/help/privacy">Privacy Policy</Nav.Link>
-          <Nav.Link href="/help/terms-and-services">Terms of Service</Nav.Link>
           {authorized ? (
             <>
               <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
@@ -119,6 +118,22 @@ function NavBar()
   <Container id='top-floating-container'>
   </Container>
 </>
+}
+
+function Footer() {
+  return (
+    <footer className="py-3 mt-auto">
+      <Container className="text-center">
+        <Nav className="justify-content-center">
+          <Nav.Link href="/help/privacy" className="text-reset text-decoration-none">Privacy Policy</Nav.Link>
+          <Nav.Link href="/help/terms-and-services" className="text-reset text-decoration-none">Terms of Service</Nav.Link>
+        </Nav>
+        <div className="small mt-2">
+          Brought to you with love, for free and with no guarantees.
+        </div>
+      </Container>
+    </footer>
+  );
 }
 
 export default App
