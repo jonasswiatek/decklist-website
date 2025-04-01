@@ -27,6 +27,24 @@ const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string 
     );
 };
 
+// Event Full Message component
+const EventFullMessage: React.FC = () => {
+    return (
+        <div className="container py-4">
+            <div className="row justify-content-center">
+                <div className="col-md-6">
+                    <div className="alert alert-warning text-center">
+                        <h5 className="alert-heading">Event is Full</h5>
+                        <p className="mb-0">
+                            This event has reached its maximum player capacity. Please contact the Tournament Organizer if you believe you should still be able to register.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export function EventView() {
     const { event_id } = useParams();
     const { authorized } = useAuth();
@@ -87,7 +105,10 @@ export function EventView() {
     return (
       <>
         <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
-        { authorized ? <DeckEditor event={data} user_id={null} showEditor={false} /> : <UnauthedView event={data} /> }
+        {(data.player_count >= data.max_players) ? 
+            <EventFullMessage /> : 
+            (authorized ? <DeckEditor event={data} user_id={null} showEditor={false} /> : <UnauthedView event={data} />)
+        }
       </>
     )
 }

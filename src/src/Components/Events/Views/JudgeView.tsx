@@ -17,7 +17,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const navigate = useNavigate();
 
     // Form states for adding player
-    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors } } = useForm<{playerName: string, email: string}>();
+    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors } } = useForm<{player_name: string, email: string}>();
 
     // Filtered players based on search term
     const filteredPlayers = players.filter(player => 
@@ -103,12 +103,12 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     }
 
     // Handler for adding a player
-    const onAddPlayer: SubmitHandler<{playerName: string, email: string}> = async data => {
+    const onAddPlayer: SubmitHandler<{player_name: string, email: string}> = async data => {
         try {
             const response = await addUserToEvent({ 
                 eventId: e.event.event_id, 
                 email: data.email || undefined, 
-                playerName: data.playerName, 
+                playerName: data.player_name, 
             });
             
             resetPlayer();
@@ -120,6 +120,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 e.refetch?.();
             }
         } catch(err) {
+            console.log(err);
             HandleValidation(setPlayerError, err);
         }
     }
@@ -152,9 +153,9 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                         className="form-control" 
                                         placeholder="Player Name *" 
                                         required
-                                        {...registerPlayer("playerName")} 
+                                        {...registerPlayer("player_name")} 
                                     />
-                                    {playerErrors.playerName && <div className="text-danger mt-1">{playerErrors.playerName.message}</div>}
+                                    {playerErrors.player_name && <div className="text-danger mt-1">{playerErrors.player_name.message}</div>}
                                 </div>
                                 <div className="mb-3">
                                     <input 
@@ -176,7 +177,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 <table className="table table-striped table-hover">
                 <thead className="table-dark">
                 <tr>
-                    <th>Players ({players.length})</th>
+                    <th>Players ({players.length}/{e.event.max_players})</th>
                     <th className="text-end">Actions</th>
                 </tr>
                 </thead>

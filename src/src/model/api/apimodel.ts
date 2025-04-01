@@ -440,6 +440,8 @@ export type EventDetails = {
     event_date: Date;
     status: string;
     decklist_style: 'commander' | 'sixty';
+    player_count: number;
+    max_players: number;
     participants: EventParticipant[]
 }
 

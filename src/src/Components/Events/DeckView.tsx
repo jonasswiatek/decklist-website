@@ -188,6 +188,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     <BsPerson />
                                 </span>
                                 <input type='text' id="player_name" className='form-control' placeholder='Player Name' required {...register("player_name", { value: data?.player_name })} />
+                                {errors.player_name && (
+                                    <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                                        <span>{errors.player_name.message}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="form-group">
