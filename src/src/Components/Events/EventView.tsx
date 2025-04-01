@@ -14,10 +14,10 @@ const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string 
         <div className='row'>
             <div className='col'>
                 <h1>
-                    {eventName} 
+                    <span>{eventName}</span>
                     {showEventId && (
                         <small className="text-muted float-end d-none d-md-inline">
-                            <span className="badge bg-primary">{eventId.toUpperCase()}</span>
+                            <span className="badge bg-primary user-select-all">{eventId.toUpperCase()}</span>
                         </small>
                     )}
                 </h1>
