@@ -1,3 +1,4 @@
+import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 export function DecklistHelp() {
@@ -6,30 +7,30 @@ export function DecklistHelp() {
       <h1 className="mb-4">Decklist Formatting Guide</h1>
       
       <div className="mb-3">
-        <Link to="/" className="btn btn-outline-secondary">Back to Front page</Link>
+        <Link to="/" className="btn btn-secondary">Back to Front page</Link>
       </div>
       
       <div className="row">
         <div className="col-12">
-          <div className="card mb-4">
-            <div className="card-header">
+          <Card className="card mb-4">
+            <Card.Header className="card-header">
               <h2 className="mb-0">Table of Contents</h2>
-            </div>
-            <div className="card-body">
+            </Card.Header>
+            <Card.Body className="card-body">
               <ul className="list-unstyled">
                 <li className="mb-2"><a href="#sixty">Standard 60-Card Format</a></li>
                 <li className="mb-2"><a href="#commander">Commander Format</a></li>
               </ul>
-            </div>
-          </div>
+            </Card.Body>
+          </Card>
         </div>
       </div>
 
-      <div id="sixty" className="card mb-4">
-        <div className="card-header">
+      <Card id="sixty" className="card mb-4">
+        <Card.Header className="card-header">
           <h2>Standard 60-Card Format</h2>
-        </div>
-        <div className="card-body">
+        </Card.Header>
+        <Card.Body className="card-body">
           <h4>Formatting requirements</h4>
           <ul>
             <li>Line format is N CardName. N is the number of cards.</li>
@@ -40,7 +41,7 @@ export function DecklistHelp() {
           </ul>
 
           <h4>Formatting Example</h4>
-          <pre className="bg-light p-3 rounded">
+          <pre className=" p-3 rounded">
 {`4 Lightning Bolt
 4 Goblin Guide
 4 Monastery Swiftspear
@@ -51,14 +52,14 @@ export function DecklistHelp() {
 2 Tormod's Crypt
 ...`}
           </pre>
-        </div>
-      </div>
+        </Card.Body>
+      </Card>
 
-      <div id="commander" className="card mb-4">
-        <div className="card-header">
+      <Card id="commander" className="card mb-4">
+        <Card.Header className="card-header">
           <h2>Commander Format</h2>
-        </div>
-        <div className="card-body">
+        </Card.Header>
+        <Card.Body className="card-body">
           <h4>Formatting requirements</h4>
           <ul>
             <li>The Commander(s) must be in a separate section from the main deck, separated by an empty line.</li>
@@ -66,7 +67,7 @@ export function DecklistHelp() {
           </ul>
 
           <h4>Formatting Example</h4>
-          <pre className="bg-light p-3 rounded">
+          <pre className=" p-3 rounded">
 {`1 Atraxa, Praetors' Voice
 
 1 Bloom Tender
@@ -87,8 +88,8 @@ export function DecklistHelp() {
 2 Island
 ...`}
           </pre>
-        </div>
-      </div>
+        </Card.Body>
+      </Card>
     </div>
   );
 }
