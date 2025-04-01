@@ -18,8 +18,8 @@ export function CreateEvent() : ReactElement {
     
     const onSubmit: SubmitHandler<Inputs> = async data => {
       try {
-        await createEventRequest({ event_name: data.event_name, format: data.format, event_date: data.event_date });
-        navigate('/');
+        const createdEvent = await createEventRequest({ event_name: data.event_name, format: data.format, event_date: data.event_date });
+        navigate('/e/' + createdEvent.event_id);
       }
       catch(e) {
         HandleValidation(setError, e);

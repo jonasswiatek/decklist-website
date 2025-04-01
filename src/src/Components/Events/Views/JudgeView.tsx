@@ -16,9 +16,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const inviteLink = `${window.location.origin}/e/${e.event.event_id}`;
     const navigate = useNavigate();
 
-    // Form states for adding player
-    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors } } = useForm<{player_name: string, email: string}>();
-
     // Filtered players based on search term
     const filteredPlayers = players.filter(player => 
         player.player_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -45,7 +42,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 "Are you sure you want to close this event?"
             );
 
-            console.log(confirmed);
             if (!confirmed) return;
         }
         
@@ -75,15 +71,10 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         window.open(`/api/events/${e.event.event_id}/decks/all`, '_blank');
     };
 
-    type Inputs = {
-        email: string,
-        playerName: string
-    };
-
-    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<Inputs>();
-    const onSubmit: SubmitHandler<Inputs> = async data => {
+    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors, isSubmitting: isJudgeSubmitting } } = useForm<{player_name: string, email: string}>();
+    const onAddJudge: SubmitHandler<{player_name: string, email: string}> = async data => {
         try {
-            await updateEventUsers({ event_id: e.event.event_id, email: data.email, player_name: data.playerName, role: 'judge' });
+            await updateEventUsers({ event_id: e.event.event_id, email: data.email, player_name: data.player_name, role: 'judge' });
             e.refetch!();
             reset();
         }
@@ -92,17 +83,8 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         }
     }
 
-    const onRemove = async (userId: string, playerName: string) => {
-        const displayName = playerName;
-        const confirmed = window.confirm(`Are you sure you want to remove ${displayName} from the event?`);
-        
-        if (confirmed) {
-            await deleteEventUser(e.event.event_id, userId);
-            e.refetch!();
-        }
-    }
-
     // Handler for adding a player
+    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors, isSubmitting: isPlayerSubmitting } } = useForm<{player_name: string, email: string}>();
     const onAddPlayer: SubmitHandler<{player_name: string, email: string}> = async data => {
         try {
             const response = await addUserToEvent({ 
@@ -122,6 +104,16 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         } catch(err) {
             console.log(err);
             HandleValidation(setPlayerError, err);
+        }
+    }
+
+    const onRemovePlayer = async (userId: string, playerName: string) => {
+        const displayName = playerName;
+        const confirmed = window.confirm(`Are you sure you want to remove ${displayName} from the event?`);
+        
+        if (confirmed) {
+            await deleteEventUser(e.event.event_id, userId);
+            e.refetch!();
         }
     }
 
@@ -167,7 +159,18 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     {playerErrors.email && <div className="text-danger mt-1">{playerErrors.email.message}</div>}
                                 </div>
                                 <div>
-                                    <button type="submit" className="btn btn-success">Add Deck</button>
+                                    <button 
+                                        type="submit" 
+                                        className="btn btn-success" 
+                                        disabled={isPlayerSubmitting}
+                                    >
+                                        {isPlayerSubmitting ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                Adding...
+                                            </>
+                                        ) : 'Add Deck'}
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -223,7 +226,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id} className="btn btn-sm btn-primary me-2">
                                         View
                                     </Link>
-                                    <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemove(p.user_id, p.player_name)}>
+                                    <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemovePlayer(p.user_id, p.player_name)}>
                                         Remove
                                     </button>
                                 </div>
@@ -361,16 +364,27 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                             </div>
                             {showAddJudgeForm && (
                                 <div className="card-body">
-                                    <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
+                                    <form onSubmit={(e) => { clearErrors(); handleSubmit(onAddJudge)(e); }} >
                                         <div className="mb-3">
-                                            <input id='player_name' type="text" className="form-control" placeholder="Judge Name" required {...register("playerName")} />
-                                            {errors.playerName && <p className="text-danger mt-2">{errors.playerName?.message}</p>}
+                                            <input id='player_name' type="text" className="form-control" placeholder="Judge Name" required {...register("player_name")} />
+                                            {errors.player_name && <p className="text-danger mt-2">{errors.player_name?.message}</p>}
                                         </div>
                                         <div className="mb-3">
                                             <input id='email' type="text" className="form-control" placeholder="Email Address" required {...register("email")} />
                                             {errors.email && <p className="text-danger mt-2">{errors.email?.message}</p>}
                                         </div>
-                                        <button type='submit' className='btn btn-success'>Add Judge</button>
+                                        <button 
+                                            type='submit' 
+                                            className='btn btn-success'
+                                            disabled={isJudgeSubmitting}
+                                        >
+                                            {isJudgeSubmitting ? (
+                                                <>
+                                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                    Adding...
+                                                </>
+                                            ) : 'Add Judge'}
+                                        </button>
                                     </form>
                                 </div>
                             )}
@@ -388,7 +402,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     <tr key={p.user_id}>
                                         <td>{p.player_name}</td>
                                         <td className="text-end">
-                                            <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemove(p.user_id, p.player_name)}>
+                                            <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemovePlayer(p.user_id, p.player_name)}>
                                                 Remove
                                             </button>
                                         </td>
