@@ -1,3 +1,4 @@
+import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 export function DecklistHelp() {
@@ -6,12 +7,12 @@ export function DecklistHelp() {
       <h1 className="mb-4">Decklist Formatting Guide</h1>
       
       <div className="mb-3">
-        <Link to="/" className="btn btn-outline-secondary">Back to Front page</Link>
+        <Link to="/" className="btn btn-secondary">Back to Front page</Link>
       </div>
       
       <div className="row">
         <div className="col-12">
-          <div className="card mb-4">
+          <Card className="card mb-4">
             <div className="card-header">
               <h2 className="mb-0">Table of Contents</h2>
             </div>
@@ -21,7 +22,7 @@ export function DecklistHelp() {
                 <li className="mb-2"><a href="#commander">Commander Format</a></li>
               </ul>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
 
@@ -40,7 +41,7 @@ export function DecklistHelp() {
           </ul>
 
           <h4>Formatting Example</h4>
-          <pre className="bg-light p-3 rounded">
+          <pre className=" p-3 rounded">
 {`4 Lightning Bolt
 4 Goblin Guide
 4 Monastery Swiftspear
@@ -66,7 +67,7 @@ export function DecklistHelp() {
           </ul>
 
           <h4>Formatting Example</h4>
-          <pre className="bg-light p-3 rounded">
+          <pre className=" p-3 rounded">
 {`1 Atraxa, Praetors' Voice
 
 1 Bloom Tender
