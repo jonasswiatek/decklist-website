@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
 import { useState } from "react";
 import { getEvent } from '../../model/api/apimodel';
 import { useAuth } from "../Login/AuthContext";
@@ -36,12 +38,22 @@ export function LandingPage() {
                     <p>
                         Enter event code, or scan QR code provided by the tournament to upload your decklist.
                     </p>
-                    <p>
-                        <input type='text' value={joinCode} onChange={(e) => setJoinCode(e.target.value)} /> <Button onClick={goToEvent}>Join Event</Button>
-                    </p>
+                    <div className="d-flex justify-content-left">
+                        <InputGroup className="mb-3" style={{ maxWidth: '500px' }}>
+                            <Form.Control 
+                                placeholder="Enter event code"
+                                value={joinCode} 
+                                onChange={(e) => setJoinCode(e.target.value)}
+                                aria-label="Event code"
+                            />
+                            <Button variant="primary" onClick={goToEvent}>
+                                Join Event
+                            </Button>
+                        </InputGroup>
+                    </div>
                     {showError ? (
                         <>
-                            <p>
+                            <p className="text-danger">
                                 This code doesn't seem right. Check that you entered it correctly.
                             </p>
                         </>
