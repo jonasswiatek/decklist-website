@@ -206,7 +206,14 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         </div>
                     </td>
                 </tr>
-                {filteredPlayers.map((p) => {
+                {filteredPlayers.length > 50 && searchTerm === '' && (
+                    <tr>
+                        <td colSpan={2} className="text-center py-3 bg-warning-subtle">
+                            Showing first 50 of {filteredPlayers.length} players. Please use the search bar to find specific players.
+                        </td>
+                    </tr>
+                )}
+                {(searchTerm !== '' ? filteredPlayers : filteredPlayers.slice(0, 50)).map((p) => {
                     return (
                         <tr key={p.user_id}>
                             <td>{p.player_name}</td>
