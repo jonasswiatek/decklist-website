@@ -7,6 +7,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
 import { BsPerson, BsCheckCircle } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
+import { LoadingScreen } from '../Login/LoadingScreen';
 
 export function DeckView() {
     const { event_id } = useParams();
@@ -23,13 +24,7 @@ export function DeckView() {
     
     if (isLoading) {
         return (
-            <>
-                <div className='row'>
-                    <div className='col'>
-                        <p>Loading...</p>
-                    </div>
-                </div>
-            </>
+            <LoadingScreen />
         )
     }
 
@@ -119,7 +114,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     };
 
     if (isLoading) {
-        return <p>Loading...</p>
+        return <LoadingScreen />
     }
 
     if (error != null) {
@@ -168,7 +163,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                 className="btn btn-secondary" 
                                 onClick={handleBackToEvent}
                             >
-                                Back to Event
+                                Back to Tournament
                             </button>
                         </div>
                         {data?.player_name && (

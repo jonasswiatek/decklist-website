@@ -3,7 +3,7 @@ import { EventListItem, getAllEventsRequest } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, Spinner, Table } from 'react-bootstrap';
+import { Spinner, Table } from 'react-bootstrap';
 
 export function EventList() : ReactElement {
   const { data, isLoading } = useQuery<EventListItem[]>({
@@ -14,53 +14,41 @@ export function EventList() : ReactElement {
   })
     
   return (
-    <div className="container mt-4">
-      <div className='row mb-4'>
-        <div className='col'>
-          <h2>My Events</h2>
-        </div>
-      </div>
-      
-      <Card>
-        <Card.Body>
-          {isLoading ? (
-            <div className="text-center p-4">
-              <Spinner animation="border" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
-            </div>
-          ) : (
-            <Table hover responsive>
-              <thead>
-                <tr>
-                  <th scope='col'>Tournament</th>
-                  <th scope='col'>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data?.map(event => (
-                  <tr key={event.event_id}>
-                    <td>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <Link to={'/e/' + event.event_id} className="fw-semibold text-decoration-none">
-                          {event.event_name}
-                        </Link>
-                        <span className="badge bg-primary">{event.role}</span>
-                      </div>
-                    </td>
-                    <td>{new Date(event.event_date).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-                {data?.length === 0 && (
-                  <tr>
-                    <td colSpan={2} className="text-center py-4">No events found</td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-          )}
-        </Card.Body>
-      </Card>
-    </div>
+    <Table hover responsive>
+      <thead>
+        <tr>
+          <th scope='col'>Tournament</th>
+          <th scope='col'>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {isLoading && (
+          <tr>
+            <td colSpan={2} className="text-center py-4">
+              <Spinner animation="border" role="status" size="sm" className="me-2" />
+              <span>Loading events...</span>
+            </td>
+          </tr>
+        )}
+        {!isLoading && data?.map(event => (
+          <tr key={event.event_id}>
+            <td>
+              <div className="d-flex justify-content-between align-items-center">
+                <Link to={'/e/' + event.event_id} className="fw-semibold text-decoration-none">
+                  {event.event_name}
+                </Link>
+                <span className="badge bg-primary">{event.role}</span>
+              </div>
+            </td>
+            <td>{new Date(event.event_date).toLocaleDateString()}</td>
+          </tr>
+        ))}
+        {!isLoading && data?.length === 0 && (
+          <tr>
+            <td colSpan={2} className="text-center py-4">No events found</td>
+          </tr>
+        )}
+      </tbody>
+    </Table>
   )
 }

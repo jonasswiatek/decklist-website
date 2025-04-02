@@ -5,6 +5,7 @@ import { JudgeView } from './Views/JudgeView';
 import { DeckEditor } from './DeckView';
 import { EventViewProps } from './EventTypes';
 import { useAuth } from '../Login/useAuth';
+import { LoadingScreen } from '../Login/LoadingScreen';
 
 // New EventHeader component
 const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string }> = ({ eventName, eventId, role }) => {
@@ -58,13 +59,7 @@ export function EventView() {
     
     if (isLoading) {
         return (
-            <>
-                <div className='row'>
-                    <div className='col'>
-                        <p>Loading...</p>
-                    </div>
-                </div>
-            </>
+            <LoadingScreen />
         )
     }
 

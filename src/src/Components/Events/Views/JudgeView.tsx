@@ -37,9 +37,9 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         // Judges can only close events, not reopen them
         if (e.event.role === "judge" && isOpen) {
             const confirmed = window.confirm(
-                "As a judge, you can close this event but cannot reopen it.\n\n" +
-                "Only the event owner can reopen a closed event.\n\n" +
-                "Are you sure you want to close this event?"
+                "As a judge, you can close this tournament but cannot reopen it.\n\n" +
+                "Only the tournament owner can reopen a closed tournament.\n\n" +
+                "Are you sure you want to close this tournament?"
             );
 
             if (!confirmed) return;
@@ -58,7 +58,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     };
 
     const handleDeleteEvent = async () => {
-        const confirmed = window.confirm("Are you sure you want to delete this event? This action cannot be undone.");
+        const confirmed = window.confirm("Are you sure you want to delete this tournament? This action cannot be undone.");
         if (confirmed) {
             await deleteEvent({ event_id: e.event.event_id });
             // Navigate back to the events list using React Router
@@ -109,7 +109,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
 
     const onRemovePlayer = async (userId: string, playerName: string) => {
         const displayName = playerName;
-        const confirmed = window.confirm(`Are you sure you want to remove ${displayName} from the event?`);
+        const confirmed = window.confirm(`Are you sure you want to remove ${displayName} from the tournament?`);
         
         if (confirmed) {
             await deleteEventUser(e.event.event_id, userId);
@@ -237,7 +237,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 {filteredPlayers.length === 0 && (
                     <tr>
                         <td colSpan={2} className="text-center py-3">
-                            {searchTerm ? "No players match your search" : "No players have joined this event yet"}
+                            {searchTerm ? "No players match your search" : "No players have joined this tournament yet"}
                         </td>
                     </tr>
                 )}
@@ -245,7 +245,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 </table>
             </div>
             <div className='col-12 col-lg-6'>
-                <h2 className="mb-3">Event</h2>
+                <h2 className="mb-3">Tournament</h2>
                 
                 <div className="alert alert-info d-flex justify-content-between align-items-center mb-4">
                     <div>
@@ -274,7 +274,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 
                 <div className="card mb-4">
                     <div className="card-header">
-                        <strong>Event Information</strong>
+                        <strong>Tournament Information</strong>
                     </div>
                     <div className="card-body">
                         <div className="row">
@@ -287,11 +287,11 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                 <div>{players.length} / {e.event.max_players}</div>
                             </div>
                             <div className="col-md-6 mb-3">
-                                <div className="fw-bold">Event Date:</div>
+                                <div className="fw-bold">Tournament Date:</div>
                                 <div>{new Date(e.event.event_date).toLocaleDateString()}</div>
                             </div>
                             <div className="col-md-6">
-                                <div className="fw-bold">Event Deletion Date:</div>
+                                <div className="fw-bold">Expiration Date:</div>
                                 <div>
                                     {
                                         (() => {
@@ -301,9 +301,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                         })()
                                     }
                                 </div>
-                                <div className="text-muted small mt-1">
-                                    (7 days after event date)
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -311,7 +308,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 
                 <div className="card mb-4">
                     <div className="card-header">
-                        <strong>Event Status</strong>
+                        <strong>Status</strong>
                     </div>
                     <div className="card-body">
                         <div className="d-flex align-items-center">
@@ -338,13 +335,13 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         </div>
                         <p className="mb-0 mt-2 text-muted">
                             {e.event.status == "open" ? 
-                                "Players can submit and modify decks when the event is open." : 
-                                "Players cannot submit or modify decks when the event is closed."}
+                                "Players can submit and modify decks when the tournament is open." : 
+                                "Players cannot submit or modify decks when the tournament is closed."}
                         </p>
                         {e.event.role === "judge" && e.event.status != "open" && (
                             <div className="alert alert-warning mt-3 mb-0">
                                 <small>
-                                    Only the event owner can reopen this event.
+                                    Only the tournament owner can reopen this tournament.
                                 </small>
                             </div>
                         )}
@@ -377,13 +374,13 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                             </div>
                             <div className="card-body">
                                 <p className="text-muted mb-3">
-                                    Deleting an event will permanently remove all related data including decks and user registrations.
+                                    Deleting a tournament will permanently remove all related data including decks and user registrations.
                                 </p>
                                 <button 
                                     type="button" 
                                     className="btn btn-danger"
                                     onClick={handleDeleteEvent}>
-                                    Delete Event
+                                    Delete Tournament
                                 </button>
                             </div>
                         </div>

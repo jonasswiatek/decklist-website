@@ -39,12 +39,12 @@ export function CreateEvent() : ReactElement {
                 <div className='col-md-8 col-lg-6'>
                     <div className="card border-0 shadow-sm mb-4">
                         <div className="card-header py-3 bg-dark text-white">
-                            <h5 className="mb-0 fw-bold">Create New Event</h5>
+                            <h5 className="mb-0 fw-bold">Create New Tournament</h5>
                         </div>
                         <div className="card-body p-4">
                             <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} > 
                                 <div className="mb-3">
-                                    <label htmlFor="event_name" className="form-label fw-bold">Event Name</label>
+                                    <label htmlFor="event_name" className="form-label fw-bold">Tournament Name</label>
                                     <input 
                                         id='event_name' 
                                         type="text" 
@@ -57,7 +57,7 @@ export function CreateEvent() : ReactElement {
                                 </div>
                                 
                                 <div className="mb-3">
-                                    <label htmlFor="event_date" className="form-label fw-bold">Event Date</label>
+                                    <label htmlFor="event_date" className="form-label fw-bold">Tournament Date</label>
                                     <input 
                                         id="event_date"
                                         type='date' 
@@ -70,20 +70,25 @@ export function CreateEvent() : ReactElement {
                                 
                                 <div className="mb-4">
                                     <label htmlFor="format" className="form-label fw-bold">Format</label>
-                                    <select 
-                                        id="format"
-                                        className={`form-select ${errors.format ? 'is-invalid' : ''}`} 
-                                        {...register("format")}
-                                        disabled={formatsLoading}
-                                    >
-                                        {formatsLoading ? (
-                                            <option>Loading formats...</option>
-                                        ) : formatsError ? (
-                                            <option>Error loading formats</option>
-                                        ) : formats?.formats.map(format => (
-                                            <option key={format.format} value={format.format}>{format.name}</option>
-                                        ))}
-                                    </select>
+                                    {formatsLoading ? (
+                                        <div className="p-2 border rounded text-center">
+                                            <small className="text-muted">Loading formats...</small>
+                                        </div>
+                                    ) : formatsError ? (
+                                        <div className="alert alert-danger py-2" role="alert">
+                                            <small>Error loading formats. Please refresh the page.</small>
+                                        </div>
+                                    ) : (
+                                        <select 
+                                            id="format"
+                                            className={`form-select ${errors.format ? 'is-invalid' : ''}`} 
+                                            {...register("format")}
+                                        >
+                                            {formats?.formats.map(format => (
+                                                <option key={format.format} value={format.format}>{format.name}</option>
+                                            ))}
+                                        </select>
+                                    )}
                                     {errors.format && <div className="invalid-feedback">{errors.format?.message}</div>}
                                 </div>
                                 
@@ -91,7 +96,7 @@ export function CreateEvent() : ReactElement {
                                     <button 
                                         type='submit' 
                                         className='btn btn-dark btn-lg'
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || formatsLoading || !!formatsError}
                                     >
                                         {isSubmitting ? (
                                             <>

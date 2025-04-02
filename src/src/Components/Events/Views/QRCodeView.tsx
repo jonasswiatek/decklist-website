@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import QRCode from 'qrcode.react';
 import { EventDetails, getEvent } from '../../../model/api/apimodel';
 import { useQuery } from 'react-query';
+import { LoadingScreen } from '../../Login/LoadingScreen';
 
 export const QRCodeView: React.FC = () => {
     const { eventId } = useParams<{ eventId: string }>();
@@ -16,15 +17,7 @@ export const QRCodeView: React.FC = () => {
     });
 
     if (isLoading) {
-        return (
-            <>
-                <div className='row'>
-                    <div className='col'>
-                        <p>Loading...</p>
-                    </div>
-                </div>
-            </>
-        )
+        return <LoadingScreen />
     }
 
     if(error === "error") {
@@ -44,7 +37,7 @@ export const QRCodeView: React.FC = () => {
             <>
                 <div className='row'>
                     <div className='col'>
-                        <p>Can't find this event. Check that the code you entered is correct.</p>
+                        <p>Can't find this tournament. Check that the code you entered is correct.</p>
                     </div>
                 </div>
             </>
@@ -123,7 +116,7 @@ export const QRCodeView: React.FC = () => {
                 />
                 
                 <div style={{ marginTop: '15px', wordBreak: 'break-all' }}>
-                    <p style={{ color: '#333', fontWeight: 'bold', marginBottom: '5px' }}><strong>Scan to register decklist for event</strong></p>
+                    <p style={{ color: '#333', fontWeight: 'bold', marginBottom: '5px' }}><strong>Scan to register your decklist</strong></p>
                     <p style={{ fontSize: '12px', color: '#333', marginTop: '0' }}>{inviteLink}</p>
                 </div>
             </div>
