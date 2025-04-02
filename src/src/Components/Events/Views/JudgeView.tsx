@@ -274,6 +274,43 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 
                 <div className="card mb-4">
                     <div className="card-header">
+                        <strong>Event Information</strong>
+                    </div>
+                    <div className="card-body">
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <div className="fw-bold">Format:</div>
+                                <div>{e.event.format_name}</div>
+                            </div>
+                            <div className="col-md-6 mb-3">
+                                <div className="fw-bold">Participants:</div>
+                                <div>{players.length} / {e.event.max_players}</div>
+                            </div>
+                            <div className="col-md-6 mb-3">
+                                <div className="fw-bold">Event Date:</div>
+                                <div>{new Date(e.event.event_date).toLocaleDateString()}</div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="fw-bold">Event Deletion Date:</div>
+                                <div>
+                                    {
+                                        (() => {
+                                            const deletionDate = new Date(e.event.event_date);
+                                            deletionDate.setDate(deletionDate.getDate() + 7);
+                                            return deletionDate.toLocaleDateString();
+                                        })()
+                                    }
+                                </div>
+                                <div className="text-muted small mt-1">
+                                    (7 days after event date)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="card mb-4">
+                    <div className="card-header">
                         <strong>Event Status</strong>
                     </div>
                     <div className="card-body">
