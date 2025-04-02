@@ -1,20 +1,16 @@
 import '../../App.scss'
-import { EventListItem } from '../../model/api/apimodel';
+import { EventListItem, getAllEventsRequest } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Spinner, Table } from 'react-bootstrap';
 
 export function EventList() : ReactElement {
-
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<EventListItem[]>({
     queryKey: ['my-events'],
     refetchOnWindowFocus: false,
     retry: false,
-    queryFn: () =>
-      fetch('/api/events').then(async (res) =>
-        await res.json() as EventListItem[],
-      ),
+    queryFn: () => getAllEventsRequest()
   })
     
   return (

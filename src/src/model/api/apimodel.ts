@@ -105,13 +105,13 @@ export async function logoutRequest() {
     throw new Error("Http Exception");
 }
 
-export async function getAllEventsRequest() : Promise<EventDetails[]> {
+export async function getAllEventsRequest() : Promise<EventListItem[]> {
     const httpResponse = await fetch("/api/events");
     if (httpResponse.status === 401) 
         throw new NotAuthenticatedError();
     
     if (httpResponse.ok) {
-        const events = await httpResponse.json() as EventDetails[];
+        const events = await httpResponse.json() as EventListItem[];
         return events;
     }
 
