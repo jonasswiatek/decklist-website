@@ -24,7 +24,8 @@ import { PrivacyHelp } from './Components/Help/PrivacyPolicy';
 import { TermsAndServicesHelp } from './Components/Help/TermsAndServices';
 import { MutliEventView } from './Components/Events/MultiEventView.tsx';
 import { useAuth } from './Components/Login/useAuth.ts';
-import { FeatureRequestsHelp } from './Components/Help/Features.tsx';
+import { ContributeHelp } from './Components/Help/Contribute.tsx';
+import { About } from './Components/Help/About.tsx';
 
 const queryClient = new QueryClient()
 
@@ -74,10 +75,13 @@ const router = createBrowserRouter([
     element: <TermsAndServicesHelp />
   },
   {
-    path: "/help/features",
-    element: <FeatureRequestsHelp />
+    path: "/help/contribute",
+    element: <ContributeHelp />
   },
-
+  {
+    path: "/help/about",
+    element: <About />
+  },
 ]);
 
 function App() {
@@ -140,7 +144,8 @@ function Footer() {
         <Nav className="justify-content-center">
           <Nav.Link href="/help/privacy" className="text-reset text-decoration-none">Privacy Policy</Nav.Link>
           <Nav.Link href="/help/terms-and-services" className="text-reset text-decoration-none">Terms of Service</Nav.Link>
-          <Nav.Link href="/help/features" className="text-reset text-decoration-none">Feature Requests</Nav.Link>
+          <Nav.Link href="/help/contribute" className="text-reset text-decoration-none">Contribute</Nav.Link>
+          <Nav.Link href="/help/About" className="text-reset text-decoration-none">About</Nav.Link>
         </Nav>
         <div className="small mt-2">
           Brought to you with love, for free and with no guarantees.

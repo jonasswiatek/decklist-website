@@ -1,7 +1,7 @@
 import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-export function FeatureRequestsHelp() {
+export function ContributeHelp() {
   return (
     <div className="container my-4">
       <h1 className="mb-4">Feature Requests Guidelines</h1>
