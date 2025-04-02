@@ -182,7 +182,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                     </>
                 )}
                 {showEditor && (
-                    <div className='col-md-4 col-sm-12'>
+                    <div className='col-lg-4 col-sm-12'>
                         <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                             <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
                             {data && !isJudge && (
@@ -265,7 +265,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 )}
                 
                 {/* Always display the decklist table, but adjust width based on edit mode */}
-                <div className={showEditor ? 'col-md-8 col-sm-12 decklist-table-container' : 'col-12 decklist-table-container'} style={{ marginTop: '10px' }}>
+                <div className={showEditor ? 'col-lg-8 col-sm-12 decklist-table-container' : 'col-12 decklist-table-container'} style={{ marginTop: '10px' }}>
                     {data && <DecklistTable decklistData={data} allowChecklist={isJudge} />}
                 </div>
                 
