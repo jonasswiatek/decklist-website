@@ -2,9 +2,9 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { EventDetails, getEvent } from '../../model/api/apimodel';
 import { JudgeView } from './Views/JudgeView';
-import { useAuth } from '../Login/AuthContext';
 import { DeckEditor } from './DeckView';
 import { EventViewProps } from './EventTypes';
+import { useAuth } from '../Login/useAuth';
 
 // New EventHeader component
 const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string }> = ({ eventName, eventId, role }) => {

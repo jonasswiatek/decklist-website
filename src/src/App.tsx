@@ -15,7 +15,7 @@ import {
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import { AuthProvider, useAuth } from './Components/Login/AuthContext.tsx';
+import { AuthProvider } from './Components/Login/AuthContext.tsx';
 import { CreateEvent } from './Components/Events/CreateEvent.tsx';
 import { DeckView } from './Components/Events/DeckView.tsx';
 import { QRCodeView } from './Components/Events/Views/QRCodeView';
@@ -23,6 +23,7 @@ import { DecklistHelp } from './Components/Help/DecklistHelp';
 import { PrivacyHelp } from './Components/Help/PrivacyPolicy';
 import { TermsAndServicesHelp } from './Components/Help/TermsAndServices';
 import { MutliEventView } from './Components/Events/MultiEventView.tsx';
+import { useAuth } from './Components/Login/useAuth.ts';
 
 const queryClient = new QueryClient()
 

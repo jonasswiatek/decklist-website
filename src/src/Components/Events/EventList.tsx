@@ -9,6 +9,8 @@ export function EventList() : ReactElement {
 
   const { data, isLoading } = useQuery({
     queryKey: ['my-events'],
+    refetchOnWindowFocus: false,
+    retry: false,
     queryFn: () =>
       fetch('/api/events').then(async (res) =>
         await res.json() as EventListItem[],

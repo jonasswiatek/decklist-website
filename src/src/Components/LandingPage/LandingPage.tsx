@@ -4,8 +4,8 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { useState } from "react";
 import { getEvent } from '../../model/api/apimodel';
-import { useAuth } from "../Login/AuthContext";
 import { EventList } from "../Events/EventList";
+import { useAuth } from "../Login/useAuth";
 
 export function LandingPage() {
     const { login, authorized } = useAuth();

@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from './useAuth';
 
 export const LoggedIn = (props: {children: ReactNode}) => {
     const { login, authorized } = useAuth();

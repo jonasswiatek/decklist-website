@@ -1,26 +1,8 @@
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { AuthState, useDecklistStore } from '../../store/deckliststore';
 import { LoginScreen } from './Login';
-
-type AuthContextType = {
-    authorized?: boolean,
-    email?: string,
-    login: () => void
-}
-
-export interface AuthedReactElement {
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export function useAuth(): AuthContextType {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-
-    return context;
-}
+import { LoadingScreen } from './LoadingScreen';
+import { AuthContext } from './useAuth';
 
 export const AuthProvider = (props: { children: ReactNode }): ReactElement => {
     const { authState, checkAuth, email } = useDecklistStore();
@@ -37,7 +19,7 @@ export const AuthProvider = (props: { children: ReactNode }): ReactElement => {
     }, [authState, checkAuth, setShowLogin]);
   
     if (authState === AuthState.Loading) {
-      return (<p>Loading...</p>)
+      return <LoadingScreen />;
     }
   
     if (showLogin && authState === AuthState.Unauthorized) {
