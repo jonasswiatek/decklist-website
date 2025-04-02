@@ -437,7 +437,7 @@ export type EventDetails = {
     format: string;
     format_name: string;
     role: string;
-    event_date: Date;
+    event_date: string;
     status: string;
     decklist_style: 'commander' | 'sixty';
     player_count: number;
