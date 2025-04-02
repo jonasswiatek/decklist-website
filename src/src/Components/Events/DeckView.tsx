@@ -154,6 +154,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         ))
     );
 
+    const showEditor = !isJudge || showJudgeEditForm || !isValid;
+
     return (
         <>
         <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} >
@@ -179,7 +181,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                         )}
                     </>
                 )}
-                {(!isJudge || showJudgeEditForm) && (
+                {showEditor && (
                     <div className='col-md-4 col-sm-12'>
                         <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                             <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
@@ -263,7 +265,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 )}
                 
                 {/* Always display the decklist table, but adjust width based on edit mode */}
-                <div className={(!isJudge || showJudgeEditForm) ? 'col-md-8 col-sm-12 decklist-table-container' : 'col-12 decklist-table-container'} style={{ marginTop: '10px' }}>
+                <div className={showEditor ? 'col-md-8 col-sm-12 decklist-table-container' : 'col-12 decklist-table-container'} style={{ marginTop: '10px' }}>
                     {data && <DecklistTable decklistData={data} allowChecklist={isJudge} />}
                 </div>
                 
@@ -279,7 +281,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             )}
                         </div>
                         {/* Show Edit Decklist button for judges when not in edit mode */}
-                        {isJudge && !showJudgeEditForm && (
+                        {!showEditor && (
                             <button 
                                 type="button" 
                                 className="btn btn-primary" 
