@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsPerson } from 'react-icons/bs';
+import { BsPerson, BsCheckCircle } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 
 export function DeckView() {
@@ -59,7 +59,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isOpen = props.event.status === "open" || isJudge;
 
     const [showJudgeEditForm, setShowJudgeEditForm] = useState(props.showEditor);
+    const [showToast, setShowToast] = useState(false);
     const navigate = useNavigate();
+    const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const { data, error, isLoading, refetch } = useQuery<DecklistResponse | null>({
         queryKey: [`deck-${props.event.event_id}-${props.user_id}`],
@@ -80,6 +82,19 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
             await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, decklist_text: data.decklist_text });
             refetch();
             reset(data);
+            
+            // Show toast notification
+            setShowToast(true);
+            
+            // Clear any existing timeout
+            if (toastTimeoutRef.current) {
+                clearTimeout(toastTimeoutRef.current);
+            }
+            
+            // Hide toast after 5 seconds
+            toastTimeoutRef.current = setTimeout(() => {
+                setShowToast(false);
+            }, 3000);
         }
         catch(e) {
             console.log("handle val", e);
@@ -279,6 +294,29 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 )}
             </div>
         </form>
+        
+        {/* Toast notification */}
+        <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 1050 }}>
+            <div 
+                className={`toast ${showToast ? 'show' : 'hide'}`} 
+                role="alert" 
+                aria-live="assertive" 
+                aria-atomic="true"
+                style={{ 
+                    display: showToast ? 'block' : 'none',
+                    minWidth: '250px'
+                }}
+            >
+                <div className="toast-header bg-success text-white">
+                    <BsCheckCircle className="me-2" />
+                    <strong className="me-auto">Success</strong>
+                    <button type="button" className="btn-close btn-close-white" onClick={() => setShowToast(false)} aria-label="Close"></button>
+                </div>
+                <div className="toast-body bg-white text-dark">
+                    Your decklist has been submitted.
+                </div>
+            </div>
+        </div>
         </>
     )
 }
