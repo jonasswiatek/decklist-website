@@ -24,6 +24,7 @@ import { PrivacyHelp } from './Components/Help/PrivacyPolicy';
 import { TermsAndServicesHelp } from './Components/Help/TermsAndServices';
 import { MutliEventView } from './Components/Events/MultiEventView.tsx';
 import { useAuth } from './Components/Login/useAuth.ts';
+import { FeatureRequestsHelp } from './Components/Help/Features.tsx';
 
 const queryClient = new QueryClient()
 
@@ -72,6 +73,11 @@ const router = createBrowserRouter([
     path: "/help/terms-and-services",
     element: <TermsAndServicesHelp />
   },
+  {
+    path: "/help/features",
+    element: <FeatureRequestsHelp />
+  },
+
 ]);
 
 function App() {
@@ -134,6 +140,7 @@ function Footer() {
         <Nav className="justify-content-center">
           <Nav.Link href="/help/privacy" className="text-reset text-decoration-none">Privacy Policy</Nav.Link>
           <Nav.Link href="/help/terms-and-services" className="text-reset text-decoration-none">Terms of Service</Nav.Link>
+          <Nav.Link href="/help/features" className="text-reset text-decoration-none">Feature Requests</Nav.Link>
         </Nav>
         <div className="small mt-2">
           Brought to you with love, for free and with no guarantees.
