@@ -80,7 +80,10 @@ export const EventlinkSync: React.FC = () => {
                 }
                 
                 if (line) {
-                    playerNames.push(line);
+                    // Extract the player name (everything before the first number) and always trim
+                    const playerNameMatch = line.match(/^(.*?)(?=\d|$)/);
+                    const playerName = (playerNameMatch ? playerNameMatch[1] : line).trim();
+                    playerNames.push(playerName);
                 }
             }
         }
