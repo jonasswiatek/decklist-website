@@ -353,16 +353,32 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         <strong>Utilities</strong>
                     </div>
                     <div className="card-body">
-                        <button 
-                            type="button" 
-                            className="btn btn-primary d-flex align-items-center"
-                            onClick={handleDownloadDecklists}
-                        >
-                            <BsDownload className="me-2" /> Download All Decklists
-                        </button>
-                        <p className="mt-2 mb-0 small text-muted">
-                            Download all decklists as a single text file for offline use or printing.
-                        </p>
+                        <div className="d-flex flex-column gap-3">
+                            <div>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-primary d-flex align-items-center"
+                                    onClick={handleDownloadDecklists}
+                                >
+                                    <BsDownload className="me-2" /> Download All Decklists
+                                </button>
+                                <p className="mt-2 mb-0 small text-muted">
+                                    Download all decklists as a single text file for offline use or printing.
+                                </p>
+                            </div>
+                            <div>
+                                <Link 
+                                    to={`/e/${e.event.event_id}/sync/eventlink`}
+                                    className="btn btn-primary d-flex align-items-center"
+                                    style={{ width: "fit-content" }}
+                                >
+                                    Eventlink Sync
+                                </Link>
+                                <p className="mt-2 mb-0 small text-muted">
+                                    Cross reference submissions with eventlink player list.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 

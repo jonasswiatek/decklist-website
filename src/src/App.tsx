@@ -26,6 +26,7 @@ import { MutliEventView } from './Components/Events/MultiEventView.tsx';
 import { useAuth } from './Components/Login/useAuth.ts';
 import { ContributeHelp } from './Components/Help/Contribute.tsx';
 import { About } from './Components/Help/About.tsx';
+import { EventlinkSync } from './Components/Events/Views/EventlinkSync.tsx';
 
 const queryClient = new QueryClient()
 
@@ -56,6 +57,13 @@ const router = createBrowserRouter([
     element:
     <LoggedIn>
       <DeckView />
+    </LoggedIn>,
+  },
+  {
+    path: "/e/:event_id/sync/eventlink",
+    element:
+    <LoggedIn>
+      <EventlinkSync />
     </LoggedIn>,
   },
   {
