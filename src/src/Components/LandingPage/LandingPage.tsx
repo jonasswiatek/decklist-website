@@ -34,14 +34,9 @@ export function LandingPage() {
 
     return (
         <div className="container">
-            <div className="row mb-4 align-items-center">
+            <div className="row mb-4">
                 <div className="col">
-                    <h1 className="display-5" style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>Register your decklist</h1>
-                </div>
-                <div className="col-auto d-none d-md-block">
-                    <Button variant="primary" onClick={() => navigate('/e/new')}>
-                        Create Tournament
-                    </Button>
+                    <h1 className="display-5">Register your decklist</h1>
                 </div>
             </div>
             
@@ -53,7 +48,7 @@ export function LandingPage() {
                             <Card.Text>
                                 Enter event code, or scan QR code provided by the tournament to upload your decklist.
                             </Card.Text>
-                            <InputGroup className="mb-3" style={{ maxWidth: '450px' }}>
+                            <InputGroup style={{ maxWidth: '450px' }}>
                                 <Form.Control 
                                     placeholder="Enter event code"
                                     value={joinCode} 
@@ -87,6 +82,14 @@ export function LandingPage() {
                             </Card.Body>
                         </Card>
                     )}
+                </div>
+            </div>
+
+            <div className="row">
+                <div className="col text-end">
+                    <Button variant="primary" onClick={() => navigate('/e/new')}>
+                        Create Tournament
+                    </Button>
                 </div>
             </div>
         </div>
