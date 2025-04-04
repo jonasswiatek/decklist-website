@@ -26,7 +26,6 @@ export const LoadingScreen = (): ReactElement => {
                     }
                 `}
             </style>
-            <p style={{ marginTop: '20px', fontSize: '16px' }}>Loading...</p>
         </div>
     );
 };

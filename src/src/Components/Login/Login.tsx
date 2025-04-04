@@ -88,7 +88,7 @@ export function LoginScreen() {
 const LoginForm: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [email, setEmail] = useState("");
-  const { register, handleSubmit, setError, formState: { errors } } = useForm<Inputs>();
+  const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<Inputs>();
   const { startLogin, continueLogin } = useDecklistStore();
   
   type Inputs = {
@@ -126,12 +126,23 @@ const LoginForm: React.FC = () => {
                 id="email" 
                 placeholder="name@example.com" 
                 required 
-                disabled={isVerifying}
+                disabled={isVerifying || isSubmitting}
                 defaultValue={email}
                 {...register("email")} 
               />
-              <button className="btn btn-primary" type="submit">
-                Continue
+              <button 
+                className="btn btn-primary" 
+                type="submit" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Sending...
+                  </>
+                ) : (
+                  'Continue'
+                )}
               </button>
               {errors.email && <div className="invalid-feedback">{errors.email?.message}</div>}
             </div>
@@ -157,10 +168,22 @@ const LoginForm: React.FC = () => {
                   id="code" 
                   placeholder="000000" 
                   required 
+                  disabled={isSubmitting}
                   {...register("code")} 
                 />
-                <button className="btn btn-primary" type="submit">
-                  Verify
+                <button 
+                  className="btn btn-primary" 
+                  type="submit" 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Verifying...
+                    </>
+                  ) : (
+                    'Verify'
+                  )}
                 </button>
                 {errors.code && <div className="invalid-feedback">{errors.code?.message}</div>}
               </div>
