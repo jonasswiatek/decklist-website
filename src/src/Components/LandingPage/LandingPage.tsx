@@ -74,7 +74,7 @@ export function LandingPage() {
                     {authorized ? (
                         <EventList />
                     ) : (
-                        <Card>
+                        <Card style={{marginBottom: '15px'}}>
                             <Card.Body>
                                 <Card.Text>
                                     <a href="#" onClick={(e) => { e.preventDefault(); login(); }}>Log in</a> to see your tournaments.
