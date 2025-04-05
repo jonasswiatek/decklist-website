@@ -18,6 +18,29 @@ export const EventlinkSync: React.FC = () => {
     const [parsedPlayers, setParsedPlayers] = useState<string[]>([]);
     const [playerSubmissionStatus, setPlayerSubmissionStatus] = useState<Map<string, boolean>>(new Map());
     const [playersNotInEventlink, setPlayersNotInEventlink] = useState<string[]>([]);
+    
+    // Helper function to get sorted players for display
+    const getSortedPlayersForDisplay = () => {
+        // Group 1: Not submitted (from EventLink)
+        const notSubmitted = displayPlayers
+            .filter(player => !playerSubmissionStatus.get(player))
+            .sort((a, b) => a.localeCompare(b));
+            
+        // Group 2: Not in EventLink
+        const notInEventlink = displayPlayersNotInEventlink
+            .sort((a, b) => a.localeCompare(b));
+            
+        // Group 3: Submitted
+        const submitted = displayPlayers
+            .filter(player => playerSubmissionStatus.get(player))
+            .sort((a, b) => a.localeCompare(b));
+            
+        return {
+            notSubmitted,
+            notInEventlink,
+            submitted
+        };
+    };
 
     if (isLoading) {
         return (
@@ -168,29 +191,46 @@ EventLink - Copyright © 2025 - Wizards of the Coast LLC"
                             </tr>
                         </thead>
                         <tbody>
-                            {/* Players from EventLink */}
-                            {displayPlayers.map(player => (
-                                <tr key={player}>
-                                    <td>{player}</td>
-                                    <td>
-                                        {playerSubmissionStatus.get(player) 
-                                            ? <span className="text-success">✓ Submitted</span> 
-                                            : <span className="text-danger">✗ Not Submitted</span>}
-                                    </td>
-                                </tr>
-                            ))}
-                            
-                            {/* Players with decklists but not in EventLink or initial list */}
-                            {displayPlayersNotInEventlink.map(player => (
-                                <tr key={`not-in-eventlink-${player}`}>
-                                    <td>{player}</td>
-                                    <td>
-                                        {parsedPlayers.length > 0 
-                                            ? <span className="text-warning">⚠ Not registered in EventLink</span>
-                                            : <span className="text-secondary">Unknown</span>}
-                                    </td>
-                                </tr>
-                            ))}
+                            {/* Display players in the specified order */}
+                            {(() => {
+                                const { notSubmitted, notInEventlink, submitted } = getSortedPlayersForDisplay();
+                                
+                                return (
+                                    <>
+                                        {/* Group 1: Not submitted */}
+                                        {notSubmitted.map(player => (
+                                            <tr key={player}>
+                                                <td>{player}</td>
+                                                <td>
+                                                    <span className="text-danger">✗ Not Submitted</span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        
+                                        {/* Group 2: Not in EventLink */}
+                                        {notInEventlink.map(player => (
+                                            <tr key={`not-in-eventlink-${player}`}>
+                                                <td>{player}</td>
+                                                <td>
+                                                    {parsedPlayers.length > 0 
+                                                        ? <span className="text-warning">⚠ Not registered in EventLink</span>
+                                                        : <span className="text-secondary">Unknown</span>}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        
+                                        {/* Group 3: Submitted */}
+                                        {submitted.map(player => (
+                                            <tr key={player}>
+                                                <td>{player}</td>
+                                                <td>
+                                                    <span className="text-success">✓ Submitted</span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </>
+                                );
+                            })()}
                         </tbody>
                     </table>
                 </div>
