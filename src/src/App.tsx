@@ -69,6 +69,7 @@ const router = createBrowserRouter([
   {
     path: "/e/:eventId/qr",
     element: <QRCodeView />
+    
   },
   {
     path: "/help/decklist",
@@ -117,33 +118,46 @@ function NavBar()
   const { login, authorized } = useAuth();
   const { logout } = useDecklistStore();
 
-  return <><Navbar collapseOnSelect expand="md" className="bg-body-tertiary">
-    <Container>
-      <Navbar.Brand href="/">decklist.lol</Navbar.Brand>
-      <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-      <Navbar.Collapse id="responsive-navbar-nav">
-        <Nav className="ms-auto">
-          <Nav.Link href="/e/new">Create Tournament</Nav.Link>
-          {authorized ? (
-            <>
-              <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
-            </>
-            ) :
-            (
+  const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
+  
+  if (isQRCodeRoute) {
+    return null;
+  }
+
+  return <>
+    <Navbar collapseOnSelect expand="md" className="bg-body-tertiary">
+      <Container>
+        <Navbar.Brand href="/">decklist.lol</Navbar.Brand>
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          <Nav className="ms-auto">
+            <Nav.Link href="/e/new">Create Tournament</Nav.Link>
+            {authorized ? (
               <>
-                <Nav.Link onClick={() => login()}>Log in</Nav.Link>
+                <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
               </>
-            )}
-        </Nav>
-      </Navbar.Collapse>
+              ) :
+              (
+                <>
+                  <Nav.Link onClick={() => login()}>Log in</Nav.Link>
+                </>
+              )}
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
+    <Container id='top-floating-container'>
     </Container>
-  </Navbar>
-  <Container id='top-floating-container'>
-  </Container>
-</>
+  </>
 }
 
 function Footer() {
+  const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
+  
+  if (isQRCodeRoute) {
+    return null;
+  }
+
   return (
     <footer className="py-3 mt-auto">
       <Container className="text-center">
