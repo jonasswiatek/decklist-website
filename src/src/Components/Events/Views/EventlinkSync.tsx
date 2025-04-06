@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { EventDetails, getEvent } from "../../../model/api/apimodel";
 import { LoadingScreen } from "../../Login/LoadingScreen";
@@ -18,6 +18,11 @@ export const EventlinkSync: React.FC = () => {
     const [parsedPlayers, setParsedPlayers] = useState<string[]>([]);
     const [playerSubmissionStatus, setPlayerSubmissionStatus] = useState<Map<string, boolean>>(new Map());
     const [playersNotInEventlink, setPlayersNotInEventlink] = useState<string[]>([]);
+    
+    // Simple, targeted effect that only runs once on component mount
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     
     // Helper function to get sorted players for display
     const getSortedPlayersForDisplay = () => {
