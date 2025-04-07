@@ -5,18 +5,18 @@ export function PrivacyHelp() {
       
       <div className="prose max-w-none">
         <p className="mb-4">
-          This privacy policy explains how we handle your data when using our services. As a company operating within the European Union, we comply with GDPR regulations and prioritize your privacy rights.
+          This privacy policy explains how data is handled when using this website. As a service operating within the European Union, it complies with GDPR regulations and prioritizes your privacy rights.
         </p>
         
         <h2 className="text-2xl font-semibold mt-6 mb-4">Email Information</h2>
         <p>
-          We do not store your email address in our database. Your email is only used for authentication purposes during the sign-in process.
+          Email addresses are not stored in the database. Your email is only used for authentication purposes during the sign-in process.
         </p>
         
         <h2 className="text-2xl font-semibold mt-6 mb-4">Cookies</h2>
         <p>
-          We only use cookies for authentication purposes. These cookies are essential for the functioning of our service 
-          as they allow you to stay logged in during your session. We do not use cookies for tracking, 
+          Cookies are only used for authentication purposes. These cookies are essential for the functioning of this service 
+          as they allow you to stay logged in during your session. No cookies are used for tracking, 
           analytics, or advertising purposes.
         </p>
 
@@ -38,10 +38,10 @@ export function PrivacyHelp() {
         
         <h2 className="text-2xl font-semibold mt-6 mb-4">Amazon Web Services (AWS)</h2>
         <p>
-          Our service is hosted on Amazon Web Services (AWS) in the Frankfurt region (EU-Central-1). We use the following AWS services to operate our platform:
+          This website is hosted on Amazon Web Services (AWS) in the Frankfurt region (EU-Central-1). The following AWS services are used to operate this platform:
         </p>
         <ul className="list-disc pl-6 mb-4">
-          <li>AWS Lambda - For serverless computing to run our application code</li>
+          <li>AWS Lambda - For serverless computing to run the application code</li>
           <li>Amazon DynamoDB - For database storage of decklists and event information</li>
           <li>Amazon SES (Simple Email Service) - For processing email communications</li>
           <li>Amazon CloudFront - For content delivery and distribution</li>
@@ -60,22 +60,22 @@ export function PrivacyHelp() {
         
         <h2 className="text-2xl font-semibold mt-6 mb-4">Your Data Rights</h2>
         <p>
-          As a user based in the European Union, you have certain rights regarding your personal data, including the right to access, correct, or delete any information we hold about you.
+          As a user based in the European Union, you have certain rights regarding your personal data, including the right to access, correct, or delete any information held about you.
         </p>
         <p>
-          Only the name you provide on your decklist is stored in our database, and you can delete that data yourself by deleting your decklist.
+          Only the name you provide on your decklist is stored in the database, and you can delete that data yourself by deleting your decklist.
         </p>
         <p>
-          We prioritize data minimization and do not retain data from past events. We don't collect statistics about your gameplay habits or preferences. This website was created to simplify the decklist submission process and avoid common issues with paper submissions such as illegible handwriting or missing information.
+          This website prioritizes data minimization and does not retain data from past events. No statistics about your gameplay habits or preferences are collected. This website was created to simplify the decklist submission process for the community and avoid common issues with paper submissions such as illegible handwriting or missing information.
         </p>
         <p>
-          If you wish to delete your data, you can do so by removing your decklist. If you've forgotten the email you used to log in with, we may not be able to assist you as all data in our database is strongly encrypted. This encryption ensures that even in the unlikely event of a data breach, your information remains protected. We do not store emails, passwords, personal identifiers, or any sensitive personal information in our database.
+          If you wish to delete your data, you can do so by removing your decklist. If you've forgotten the email you used to log in with, assistance may not be possible as all data in the database is strongly encrypted. This encryption ensures that even in the unlikely event of a data breach, your information remains protected. No emails, passwords, personal identifiers, or any sensitive personal information are stored in the database.
         </p>
         <p>
           All decklists and information about events are automatically deleted within a week after the event ends to maintain data minimization principles.
         </p>
         <p>
-          If you need to contact me for some reason, you can reach me at: jonas DOT swiatek AT gmail DOT com
+          For contact regarding this website, please email: jonas DOT swiatek AT gmail DOT com
         </p>
         
         <p className="mt-8 text-sm text-gray-600">
