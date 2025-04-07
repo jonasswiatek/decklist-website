@@ -118,28 +118,32 @@ const UnauthedView: React.FC<EventViewProps> = (props) => {
         <div className="container py-4">
             <div className="row justify-content-center">
                 <div className="col-md-6">
-                    <div className="text-center py-3">
-                        {!isEventOpen ? (
-                            <div className="alert alert-warning">
-                                <p className="mb-0">
-                                    This event has been closed for registration. If you need to participate, please contact your Tournament Organiser or Judge.
-                                </p>
-                            </div>
-                        ) :  (
-                            <>
-                                <p className="mb-3">
-                                    You need to log in to submit your decklist.
+                    {!isEventOpen ? (
+                        <div className="alert alert-warning shadow-sm">
+                            <h5 className="alert-heading">
+                                Event Closed
+                            </h5>
+                            <p className="mb-0">
+                                This event has been closed for registration. If you need to participate, please contact your Tournament Organiser or Judge.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="card shadow-sm bg-dark text-light">
+                            <div className="card-body text-center py-4">
+                                <i className="bi bi-person-badge fs-1 text-info mb-3"></i>
+                                <p className="card-text mb-4">
+                                    Log in submit your decklist for this event.
                                 </p>
                                 <button 
                                     type="button" 
-                                    className="btn btn-outline-primary" 
+                                    className="btn btn-outline-light" 
                                     onClick={login}
                                 >
-                                    Log in
+                                    Log in to Continue
                                 </button>
-                            </>
-                        )}
-                    </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
