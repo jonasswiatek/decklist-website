@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "react-router";
 import { EventDetails, getEvent } from "../../../model/api/apimodel";
 import { LoadingScreen } from "../../Login/LoadingScreen";
@@ -18,12 +18,7 @@ export const EventlinkSync: React.FC = () => {
     const [parsedPlayers, setParsedPlayers] = useState<string[]>([]);
     const [playerSubmissionStatus, setPlayerSubmissionStatus] = useState<Map<string, boolean>>(new Map());
     const [playersNotInEventlink, setPlayersNotInEventlink] = useState<string[]>([]);
-    
-    // Simple, targeted effect that only runs once on component mount
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
-    
+        
     // Helper function to get sorted players for display
     const getSortedPlayersForDisplay = () => {
         // Group 1: Not submitted (from EventLink)
@@ -202,7 +197,17 @@ EventLink - Copyright © 2025 - Wizards of the Coast LLC"
                                 
                                 return (
                                     <>
-                                        {/* Group 1: Not submitted */}
+                                        {/* Group 1: Submitted */}
+                                        {submitted.map(player => (
+                                            <tr key={player}>
+                                                <td>{player}</td>
+                                                <td>
+                                                    <span className="text-success">✓ Submitted</span>
+                                                </td>
+                                            </tr>
+                                        ))}
+
+                                        {/* Group 2: Not submitted */}
                                         {notSubmitted.map(player => (
                                             <tr key={player}>
                                                 <td>{player}</td>
@@ -212,7 +217,7 @@ EventLink - Copyright © 2025 - Wizards of the Coast LLC"
                                             </tr>
                                         ))}
                                         
-                                        {/* Group 2: Not in EventLink */}
+                                        {/* Group 3: Not in EventLink */}
                                         {notInEventlink.map(player => (
                                             <tr key={`not-in-eventlink-${player}`}>
                                                 <td>{player}</td>
@@ -220,16 +225,6 @@ EventLink - Copyright © 2025 - Wizards of the Coast LLC"
                                                     {parsedPlayers.length > 0 
                                                         ? <span className="text-warning">⚠ Not registered in EventLink</span>
                                                         : <span className="text-secondary">Unknown</span>}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        
-                                        {/* Group 3: Submitted */}
-                                        {submitted.map(player => (
-                                            <tr key={player}>
-                                                <td>{player}</td>
-                                                <td>
-                                                    <span className="text-success">✓ Submitted</span>
                                                 </td>
                                             </tr>
                                         ))}

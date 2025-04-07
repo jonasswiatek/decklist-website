@@ -27,69 +27,101 @@ import { useAuth } from './Components/Login/useAuth.ts';
 import { ContributeHelp } from './Components/Help/Contribute.tsx';
 import { About } from './Components/Help/About.tsx';
 import { EventlinkSync } from './Components/Events/Views/EventlinkSync.tsx';
+import { ScrollToTop } from './Util/ScrollToTop.tsx';
 
 const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LandingPage />,
+    
+    element: 
+      <ScrollToTop>
+        <LandingPage />
+      </ScrollToTop>,
   },
   {
     path: "/multi/:hub_name",
     element:
-      <MutliEventView/>
+      <ScrollToTop>
+        <MutliEventView/>
+      </ScrollToTop>,
   },
   {
     path: "/e/new",
     element:
       <LoggedIn>
-        <CreateEvent />
+        <ScrollToTop>
+          <CreateEvent />
+        </ScrollToTop>
       </LoggedIn>,
   },
   {
     path: "/e/:event_id",
     element:
-      <EventView />
+      <ScrollToTop>
+        <EventView />
+      </ScrollToTop>
   },
   {
     path: "/e/:event_id/deck",
     element:
     <LoggedIn>
-      <DeckView />
+      <ScrollToTop>
+        <DeckView />
+      </ScrollToTop>
     </LoggedIn>,
   },
   {
     path: "/e/:event_id/sync/eventlink",
     element:
     <LoggedIn>
-      <EventlinkSync />
+      <ScrollToTop>
+        <EventlinkSync />
+      </ScrollToTop>
     </LoggedIn>,
   },
   {
     path: "/e/:eventId/qr",
-    element: <QRCodeView />
-    
+    element: 
+      <ScrollToTop>
+        <QRCodeView />
+      </ScrollToTop>,
   },
   {
     path: "/help/decklist",
-    element: <DecklistHelp />
+    element: 
+      <ScrollToTop>
+        <DecklistHelp />
+      </ScrollToTop>
   },
   {
     path: "/help/privacy",
-    element: <PrivacyHelp />
+    element:
+      <ScrollToTop>
+        <PrivacyHelp />
+      </ScrollToTop>
   },
   {
     path: "/help/terms-and-services",
-    element: <TermsAndServicesHelp />
+    element:
+      <ScrollToTop>
+        <TermsAndServicesHelp />
+      </ScrollToTop>
   },
   {
     path: "/help/contribute",
-    element: <ContributeHelp />
+    element:
+      <ScrollToTop>
+        <ContributeHelp />
+      </ScrollToTop>
   },
   {
     path: "/help/about",
-    element: <About />
+    element:
+      <ScrollToTop>
+        <About />
+      </ScrollToTop>
   },
 ]);
 
