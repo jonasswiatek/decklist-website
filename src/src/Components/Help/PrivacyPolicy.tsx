@@ -13,6 +13,13 @@ export function PrivacyHelp() {
           We do not store your email address in our database. Your email is only used for authentication purposes during the sign-in process.
         </p>
         
+        <h2 className="text-2xl font-semibold mt-6 mb-4">Cookies</h2>
+        <p>
+          We only use cookies for authentication purposes. These cookies are essential for the functioning of our service 
+          as they allow you to stay logged in during your session. We do not use cookies for tracking, 
+          analytics, or advertising purposes.
+        </p>
+
         <h2 className="text-2xl font-semibold mt-6 mb-4">Google Authentication</h2>
         <p>
           If you choose to sign in with Google, please be aware that Google may set cookies on your device as part of their authentication process. By using Google Sign-In, you accept Google's privacy policy regarding how they handle your data.
@@ -21,22 +28,6 @@ export function PrivacyHelp() {
           For more information about how Google processes your data, please visit their{" "}
           <a 
             href="https://policies.google.com/privacy" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
-          >
-            Privacy Policy
-          </a>.
-        </p>
-        
-        <h2 className="text-2xl font-semibold mt-6 mb-4">Email Authentication</h2>
-        <p>
-          If you choose to log in via email, we use Sendgrid (a third-party email service provider) to send authentication emails. When you request an email login link, your email address is temporarily processed by Sendgrid to deliver the authentication email.
-        </p>
-        <p className="mt-2">
-          For more information about how Sendgrid handles your data, please refer to their{" "}
-          <a 
-            href="https://www.twilio.com/en-us/legal/privacy" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline"
