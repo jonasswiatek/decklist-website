@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest } from '../../model/api/apimodel';
@@ -53,10 +53,21 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isJudge = props.user_id != null;
     const isOpen = props.event.status === "open" || isJudge;
 
-    const [showJudgeEditForm, setShowJudgeEditForm] = useState(props.showEditor);
+    const [showJudgeEditForm, setShowJudgeEditForm] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const navigate = useNavigate();
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    //When the judge clicks "Edit Decklist", scroll to the player name input.
+    useEffect(() => {
+        if (showJudgeEditForm) {
+            const playerNameElement = document.getElementById('player_name');
+            if (playerNameElement) {
+                playerNameElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+    }, [showJudgeEditForm])
 
     const { data, error, isLoading, refetch } = useQuery<DecklistResponse | null>({
         queryKey: [`deck-${props.event.event_id}-${props.user_id}`],
@@ -149,7 +160,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         ))
     );
 
-    const showEditor = !isJudge || showJudgeEditForm || !isValid;
+    const showEditor = !isJudge || showJudgeEditForm || props.showEditor || !isValid;
 
     return (
         <>
