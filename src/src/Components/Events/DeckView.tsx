@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest } from '../../model/api/apimodel';
+import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest, setDeckChecked } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
@@ -124,6 +124,17 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         return isValid ? "submit-button-ok" : "submit-button-warning";
     };
 
+    const handleToggleDeckChecked = async (isChecked: boolean) => {
+        if (props.user_id && isJudge) {
+            await setDeckChecked({
+                event_id: props.event.event_id,
+                user_id: props.user_id,
+                is_checked: isChecked
+            });
+            refetch();
+        }
+    };
+
     if (isLoading) {
         return <LoadingScreen />
     }
@@ -168,7 +179,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
             <div className='row'>
                 {isJudge && (
                     <>
-                        <div className='col-12 mb-3'>
+                        <div className='col-12 mb-3 d-flex justify-content-between align-items-center'>
                             <button 
                                 type="button" 
                                 className="btn btn-secondary" 
@@ -176,6 +187,18 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             >
                                 Back to Tournament
                             </button>
+                            <div className="form-check form-switch d-flex align-items-center">
+                                <label className="form-check-label me-5" htmlFor="deckCheckedSwitch">
+                                    {data?.is_deck_checked ? 'Checked' : 'Unchecked'}
+                                </label>
+                                <input 
+                                    className="form-check-input" 
+                                    type="checkbox" 
+                                    id="deckCheckedSwitch" 
+                                    checked={data?.is_deck_checked || false} 
+                                    onChange={() => handleToggleDeckChecked(!data?.is_deck_checked)} 
+                                />
+                            </div>
                         </div>
                         {data?.player_name && (
                             <div className='col-12 mb-3'>

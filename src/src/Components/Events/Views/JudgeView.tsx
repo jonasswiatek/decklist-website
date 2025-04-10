@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp, BsDownload } from 'react-icons/bs'; 
+import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp, BsDownload, BsTrash, BsExclamationTriangleFill, BsCheckCircleFill } from 'react-icons/bs'; 
 import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent, addUserToEvent } from '../../../model/api/apimodel';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
@@ -222,12 +222,27 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         <tr key={p.user_id}>
                             <td>{p.player_name}</td>
                             <td className="text-end">
-                                <div className="d-flex justify-content-end">
-                                    <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id} className="btn btn-sm btn-primary me-2">
-                                        View
+                                <div className="d-flex justify-content-end align-items-center">
+                                    {p.has_deck_warning && (
+                                        <BsExclamationTriangleFill className="text-warning me-2" title="Warning" />
+                                    )}
+                                    {p.is_deck_checked && (
+                                        <BsCheckCircleFill className="text-success me-2" title="Checked" />
+                                    )}
+                                    <Link 
+                                        to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id} 
+                                        className="btn btn-sm btn-primary me-2"
+                                        title="View Deck"
+                                    >
+                                        <BsSearch />
                                     </Link>
-                                    <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemovePlayer(p.user_id, p.player_name)}>
-                                        Remove
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-sm btn-danger" 
+                                        onClick={async () => onRemovePlayer(p.user_id, p.player_name)}
+                                        title="Remove Player"
+                                    >
+                                        <BsTrash />
                                     </button>
                                 </div>
                             </td>

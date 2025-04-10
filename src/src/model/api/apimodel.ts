@@ -252,6 +252,7 @@ export type DecklistResponse = {
     player_name: string;
     groups: DecklistGroup[],
     deck_warnings: string[],
+    is_deck_checked: boolean,
     decklist_text: string,
 }
 
@@ -269,7 +270,7 @@ export type DecklistCard = {
     warnings: string[],
 }
 
-export async function getDecklistRequest(eventId: string, userId: string | null) {
+export async function getDecklistRequest(eventId: string, userId: string | null) : Promise<DecklistResponse | null> {
     let url = `/api/events/${eventId}/deck`;
     if (userId) {
         url += `?user_id=${encodeURIComponent(userId)}`;
@@ -449,6 +450,8 @@ type EventParticipant = {
     player_name: string,
     role: string
     user_id: string,
+    has_deck_warning: boolean,
+    is_deck_checked: boolean,
 }
 
 export type LoginStartResponse = {
@@ -486,4 +489,29 @@ export class ValidationError extends Error {
 
 export class NotAuthenticatedError extends Error {
 
+}
+
+type SetDeckCheckedRequest = {
+    event_id: string;
+    user_id: string;
+    is_checked: boolean;
+}
+
+export async function setDeckChecked(data: SetDeckCheckedRequest) {
+    const httpResponse = await fetch(`/api/events/${data.event_id}/deck/set-checked`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_id: data.user_id,
+            is_checked: data.is_checked
+        })
+    });
+
+    if (httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
 }
