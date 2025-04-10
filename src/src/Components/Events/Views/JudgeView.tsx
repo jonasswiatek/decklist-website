@@ -15,11 +15,18 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const [showAddJudgeForm, setShowAddJudgeForm] = useState(false);
     const inviteLink = `${window.location.origin}/e/${e.event.event_id}`;
     const navigate = useNavigate();
+    const [filterByDeckStatus, setFilterByDeckStatus] = useState<'all' | 'checked' | 'unchecked' | 'warnings'>('all');
 
-    // Filtered players based on search term
-    const filteredPlayers = players.filter(player => 
-        player.player_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Filtered players based on search term and deck status
+    const filteredPlayers = players.filter(player => {
+        const matchesSearch = player.player_name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDeckStatus = 
+            filterByDeckStatus === 'all' ||
+            (filterByDeckStatus === 'checked' && player.is_deck_checked) ||
+            (filterByDeckStatus === 'unchecked' && !player.is_deck_checked) ||
+            (filterByDeckStatus === 'warnings' && player.has_deck_warning);
+        return matchesSearch && matchesDeckStatus;
+    });
 
     const copyToClipboard = async () => {
         try {
@@ -207,6 +214,32 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     Clear
                                 </button>
                             )}
+                        </div>
+                        <div className="btn-group w-100 mt-2">
+                            <button 
+                                className={`btn btn-outline-secondary ${filterByDeckStatus === 'all' ? 'active' : ''}`} 
+                                onClick={() => setFilterByDeckStatus('all')}
+                            >
+                                All
+                            </button>
+                            <button 
+                                className={`btn btn-outline-secondary ${filterByDeckStatus === 'checked' ? 'active' : ''}`} 
+                                onClick={() => setFilterByDeckStatus('checked')}
+                            >
+                                Checked
+                            </button>
+                            <button 
+                                className={`btn btn-outline-secondary ${filterByDeckStatus === 'unchecked' ? 'active' : ''}`} 
+                                onClick={() => setFilterByDeckStatus('unchecked')}
+                            >
+                                Unchecked
+                            </button>
+                            <button 
+                                className={`btn btn-outline-secondary ${filterByDeckStatus === 'warnings' ? 'active' : ''}`} 
+                                onClick={() => setFilterByDeckStatus('warnings')}
+                            >
+                                Warnings
+                            </button>
                         </div>
                     </td>
                 </tr>
