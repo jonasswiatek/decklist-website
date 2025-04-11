@@ -47,6 +47,7 @@ export function DecklistHelp() {
 4 Monastery Swiftspear
 3 Eidolon of the Great Revel
 
+Sideboard
 3 Smash to Smithereens
 2 Blood Moon
 2 Tormod's Crypt
