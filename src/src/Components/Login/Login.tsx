@@ -75,7 +75,7 @@ export function LoginScreen() {
             <div className="card-body">
               <h5 className="card-title">Please consider Google Login</h5>
               <p className="card-text">
-                Sending emails isn't free, so unless you absolutely can't make yourself do it, pleaes use Google Login.
+                Sending emails isn't free, so unless you absolutely can't make yourself do it, please use Google Login.
               </p>
             </div>
           </div>

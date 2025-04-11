@@ -285,7 +285,9 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 {filteredPlayers.length === 0 && (
                     <tr>
                         <td colSpan={2} className="text-center py-3">
-                            {searchTerm ? "No players match your search" : "No players have joined this tournament yet"}
+                            {players.length <= 0 
+                                ? "No players have joined this tournament yet" 
+                                : "No players match your filter"}
                         </td>
                     </tr>
                 )}
