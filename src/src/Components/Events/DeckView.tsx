@@ -162,7 +162,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                     </button>
                     <button 
                         type="button" 
-                        className={`btn ${data?.is_deck_checked ? 'btn-success' : 'btn-warning'}`} 
+                        className={`btn ${data?.is_deck_checked ? 'btn-warning' : 'btn-success'}`} 
                         onClick={() => handleToggleDeckChecked(!data?.is_deck_checked)}
                     >
                         {data?.is_deck_checked ? 'Mark as Unchecked' : 'Mark as Checked'}
@@ -283,9 +283,15 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             </div>
                         ) : (
                             <>
-                             <div className="d-flex">
-                                <span style={{ marginRight: 10 }} className="no-wrap-text">Main: {mainboardCount}</span>
-                                <span className="no-wrap-text">Side: {sideboardCount}</span>
+                            <div className="d-flex">
+                                {props.event.decklist_style.toLowerCase() === "commander" ? (
+                                    <span className="no-wrap-text">Deck: {mainboardCount}</span>
+                                ) : (
+                                    <>
+                                        <span style={{ marginRight: 10 }} className="no-wrap-text">Main: {mainboardCount}</span>
+                                        <span className="no-wrap-text">Side: {sideboardCount}</span>
+                                    </>
+                                )}
                             </div>
                             {isDirty && (
                                 <button 
