@@ -1,6 +1,10 @@
 export const getDecklistPlaceholder = (decklistStyle: string = 'sixty'): string => {
   if (decklistStyle === 'commander') {
-    return `Atraxa, Grand Unifier
+    return `Commander
+Atraxa, Grand Unifier
+
+Companion
+Jegantha, the Wellspring
 
 Birds of Paradise
 Bloom Tender
