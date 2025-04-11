@@ -102,7 +102,7 @@ export function EventView() {
         <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
         {(data.player_count >= data.max_players) ? 
             <EventFullMessage /> : 
-            (authorized ? <DeckEditor event={data} user_id={null} showEditor={false} /> : <UnauthedView event={data} />)
+            (authorized ? <DeckEditor event={data} user_id={null} /> : <UnauthedView event={data} />)
         }
       </>
     )
