@@ -5,7 +5,7 @@ import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, 
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsPerson, BsCheckCircle } from 'react-icons/bs';
+import { BsPerson } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
 
@@ -109,10 +109,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         navigate(`/e/${props.event.event_id}`);
     };
 
-    const getSubmitButtonWrapperClass = (isValid: boolean): string => {
-        return isValid ? "submit-button-ok" : "submit-button-warning";
-    };
-
     const handleToggleDeckChecked = async (isChecked: boolean) => {
         if (props.user_id && isJudge) {
             await setDeckChecked({
@@ -149,16 +145,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
             .find(group => group.group_name === "Sideboard")?.cards
             .reduce((sum, card) => sum + card.quantity, 0) || 0
         : 0;
-
-    // Check if the deck is valid:
-    // 1. deck_warnings should be empty
-    // 2. No card in any group should have warnings
-    const isValid = (
-        (!data?.deck_warnings || data.deck_warnings.length === 0) &&
-        (!data?.groups || !data.groups.some(group => 
-            group.cards.some(card => card.warnings && card.warnings.length > 0)
-        ))
-    );
 
     const inputDisabled = (isJudge && !isEditing) || !isOpen;
 
@@ -271,7 +257,50 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             )}
                         </div>
                     </div>
-                    
+                    <div 
+                        className="event-info mb-3 d-flex justify-content-between align-items-center position-relative" 
+                        style={{ padding: '10px', marginTop: '5px', minHeight: '60px' }}
+                    >
+                        {showToast ? (
+                            <div 
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    backgroundColor: 'green',
+                                    color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 'bold',
+                                    borderRadius: '4px',
+                                    zIndex: 1
+                                }}
+                            >
+                                Your deck has been submitted
+                            </div>
+                        ) : (
+                            <>
+                             <div className="d-flex">
+                                <span style={{ marginRight: 10 }} className="no-wrap-text">Main: {mainboardCount}</span>
+                                <span className="no-wrap-text">Side: {sideboardCount}</span>
+                            </div>
+                            {isDirty && (
+                                <button 
+                                    type='submit' 
+                                    className='btn btn-primary no-wrap-text' 
+                                    id='submit-button'
+                                >
+                                    {data ? 'Resubmit Decklist' : 'Submit Decklist'}
+                                </button>
+                            )}
+
+                            </>
+                        )}
+                    </div>
+
                     {data?.deck_warnings && data.deck_warnings.length > 0 && (
                         <div className="mt-3">
                             <div className="alert alert-warning">
@@ -289,45 +318,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 <div className='col-lg-8 col-sm-12 decklist-table-container' style={{ marginTop: '10px' }}>
                     {data && <DecklistTable decklistData={data} allowChecklist={isJudge} />}
                 </div>
-                
-                {isOpen && (
-                    <div className={`float-bottom submit-button-wrapper ${getSubmitButtonWrapperClass(isValid)}`}>
-                        <div>
-                            {isDirty && (<span className="no-wrap-text">You have unsaved changes</span>)}
-                            {!isDirty && (
-                                <div style={{ display: 'flex', minWidth: 0, flexShrink: 1 }}>
-                                    <span style={{margin: 5}} className="no-wrap-text">Main: {mainboardCount}</span>
-                                    <span style={{margin: 5}} className="no-wrap-text">Side: {sideboardCount}</span>
-                                </div>
-                            )}
-                        </div>
-                        {isDirty && <button type='submit' className='btn btn-primary no-wrap-text' id='submit-button'>{data ? 'Resubmit Decklist' : 'Submit Decklist'}</button>}
-                    </div>
-                )}
             </div>
         </form>
-        
-        <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 1050 }}>
-            <div 
-                className={`toast ${showToast ? 'show' : 'hide'}`} 
-                role="alert" 
-                aria-live="assertive" 
-                aria-atomic="true"
-                style={{ 
-                    display: showToast ? 'block' : 'none',
-                    minWidth: '250px'
-                }}
-            >
-                <div className="toast-header bg-success text-white">
-                    <BsCheckCircle className="me-2" />
-                    <strong className="me-auto">Success</strong>
-                    <button type="button" className="btn-close btn-close-white" onClick={() => setShowToast(false)} aria-label="Close"></button>
-                </div>
-                <div className="toast-body bg-white text-dark">
-                    Your decklist has been submitted.
-                </div>
-            </div>
-        </div>
         </>
     )
 }
