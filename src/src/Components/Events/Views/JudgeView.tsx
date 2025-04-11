@@ -500,9 +500,16 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     <tr key={p.user_id}>
                                         <td>{p.player_name}</td>
                                         <td className="text-end">
-                                            <button type="button" className="btn btn-sm btn-danger" onClick={async () => onRemovePlayer(p.user_id, p.player_name)}>
-                                                Remove
-                                            </button>
+                                            <div className="d-flex justify-content-end align-items-center">
+                                                <button 
+                                                    type="button" 
+                                                    className="btn btn-sm btn-danger" 
+                                                    onClick={async () => onRemovePlayer(p.user_id, p.player_name)}
+                                                    title="Remove Judge"
+                                                >
+                                                    <BsTrash />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 )

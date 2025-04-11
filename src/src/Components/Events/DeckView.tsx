@@ -187,18 +187,13 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             >
                                 Back to Tournament
                             </button>
-                            <div className="form-check form-switch d-flex align-items-center">
-                                <label className="form-check-label me-5" htmlFor="deckCheckedSwitch">
-                                    {data?.is_deck_checked ? 'Checked' : 'Unchecked'}
-                                </label>
-                                <input 
-                                    className="form-check-input" 
-                                    type="checkbox" 
-                                    id="deckCheckedSwitch" 
-                                    checked={data?.is_deck_checked || false} 
-                                    onChange={() => handleToggleDeckChecked(!data?.is_deck_checked)} 
-                                />
-                            </div>
+                            <button 
+                                type="button" 
+                                className={`btn ${data?.is_deck_checked ? 'btn-success' : 'btn-warning'}`} 
+                                onClick={() => handleToggleDeckChecked(!data?.is_deck_checked)}
+                            >
+                                {data?.is_deck_checked ? 'Mark as Unchecked' : 'Mark as Checked'}
+                            </button>
                         </div>
                         {data?.player_name && (
                             <div className='col-12 mb-3'>
