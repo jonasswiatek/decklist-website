@@ -71,7 +71,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         decklist_text: string
     };
  
-    const { register, setError, handleSubmit, clearErrors, reset, formState: { errors, isDirty } } = useForm<Inputs>();
+    const { register, setError, handleSubmit, clearErrors, reset, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>();
     const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
         try {
             await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, decklist_text: data.decklist_text });
@@ -107,17 +107,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     const handleBackToEvent = () => {
         navigate(`/e/${props.event.event_id}`);
-    };
-
-    const handleToggleDeckChecked = async (isChecked: boolean) => {
-        if (props.user_id && isJudge) {
-            await setDeckChecked({
-                event_id: props.event.event_id,
-                user_id: props.user_id,
-                is_checked: isChecked
-            });
-            refetch();
-        }
     };
 
     if (isLoading) {
@@ -160,13 +149,12 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                     >
                         Back to Tournament
                     </button>
-                    <button 
-                        type="button" 
-                        className={`btn ${data?.is_deck_checked ? 'btn-warning' : 'btn-success'}`} 
-                        onClick={() => handleToggleDeckChecked(!data?.is_deck_checked)}
-                    >
-                        {data?.is_deck_checked ? 'Mark as Unchecked' : 'Mark as Checked'}
-                    </button>
+                    <FlagCheckedButton 
+                        eventId={props.event.event_id} 
+                        userId={props.user_id!} 
+                        isChecked={data?.is_deck_checked || false} 
+                        refetch={refetch} 
+                    />
                 </div>
                 {data?.player_name && (
                     <div className='col-12 mb-3'>
@@ -298,8 +286,16 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     type='submit' 
                                     className='btn btn-primary no-wrap-text' 
                                     id='submit-button'
+                                    disabled={isSubmitting} // Disable button while submitting
                                 >
-                                    {data ? 'Resubmit Decklist' : 'Submit Decklist'}
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Submitting
+                                        </>
+                                    ) : (
+                                        data ? 'Resubmit Decklist' : 'Submit Decklist'
+                                    )}
                                 </button>
                             )}
 
@@ -329,3 +325,31 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         </>
     )
 }
+
+const FlagCheckedButton: React.FC<{ eventId: string, userId: string, isChecked: boolean, refetch: () => void }> = ({ eventId, userId, isChecked, refetch }) => {
+    const { handleSubmit, formState: { isSubmitting } } = useForm();
+    const [localCheckedState, setLocalCheckedState] = useState(isChecked);
+
+    const onSubmit = async () => {
+        const newCheckedState = !localCheckedState;
+        setLocalCheckedState(newCheckedState);
+        await setDeckChecked({
+            event_id: eventId,
+            user_id: userId,
+            is_checked: newCheckedState
+        });
+        refetch();
+    };
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <button 
+                type="submit" 
+                className={`btn ${isSubmitting ? 'btn-secondary' : (localCheckedState ? 'btn-warning' : 'btn-success')}`} 
+                disabled={isSubmitting}
+            >
+                {localCheckedState ? 'Mark as Unchecked' : 'Mark as Checked'}
+            </button>
+        </form>
+    );
+};
