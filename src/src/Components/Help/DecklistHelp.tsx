@@ -62,30 +62,35 @@ export function DecklistHelp() {
         <Card.Body className="card-body">
           <h4>Formatting requirements</h4>
           <ul>
-            <li>The Commander(s) must be in a separate section from the main deck, separated by an empty line.</li>
+            <li>The Commander(s) must be in a separate section from the main deck, separated by an empty line. Optionally you can write "Commander" above it.</li>
+            <li>Companions must be listed after a Companion line</li>
             <li>Lines with text like mainboard and sideboard, or starting with // are ignored, but can be included for your own benefit</li>
           </ul>
 
           <h4>Formatting Example</h4>
           <pre className=" p-3 rounded">
-{`1 Atraxa, Praetors' Voice
+{`Commander
+Atraxa, Praetors' Voice
 
-1 Bloom Tender
-1 Birds of Paradise
-1 Eternal Witness
-1 Counterspell
-1 Cyclonic Rift
-1 Cultivate
-1 Demonic Tutor
-1 Sol Ring
-1 Arcane Signet
-1 Smothering Tithe
-1 Sylvan Library
-1 Teferi, Time Raveler
-1 Command Tower
-1 Breeding Pool
-3 Forest
-2 Island
+Companion
+Jegantha, the Wellspring
+
+Bloom Tender
+Birds of Paradise
+Eternal Witness
+Counterspell
+Cyclonic Rift
+Cultivate
+Demonic Tutor
+Sol Ring
+Arcane Signet
+Smothering Tithe
+Sylvan Library
+Teferi, Time Raveler
+Command Tower
+Breeding Pool
+Forest
+Island
 ...`}
           </pre>
         </Card.Body>
