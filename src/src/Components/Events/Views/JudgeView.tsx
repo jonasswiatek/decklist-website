@@ -104,7 +104,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
             
             if (response && response.user_id) {
                 // Navigate to the player's deck page
-                navigate(`/e/${e.event.event_id}/deck?id=${response.user_id}&showEditor=true`);
+                navigate(`/e/${e.event.event_id}/deck?id=${response.user_id}`);
             } else {
                 e.refetch?.();
             }
