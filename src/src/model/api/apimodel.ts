@@ -27,7 +27,7 @@ export async function startLoginRequest(data: StartLoginRequest) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email: data.email,
+            email: data.email.trim(),
         })
     });
 
@@ -53,8 +53,8 @@ export async function continueLoginRequest(data: ContinueLoginRequest) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email: data.email,
-            code: data.code
+            email: data.email.trim(),
+            code: data.code.trim()
         })
     });
 
@@ -152,7 +152,7 @@ export async function createEventRequest(data: CreateEventRequest) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            event_name: data.event_name,
+            event_name: data.event_name.trim(),
             format: data.format,
             event_date: data.event_date
         })
@@ -185,8 +185,8 @@ export async function addUserToEvent(data: AddUserRequest) : Promise<AddUserResp
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email: data.email,
-            player_name: data.playerName
+            email: data.email?.trim(),
+            player_name: data.playerName.trim()
         })
     });
 
@@ -213,8 +213,8 @@ export async function updateEventUsers(data: UpdateEventUsersRequest) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            email: data.email,
-            player_name: data.player_name,
+            email: data.email.trim(),
+            player_name: data.player_name.trim(),
             role: data.role
         })
     });
@@ -306,7 +306,7 @@ export async function submitDecklistRequest(data: SubmitDecklistRequest) {
         },
         body: JSON.stringify({
             user_id: data.user_id,
-            player_name: data.player_name,
+            player_name: data.player_name.trim(),
             decklist_text: data.decklist_text,
         })
     });
