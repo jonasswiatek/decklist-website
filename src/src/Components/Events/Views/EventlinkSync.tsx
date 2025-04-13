@@ -78,7 +78,7 @@ export const EventlinkSync: React.FC = () => {
     // show all existing players with "unknown" status
     const displayPlayers = parsedPlayers.length === 0 ? [] : parsedPlayers;
     const displayPlayersNotInEventlink = parsedPlayers.length === 0 
-        ? players.map(p => p.player_name) 
+        ? players.map(p => p.player_name.trim()) 
         : playersNotInEventlink;
 
     // Parse player names from the pasted text according to the specified format
@@ -125,8 +125,8 @@ export const EventlinkSync: React.FC = () => {
             // If player is in the players array, they have submitted a decklist
             // Use case-insensitive comparison
             const hasSubmitted = players.some(p => 
-                p.player_name.toLowerCase() === playerName.toLowerCase());
-            statusMap.set(playerName, hasSubmitted);
+                p.player_name.trim().toLowerCase() === playerName.trim().toLowerCase());
+            statusMap.set(playerName.trim(), hasSubmitted);
         });
         
         setPlayerSubmissionStatus(statusMap);
@@ -135,8 +135,8 @@ export const EventlinkSync: React.FC = () => {
         // Use case-insensitive comparison
         const notInEventlink = players
             .filter(p => !parsedPlayerNames.some(name => 
-                name.toLowerCase() === p.player_name.toLowerCase()))
-            .map(p => p.player_name);
+                name.trim().toLowerCase() === p.player_name.trim().toLowerCase()))
+            .map(p => p.player_name.trim());
         
         setPlayersNotInEventlink(notInEventlink);
     };
