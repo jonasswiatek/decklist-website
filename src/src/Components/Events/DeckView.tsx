@@ -5,7 +5,7 @@ import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, 
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsPerson } from 'react-icons/bs';
+import { BsArrowLeft, BsPerson } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
 
@@ -160,10 +160,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 <div className='col-12 mb-3 d-flex justify-content-between align-items-center'>
                     <button 
                         type="button" 
-                        className="btn btn-secondary" 
+                        className="btn btn-link text-decoration-none p-0" 
                         onClick={handleBackToEvent}
                     >
-                        Back to Tournament
+                        <BsArrowLeft className="me-1" /> Back Tournament
                     </button>
                     <FlagCheckedButton 
                         eventId={props.event.event_id} 

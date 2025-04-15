@@ -92,17 +92,21 @@ const router = createBrowserRouter([
   },
   {
     path: "/library",
-    element: 
-      <ScrollToTop>
-        <LibraryOverview />
-      </ScrollToTop>,
+    element:
+      <LoggedIn>
+        <ScrollToTop>
+          <LibraryOverview />
+        </ScrollToTop>
+      </LoggedIn>,
   },
   {
     path: "/library/deck/:deck_id?",
     element: 
-      <ScrollToTop>
-        <LibraryDeckEditorPage />
-      </ScrollToTop>,
+      <LoggedIn>
+        <ScrollToTop>
+          <LibraryDeckEditorPage />
+        </ScrollToTop>
+      </LoggedIn>,
   },
   {
     path: "/help/decklist",
@@ -147,7 +151,7 @@ function App() {
     <AuthProvider>
       <div className="d-flex flex-column min-vh-100">
         <NavBar />
-        <div className="py-3 py-md-5 flex-grow-1">
+        <div className="py-3 py-md-3 flex-grow-1">
           <div className='container'>
             <QueryClientProvider client={queryClient}>
               <RouterProvider router={router} />

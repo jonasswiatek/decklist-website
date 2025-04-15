@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
-import { DecklistGroup, deleteLibraryDeckRequest, FormatResponse, getFormatsRequest, getLibraryDeckRequest, LibraryDeckResponse, saveLibraryDeckRequest } from '../../model/api/apimodel';
+import { useLocation, useNavigate, useParams } from 'react-router';
+import { DecklistGroup, deleteLibraryDeckRequest, Format, FormatResponse, getFormatsRequest, getLibraryDeckRequest, LibraryDeckResponse, saveLibraryDeckRequest } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
-import { BsPerson, BsArrowLeft } from 'react-icons/bs';
+import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTable } from '../Events/DecklistTable';
@@ -11,6 +11,8 @@ import { LoadingScreen } from '../Login/LoadingScreen';
 export const LibraryDeckEditorPage: React.FC = () => {
   const { deck_id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const importedDeck = location.state?.importedDeck;
 
   const { data, error, isLoading, refetch } = useQuery<LibraryDeckResponse>({
       queryKey: [`library-deck-${deck_id}`],
@@ -19,13 +21,21 @@ export const LibraryDeckEditorPage: React.FC = () => {
       enabled: !!deck_id,
       queryFn: () => getLibraryDeckRequest({  deck_id: deck_id! }),
   });
-  
 
-  if (isLoading) {
+  const { data: formats, isLoading: formatsLoading, error: formatsError } = useQuery<FormatResponse>(
+    'formats',
+    () => getFormatsRequest(),
+    {
+      retry: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  if (isLoading || formatsLoading) {
       return <LoadingScreen />
   }
   
-  if(error) {
+  if(error || formatsError) {
       return (
           <div className="alert alert-danger" role="alert">
               <h4 className="alert-heading">Error loading deck</h4>
@@ -70,10 +80,11 @@ export const LibraryDeckEditorPage: React.FC = () => {
       </div>
       <LibraryDeckEditor 
         deck_name={data?.deck_name}
-        format={data?.format}
+        format={data?.format ?? importedDeck?.format}
+        formats={formats!.formats}
         groups={data?.groups}
         deck_warnings={data?.deck_warnings}
-        decklist_text={data?.decklist_text}
+        decklist_text={data?.decklist_text ?? importedDeck?.decklist_text}
         onDeckUpdate={handleDeckUpdate}
         onDeleteDeck={handleDeleteDeck}
       />
@@ -84,6 +95,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
 type LibraryDeckEditorProps = {
   deck_name?: string;
   format?: string;
+  formats: Format[];
   groups?: DecklistGroup[];
   deck_warnings?: string[];
   decklist_text?: string;
@@ -99,14 +111,6 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
   }
 
   const [decklistStyle, setDecklistStyle] = useState<string | undefined>(undefined);
-  const { data: formats, isLoading: formatsLoading, error: formatsError } = useQuery<FormatResponse>(
-      'formats',
-      () => getFormatsRequest(),
-      {
-        retry: false,
-        refetchOnWindowFocus: false,
-      }
-  );
 
   const { register, handleSubmit, clearErrors, watch, reset, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>({
     defaultValues: {
@@ -120,19 +124,19 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
   useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name === 'format') {
-        const style = formats?.formats.find(format => format.format === value.format)?.decklist_style;
+        const style = props.formats.find(format => format.format === value.format)?.decklist_style;
         setDecklistStyle(style);
       }
     });
     return () => subscription.unsubscribe();
-  }, [watch, formats]);
+  }, [watch, props.formats]);
 
   useEffect(() => {
     if (props.format) {
-      const style = formats?.formats.find(format => format.format === props.format)?.decklist_style;
+      const style = props.formats.find(format => format.format === props.format)?.decklist_style;
       setDecklistStyle(style);
     }
-  }, [props.format, formats]);
+  }, [props.format, props.formats]);
 
   const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
     props.onDeckUpdate(data.deck_name, data.format, data.decklist_text);
@@ -163,46 +167,8 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
   <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmitDecklist)(e); }} >
         <div className='row'>
             <div className='col-lg-4 col-sm-12'>
-                <div className="event-info mb-3 d-flex justify-content-between align-items-center">
-                  <div className="format-container flex-grow-1 me-2">
-                    {formatsLoading ? (
-                        <div className="p-2 border rounded text-center">
-                            <small className="text-muted">Loading formats...</small>
-                        </div>
-                    ) : formatsError ? (
-                        <div className="alert alert-danger py-2" role="alert">
-                            <small>Error loading formats. Please refresh the page.</small>
-                        </div>
-                    ) : (
-                        <select 
-                            id="format"
-                            className={`form-select ${errors.format ? 'is-invalid' : ''}`} 
-                            {...register("format")}
-                        >
-                            <option value="" defaultChecked>Select a format</option>
-                            {formats?.formats.map(format => (
-                                <option key={format.format} value={format.format}>{format.name}</option>
-                            ))}
-                        </select>
-                    )}
-                    {errors.format && <div className="invalid-feedback">{errors.format?.message}</div>}
-                  </div>
-
-                  <div className="delete-container">
-                    {(props.groups || true) && (
-                        <button 
-                            type="button" 
-                            className="btn btn-danger btn-sm" 
-                            onClick={handleDeleteDeck}
-                        >
-                            Delete Deck
-                        </button>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="form-group position-relative">
-                    <div className={`input-group`}>
+                <div className="form-group position-relative mb-1">
+                    <div className="input-group">
                         <span className="input-group-text" id="basic-addon1">
                             <BsPerson />
                         </span>
@@ -214,13 +180,45 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
                             required 
                             {...register("deck_name", { value: props.deck_name })} 
                         />
-                        {errors.deck_name && (
-                            <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                <span>{errors.deck_name.message}</span>
-                            </div>
+                        {(props.groups) && (
+                            <button 
+                                type="button" 
+                                className="btn btn-danger" 
+                                onClick={handleDeleteDeck}
+                                title="Delete Deck"
+                            >
+                                <BsTrash />
+                            </button>
                         )}
                     </div>
+                    {errors.deck_name && (
+                        <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                            <span>{errors.deck_name.message}</span>
+                        </div>
+                    )}
                 </div>
+                
+                <div className="event-info mb-1">
+                  <div className="format-container">
+                    <div className="input-group">
+                        <span className="input-group-text" id="format-addon">
+                            <BsCardText />
+                        </span>
+                        <select 
+                            id="format"
+                            className={`form-select ${errors.format ? 'is-invalid' : ''}`} 
+                            {...register("format")}
+                        >
+                            <option value="" defaultChecked>Select a format</option>
+                            {props.formats.map(format => (
+                                <option key={format.format} value={format.format}>{format.name}</option>
+                            ))}
+                        </select>
+                        {errors.format && <div className="invalid-feedback">{errors.format?.message}</div>}
+                    </div>
+                  </div>
+                </div>
+                
                 {decklistStyle && (<>
                   <div className="form-group position-relative">
                     <div className={`textarea-container}`}>
