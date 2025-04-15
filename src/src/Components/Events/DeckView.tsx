@@ -245,23 +245,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     </div>
                                 )}
                             </div>
-                            <textarea 
-                                id='decklist_text' 
-                                className="form-control" 
-                                placeholder={getDecklistPlaceholder(props.event.decklist_style)} 
-                                required 
-                                {...register("decklist_text", { value: data?.decklist_text })} 
-                                style={{ width: '100%', height: 400 }} 
-                                disabled={inputDisabled} // Disable for players if the event is closed
-                            />
-                            {errors.decklist_text && (
-                                <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                    <span>{errors.decklist_text.message}</span>
-                                </div>
-                            )}
-                            
+
                             {!isJudge && (
-                                <div className="mt-2">
+                                <div className="mb-1">
                                     <select 
                                         className="form-select" 
                                         onChange={(e) => {
@@ -286,6 +272,22 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     </select>
                                 </div>
                             )}
+
+                            <textarea 
+                                id='decklist_text' 
+                                className="form-control" 
+                                placeholder={getDecklistPlaceholder(props.event.decklist_style)} 
+                                required 
+                                {...register("decklist_text", { value: data?.decklist_text })} 
+                                style={{ width: '100%', height: 400 }} 
+                                disabled={inputDisabled} // Disable for players if the event is closed
+                            />
+                            {errors.decklist_text && (
+                                <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                                    <span>{errors.decklist_text.message}</span>
+                                </div>
+                            )}
+                            
                         </div>
                     </div>
                     <div 
