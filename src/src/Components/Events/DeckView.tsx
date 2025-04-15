@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest } from '../../model/api/apimodel';
+import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest, getAllEventsRequest, EventListItem } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
@@ -66,11 +66,19 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     });
 
     const { data: library, error: libraryError, isLoading: libraryLoading } = useQuery<LibraryDecksResponse>({
-        queryKey: [`library-deckS`],
+        queryKey: [`library-decks`],
         retry: false,
         refetchOnWindowFocus: false,
         queryFn: () => getLibraryDecksRequest(),
     });
+
+    const { data: events, isLoading: eventsLoading } = useQuery<EventListItem[]>({
+        queryKey: ['my-events'],
+        refetchOnWindowFocus: false,
+        retry: false,
+        queryFn: () => getAllEventsRequest()
+    })
+    
     
     type Inputs = {
         user_id?: string,
@@ -112,19 +120,41 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         }
     };
 
-    const handleSelectLibraryDeck = async (deckId: string) => {
-        const deck = await getLibraryDeckRequest({  deck_id: deckId });
-        setValue("decklist_text", deck.decklist_text, { 
-            shouldDirty: true,
-            shouldValidate: true
-        });
+    const handleSelectLibraryDeck = async (selectedDeck: string) => {
+        if (selectedDeck === 'none') {
+            setValue("decklist_text", '', { 
+                shouldDirty: true,
+                shouldValidate: true
+            });
+            return;
+        }
+        const [source, id] = selectedDeck.split(':');
+        switch (source) {
+            case 'saved': {
+                const savedDeck = await getLibraryDeckRequest({ deck_id: id });
+                setValue("decklist_text", savedDeck.decklist_text, { 
+                    shouldDirty: true,
+                    shouldValidate: true
+                });
+                break;
+            }
+
+            case 'event': {
+                const decklist = await getDecklistRequest(id, null);
+                setValue("decklist_text", decklist!.decklist_text, { 
+                    shouldDirty: true,
+                    shouldValidate: true
+                });
+                break;
+            }
+        }
     };
 
     const handleBackToEvent = () => {
         navigate(`/e/${props.event.event_id}`);
     };
 
-    if (isLoading || libraryLoading) {
+    if (isLoading || libraryLoading || eventsLoading) {
         return <LoadingScreen />
     }
 
@@ -152,6 +182,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     const inputDisabled = (isJudge && !isEditing) || !isOpen;
     const availableSavedDecks = library?.decks.filter(deck => deck.format_name === props.event.format_name) ?? [];
+    const pastEvents = events?.filter(
+        event => event.role === "player" &&
+        event.format === props.event.format &&
+        event.event_id != props.event.event_id) ?? [];
 
     return (
         <>
@@ -256,19 +290,31 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                                 handleSelectLibraryDeck(selectedDeckId);
                                             }
                                         }}
-                                        disabled={availableSavedDecks.length === 0 || inputDisabled}
+                                        disabled={(availableSavedDecks.length === 0 && pastEvents.length === 0) || inputDisabled}
                                     >
-                                        <option value="">
-                                            {availableSavedDecks.length === 0 
+                                        <option key="none" value="none">
+                                            {availableSavedDecks.length === 0 && pastEvents.length === 0
                                                 ? "No saved decks for this format" 
                                                 : "Import from a saved deck"}
                                         </option>
-                                        {availableSavedDecks.map(deck => (
-                                                <option key={deck.deck_id} value={deck.deck_id}>
-                                                    {deck.deck_name}
-                                                </option>
-                                            ))
-                                        }
+                                        {availableSavedDecks.length > 0 && (
+                                            <optgroup label="Saved Decks">
+                                                {availableSavedDecks.map(deck => (
+                                                    <option key={`saved-${deck.deck_id}`} value={`saved:${deck.deck_id}`}>
+                                                        {deck.deck_name}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+                                        {pastEvents && pastEvents.length > 0 && (
+                                            <optgroup label="Other Events">
+                                                {pastEvents.map(event => (
+                                                    <option key={`event-${event.event_id}`} value={`event:${event.event_id}`}>
+                                                        {event.event_name}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        )}
                                     </select>
                                 </div>
                             )}

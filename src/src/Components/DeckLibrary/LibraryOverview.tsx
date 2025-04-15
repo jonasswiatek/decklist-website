@@ -8,7 +8,7 @@ export const LibraryOverview: React.FC = () => {
   const navigate = useNavigate();
 
   const { data, error, isLoading } = useQuery<LibraryDecksResponse>({
-      queryKey: [`library-deckS`],
+      queryKey: [`library-decks`],
       retry: false,
       refetchOnWindowFocus: false,
       queryFn: () => getLibraryDecksRequest(),

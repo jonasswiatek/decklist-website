@@ -35,8 +35,6 @@ export const LibraryDeckEditorPage: React.FC = () => {
       return <LoadingScreen />
   }
   
-  console.log("error", error, formatsError);
-
   if(error instanceof NotFoundError) {
     return (
     <div className="alert alert-warning" role="alert">
