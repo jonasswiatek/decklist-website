@@ -318,7 +318,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 </div>
                 
                 <div className='col-lg-8 col-sm-12 decklist-table-container' style={{ marginTop: '10px' }}>
-                    {data && <DecklistTable decklistData={data} allowChecklist={isJudge} />}
+                    {data && <DecklistTable cardGroups={data.groups} allowChecklist={isJudge} />}
                 </div>
             </div>
         </form>

@@ -28,6 +28,7 @@ import { ContributeHelp } from './Components/Help/Contribute.tsx';
 import { About } from './Components/Help/About.tsx';
 import { EventlinkSync } from './Components/Events/Views/EventlinkSync.tsx';
 import { ScrollToTop } from './Util/ScrollToTop.tsx';
+import { LibraryDeckEditorPage } from './Components/DeckLibrary/LibraryDeckEditorPage.tsx';
 
 const queryClient = new QueryClient()
 
@@ -86,6 +87,13 @@ const router = createBrowserRouter([
     element: 
       <ScrollToTop>
         <QRCodeView />
+      </ScrollToTop>,
+  },
+  {
+    path: "/library/deck/:deck_id?",
+    element: 
+      <ScrollToTop>
+        <LibraryDeckEditorPage />
       </ScrollToTop>,
   },
   {

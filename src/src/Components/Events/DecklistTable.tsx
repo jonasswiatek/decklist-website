@@ -1,5 +1,5 @@
 import React from "react";
-import { DecklistCard, DecklistGroup, DecklistResponse } from "../../model/api/apimodel";
+import { DecklistCard, DecklistGroup } from "../../model/api/apimodel";
 import { ReactElement, useState, CSSProperties } from 'react';
 
 // Extracted styles as constants
@@ -179,16 +179,16 @@ function useCheckedRows() {
 
 // Main component
 type DecklistTableProps = {
-  decklistData: DecklistResponse,
+  cardGroups: DecklistGroup[],
   allowChecklist: boolean,
 }
 
-export const DecklistTable: React.FC<DecklistTableProps> = ({ decklistData, allowChecklist }) => {
+export const DecklistTable: React.FC<DecklistTableProps> = ({ cardGroups, allowChecklist }) => {
   const { checkedRows, toggleRow } = useCheckedRows();
   
   return (
     <div className="decklist-container" style={{ width: '100%' }}>
-      {decklistData.groups.map(group => (
+      {cardGroups.map(group => (
         <CardSection 
           key={`section-${group.group_name}`}
           group={group} 
