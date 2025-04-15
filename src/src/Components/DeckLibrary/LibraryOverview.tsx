@@ -32,9 +32,15 @@ export const LibraryOverview: React.FC = () => {
         <p className="text-muted">You can quickly reuse these decklists when signing up for events</p>
       </div>
       <div className="mb-4">
-        <a href="/library/deck" className="btn btn-primary">
-          <PlusCircle className="me-2" /> Create New Deck
-        </a>
+        {data && data.decks.length >= 20 ? (
+          <div className="alert alert-warning">
+            You can only have a maximum of 20 saved decks. Please delete some decks before creating new ones.
+          </div>
+        ) : (
+          <a href="/library/deck" className="btn btn-primary">
+            <PlusCircle className="me-2" /> Create New Deck
+          </a>
+        )}
       </div>
       {!data || data.decks.length === 0 ? (
         <div className="text-center mt-5">
@@ -72,6 +78,7 @@ export const LibraryOverview: React.FC = () => {
           </table>
         </div>
       )}
+      <p className="mt-3 text-muted fst-italic">Decks that haven't been used for 90 days are automatically deleted</p>
     </>
   );
 }
