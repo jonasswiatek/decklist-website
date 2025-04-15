@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest, setDeckChecked } from '../../model/api/apimodel';
+import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
@@ -65,13 +65,20 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         queryFn: () => getDecklistRequest(props.event.event_id, props.user_id),
     });
 
+    const { data: library, error: libraryError, isLoading: libraryLoading } = useQuery<LibraryDecksResponse>({
+        queryKey: [`library-deckS`],
+        retry: false,
+        refetchOnWindowFocus: false,
+        queryFn: () => getLibraryDecksRequest(),
+    });
+    
     type Inputs = {
         user_id?: string,
         player_name: string,
         decklist_text: string
     };
  
-    const { register, setError, handleSubmit, clearErrors, reset, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>();
+    const { register, setError, handleSubmit, clearErrors, reset, setValue, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>();
     const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
         try {
             await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, decklist_text: data.decklist_text });
@@ -105,15 +112,23 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         }
     };
 
+    const handleSelectLibraryDeck = async (deckId: string) => {
+        const deck = await getLibraryDeckRequest({  deck_id: deckId });
+        setValue("decklist_text", deck.decklist_text, { 
+            shouldDirty: true,
+            shouldValidate: true
+        });
+    };
+
     const handleBackToEvent = () => {
         navigate(`/e/${props.event.event_id}`);
     };
 
-    if (isLoading) {
+    if (isLoading || libraryLoading) {
         return <LoadingScreen />
     }
 
-    if (error != null) {
+    if (error || libraryError) {
         return <p>Error, try later</p>
     }
 
@@ -136,6 +151,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         : 0;
 
     const inputDisabled = (isJudge && !isEditing) || !isOpen;
+    const availableSavedDecks = library?.decks.filter(deck => deck.format_name === props.event.format_name) ?? [];
 
     return (
         <>
@@ -241,6 +257,33 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             {errors.decklist_text && (
                                 <div className="alert alert-danger py-1 mt-1 mb-0 small">
                                     <span>{errors.decklist_text.message}</span>
+                                </div>
+                            )}
+                            
+                            {!isJudge && (
+                                <div className="mt-2">
+                                    <select 
+                                        className="form-select" 
+                                        onChange={(e) => {
+                                            const selectedDeckId = e.target.value;
+                                            if (selectedDeckId) {
+                                                handleSelectLibraryDeck(selectedDeckId);
+                                            }
+                                        }}
+                                        disabled={availableSavedDecks.length === 0 || inputDisabled}
+                                    >
+                                        <option value="">
+                                            {availableSavedDecks.length === 0 
+                                                ? "No saved decks for this format" 
+                                                : "Import from a saved deck"}
+                                        </option>
+                                        {availableSavedDecks.map(deck => (
+                                                <option key={deck.deck_id} value={deck.deck_id}>
+                                                    {deck.deck_name}
+                                                </option>
+                                            ))
+                                        }
+                                    </select>
                                 </div>
                             )}
                         </div>

@@ -4,12 +4,12 @@ import { LoadingScreen } from "../Login/LoadingScreen";
 import { PlusCircle, ExclamationTriangle } from 'react-bootstrap-icons';
 
 export const LibraryOverview: React.FC = () => {
-    const { data, error, isLoading } = useQuery<LibraryDecksResponse>({
-        queryKey: [`library-deckS`],
-        retry: false,
-        refetchOnWindowFocus: false,
-        queryFn: () => getLibraryDecksRequest(),
-    });
+  const { data, error, isLoading } = useQuery<LibraryDecksResponse>({
+      queryKey: [`library-deckS`],
+      retry: false,
+      refetchOnWindowFocus: false,
+      queryFn: () => getLibraryDecksRequest(),
+  });
 
   if (isLoading) {
       return <LoadingScreen />

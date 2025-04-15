@@ -295,7 +295,7 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
             </div>
             
             <div className='col-lg-8 col-sm-12 decklist-table-container' style={{ marginTop: '10px' }}>
-                {props.groups && <DecklistTable cardGroups={props.groups} allowChecklist={true} />}
+                {props.groups && <DecklistTable cardGroups={props.groups} allowChecklist={false} />}
             </div>
         </div>
     </form>

@@ -402,7 +402,7 @@ export type LibraryDecksResponse = {
     decks: LibraryDeckListItem[],
 }
 
-type LibraryDeckListItem = {
+export type LibraryDeckListItem = {
     deck_id: string,
     deck_name: string,
     format: string,
