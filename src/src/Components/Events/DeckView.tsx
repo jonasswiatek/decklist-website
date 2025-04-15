@@ -5,7 +5,7 @@ import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, 
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsArrowLeft, BsPerson } from 'react-icons/bs';
+import { BsArrowLeft, BsPerson, BsTrash } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
 
@@ -163,7 +163,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                         className="btn btn-link text-decoration-none p-0" 
                         onClick={handleBackToEvent}
                     >
-                        <BsArrowLeft className="me-1" /> Back Tournament
+                        <BsArrowLeft className="me-1" /> Back
                     </button>
                     <FlagCheckedButton 
                         eventId={props.event.event_id} 
@@ -188,15 +188,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 <div className='col-lg-4 col-sm-12'>
                     <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                         <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
-                        {data && !isJudge && (
-                            <button 
-                                type="button" 
-                                className="btn btn-danger btn-sm" 
-                                onClick={handleDeleteDeck}
-                            >
-                                Delete Deck
-                            </button>
-                        )}
                     </div>
                     {!isOpen && (
                         <div className="alert alert-info mb-3">The event is closed. Decklist cannot be modified.</div>
@@ -216,6 +207,15 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                 {...register("player_name", { value: data?.player_name })} 
                                 disabled={inputDisabled} // Disable for players if the event is closed
                             />
+                            {data && !isJudge && (
+                                <button 
+                                    type="button" 
+                                    className="btn btn-danger" 
+                                    onClick={handleDeleteDeck}
+                                >
+                                    <BsTrash />
+                                </button>
+                            )}
                             {errors.player_name && (
                                 <div className="alert alert-danger py-1 mt-1 mb-0 small">
                                     <span>{errors.player_name.message}</span>

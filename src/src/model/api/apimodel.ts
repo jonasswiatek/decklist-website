@@ -374,6 +374,9 @@ export async function getLibraryDeckRequest(data: LibraryDeckRequest) : Promise<
         method: "GET"
     });
 
+    if (httpResponse.status === 404) 
+        throw new NotFoundError();
+
     await ThrowIfValidationErrors(httpResponse);
     
     if(httpResponse.ok) {
@@ -596,6 +599,11 @@ export class ValidationError extends Error {
 export class NotAuthenticatedError extends Error {
 
 }
+
+export class NotFoundError extends Error {
+
+}
+
 
 type SetDeckCheckedRequest = {
     event_id: string;

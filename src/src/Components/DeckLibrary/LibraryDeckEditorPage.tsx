@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
-import { DecklistGroup, deleteLibraryDeckRequest, Format, FormatResponse, getFormatsRequest, getLibraryDeckRequest, LibraryDeckResponse, saveLibraryDeckRequest } from '../../model/api/apimodel';
+import { DecklistGroup, deleteLibraryDeckRequest, Format, FormatResponse, getFormatsRequest, getLibraryDeckRequest, LibraryDeckResponse, NotFoundError, saveLibraryDeckRequest } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -35,6 +35,18 @@ export const LibraryDeckEditorPage: React.FC = () => {
       return <LoadingScreen />
   }
   
+  console.log("error", error, formatsError);
+
+  if(error instanceof NotFoundError) {
+    return (
+    <div className="alert alert-warning" role="alert">
+      <h4 className="alert-heading">Deck not found</h4>
+      <hr />
+      <p className="mb-0">No deck found.</p> 
+    </div>
+    );
+  }
+
   if(error || formatsError) {
       return (
           <div className="alert alert-danger" role="alert">
