@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { DecklistGroup, deleteLibraryDeckRequest, FormatResponse, getFormatsRequest, getLibraryDeckRequest, LibraryDeckResponse, saveLibraryDeckRequest } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
-import { BsPerson } from 'react-icons/bs';
+import { BsPerson, BsArrowLeft } from 'react-icons/bs';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTable } from '../Events/DecklistTable';
@@ -58,15 +58,26 @@ export const LibraryDeckEditorPage: React.FC = () => {
   };
 
   return (
-    <LibraryDeckEditor 
-      deck_name={data?.deck_name}
-      format={data?.format}
-      groups={data?.groups}
-      deck_warnings={data?.deck_warnings}
-      decklist_text={data?.decklist_text}
-      onDeckUpdate={handleDeckUpdate}
-      onDeleteDeck={handleDeleteDeck}
-    />
+    <>
+      <div className="mb-3">
+        <button 
+          type="button" 
+          className="btn btn-link text-decoration-none p-0" 
+          onClick={() => navigate('/library')}
+        >
+          <BsArrowLeft className="me-1" /> Back to Library
+        </button>
+      </div>
+      <LibraryDeckEditor 
+        deck_name={data?.deck_name}
+        format={data?.format}
+        groups={data?.groups}
+        deck_warnings={data?.deck_warnings}
+        decklist_text={data?.decklist_text}
+        onDeckUpdate={handleDeckUpdate}
+        onDeleteDeck={handleDeleteDeck}
+      />
+    </>
   );
 }
 

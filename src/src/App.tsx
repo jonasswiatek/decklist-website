@@ -29,6 +29,7 @@ import { About } from './Components/Help/About.tsx';
 import { EventlinkSync } from './Components/Events/Views/EventlinkSync.tsx';
 import { ScrollToTop } from './Util/ScrollToTop.tsx';
 import { LibraryDeckEditorPage } from './Components/DeckLibrary/LibraryDeckEditorPage.tsx';
+import { LibraryOverview } from './Components/DeckLibrary/LibraryOverview.tsx';
 
 const queryClient = new QueryClient()
 
@@ -87,6 +88,13 @@ const router = createBrowserRouter([
     element: 
       <ScrollToTop>
         <QRCodeView />
+      </ScrollToTop>,
+  },
+  {
+    path: "/library",
+    element: 
+      <ScrollToTop>
+        <LibraryOverview />
       </ScrollToTop>,
   },
   {
@@ -172,6 +180,7 @@ function NavBar()
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="ms-auto">
             <Nav.Link href="/e/new">Create Tournament</Nav.Link>
+            <Nav.Link href="/library">My Decks</Nav.Link>
             {authorized ? (
               <>
                 <Nav.Link onClick={() => logout()}>Log out</Nav.Link>

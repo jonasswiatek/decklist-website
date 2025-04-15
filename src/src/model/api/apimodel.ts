@@ -398,6 +398,32 @@ export async function deleteLibraryDeckRequest(deck_id: string) : Promise<void> 
     throw new Error("Http Exception");
 }
 
+export type LibraryDecksResponse = {
+    decks: LibraryDeckListItem[],
+}
+
+type LibraryDeckListItem = {
+    deck_id: string,
+    deck_name: string,
+    format: string,
+    format_name: string,
+    has_warnings: boolean,
+}
+
+export async function getLibraryDecksRequest() : Promise<LibraryDecksResponse> {
+    const httpResponse = await fetch(`/api/decks/library`, {
+        method: "GET"
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        const res = await httpResponse.json() as LibraryDecksResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
 
 export async function deleteDeckRequest(eventId: string) {
     const httpResponse = await fetch(`/api/events/${eventId}/deck`, {
