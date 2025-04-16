@@ -12,10 +12,11 @@ const STYLES: Record<string, CSSProperties> = {
     textDecoration: 'line-through'
   },
   warningRow: {
-    backgroundColor: 'rgba(255, 243, 205, 0.05)',
-    color: '#d63939',
+    backgroundColor: 'rgba(255, 243, 205, 0.10)',
+    color: '#ff5252', // Brighter red for better visibility against dark background
     fontSize: '0.9em',
-    fontStyle: 'italic'
+    fontStyle: 'italic',
+    fontWeight: 'bold'
   },
   cardSection: {
     breakInside: 'avoid-column', // Updated to a valid value for breakInside
@@ -60,7 +61,8 @@ const CardWarning: React.FC<CardWarningProps> = ({ warning }) => (
     ...STYLES.warningRow,
     display: 'flex',
     paddingLeft: '30px',
-    marginBottom: '5px'
+    marginBottom: '5px',
+    fontWeight: 'bold'
   }}>
     {warning}
   </div>
