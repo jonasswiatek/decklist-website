@@ -120,7 +120,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         }
     };
 
-    const handleSelectLibraryDeck = async (selectedDeck: string) => {
+    const handleImportDeck = async (selectedDeck: string) => {
         if (selectedDeck === 'none') {
             setValue("decklist_text", '', { 
                 shouldDirty: true,
@@ -287,7 +287,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                         onChange={(e) => {
                                             const selectedDeckId = e.target.value;
                                             if (selectedDeckId) {
-                                                handleSelectLibraryDeck(selectedDeckId);
+                                                handleImportDeck(selectedDeckId);
                                             }
                                         }}
                                         disabled={(availableSavedDecks.length === 0 && pastEvents.length === 0) || inputDisabled}
