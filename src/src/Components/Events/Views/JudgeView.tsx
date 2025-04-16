@@ -217,25 +217,25 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         </div>
                         <div className="btn-group w-100 mt-2">
                             <button 
-                                className={`btn btn-outline-secondary ${filterByDeckStatus === 'all' ? 'active' : ''}`} 
+                                className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'all' ? 'active' : ''}`} 
                                 onClick={() => setFilterByDeckStatus('all')}
                             >
                                 All
                             </button>
                             <button 
-                                className={`btn btn-outline-secondary ${filterByDeckStatus === 'checked' ? 'active' : ''}`} 
+                                className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'checked' ? 'active' : ''}`} 
                                 onClick={() => setFilterByDeckStatus('checked')}
                             >
                                 Checked
                             </button>
                             <button 
-                                className={`btn btn-outline-secondary ${filterByDeckStatus === 'unchecked' ? 'active' : ''}`} 
+                                className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'unchecked' ? 'active' : ''}`} 
                                 onClick={() => setFilterByDeckStatus('unchecked')}
                             >
                                 Unchecked
                             </button>
                             <button 
-                                className={`btn btn-outline-secondary ${filterByDeckStatus === 'warnings' ? 'active' : ''}`} 
+                                className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'warnings' ? 'active' : ''}`} 
                                 onClick={() => setFilterByDeckStatus('warnings')}
                             >
                                 Warnings
@@ -298,7 +298,12 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 <h2 className="mb-3">Tournament</h2>
                 
                 <div className="alert alert-info d-flex justify-content-between align-items-center mb-4">
-                    <div>
+                    <div style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '70%'
+                    }}>
                         <strong>Invite Link:</strong> {inviteLink}
                     </div>
                     <div className="d-flex align-items-center">
@@ -328,19 +333,19 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                     </div>
                     <div className="card-body">
                         <div className="row">
-                            <div className="col-md-6 mb-3">
+                            <div className="col-6 mb-3">
                                 <div className="fw-bold">Format:</div>
                                 <div>{e.event.format_name}</div>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-6 mb-3">
                                 <div className="fw-bold">Participants:</div>
                                 <div>{players.length} / {e.event.max_players}</div>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-6 mb-3">
                                 <div className="fw-bold">Tournament Date:</div>
                                 <div>{new Date(e.event.event_date).toLocaleDateString()}</div>
                             </div>
-                            <div className="col-md-6">
+                            <div className="col-6 mb-3">
                                 <div className="fw-bold">Expiration Date:</div>
                                 <div>
                                     {

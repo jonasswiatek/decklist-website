@@ -295,10 +295,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                         <option key="none" value="none">
                                             {availableSavedDecks.length === 0 && pastEvents.length === 0
                                                 ? "No saved decks for this format" 
-                                                : "Import from a saved deck"}
+                                                : "Import from..."}
                                         </option>
                                         {availableSavedDecks.length > 0 && (
-                                            <optgroup label="Saved Decks">
+                                            <optgroup label="My Decks">
                                                 {availableSavedDecks.map(deck => (
                                                     <option key={`saved-${deck.deck_id}`} value={`saved:${deck.deck_id}`}>
                                                         {deck.deck_name}

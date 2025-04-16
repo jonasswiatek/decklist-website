@@ -79,7 +79,7 @@ export const LibraryOverview: React.FC = () => {
                   defaultValue=""
                   disabled={pastEvents?.length === 0}
                 >
-                  <option value="" disabled>Save deck from event</option>
+                  <option value="" disabled>Import from event</option>
                   {pastEvents?.map((event) => (
                     <option key={event.event_id} value={event.event_id}>
                       {event.event_name}
