@@ -180,7 +180,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         : 0;
 
     const inputDisabled = (isJudge && !isEditing) || !isOpen;
-    const availableSavedDecks = library?.decks.filter(deck => deck.format_name === props.event.format_name) ?? [];
+    const availableSavedDecks = library?.decks.filter(deck => deck.format === props.event.format) ?? [];
     const pastEvents = events?.filter(
         event => event.role === "player" &&
         event.format === props.event.format &&
