@@ -249,8 +249,8 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 {(searchTerm !== '' ? filteredPlayers : filteredPlayers.slice(0, 50)).map((p) => {
                     return (
                         <tr key={p.user_id}>
-                            <td>{p.player_name}</td>
-                            <td className="text-end">
+                            <td className="align-middle">{p.player_name}</td>
+                            <td className="text-end align-middle">
                                 <div className="d-flex justify-content-end align-items-center">
                                     {p.has_deck_warning && (
                                         <BsExclamationTriangleFill className="text-warning me-2" title="Warning" />
