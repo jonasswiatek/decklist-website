@@ -37,6 +37,7 @@ export function LandingPage() {
             <div className="row mb-4">
                 <div className="col">
                     <h1 className="display-5">Register your decklist</h1>
+                    <h2 className="lead text-muted">Decklists for your Magic: the Gathering tournaments - for free</h2>
                 </div>
             </div>
             

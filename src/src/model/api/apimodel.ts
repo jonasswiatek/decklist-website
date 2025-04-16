@@ -320,6 +320,114 @@ export async function submitDecklistRequest(data: SubmitDecklistRequest) {
     throw new Error("Http Exception");
 }
 
+type SaveLibraryDeckRequest = {
+    deck_id?: string,
+    deck_name: string,
+    format: string,
+    decklist_text: string,
+}
+
+type SaveLibraryDeckResponse = {
+    deck_id: string,
+}
+
+export async function saveLibraryDeckRequest(data: SaveLibraryDeckRequest) : Promise<SaveLibraryDeckResponse> {
+    const httpResponse = await fetch(`/api/decks/library${data.deck_id ? '/'+data.deck_id : ''}`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            deck_id: data.deck_id,
+            deck_name: data.deck_name.trim(),
+            format: data.format,
+            decklist_text: data.decklist_text,
+        })
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        const res = await httpResponse.json() as SaveLibraryDeckResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
+type LibraryDeckRequest = {
+    deck_id: string,
+}
+
+export type LibraryDeckResponse = {
+    deck_id: string,
+    deck_name: string,
+    format: string,
+    format_name: string,
+    groups: DecklistGroup[],
+    deck_warnings: string[],
+    decklist_text: string,
+}
+
+export async function getLibraryDeckRequest(data: LibraryDeckRequest) : Promise<LibraryDeckResponse> {
+    const httpResponse = await fetch(`/api/decks/library/${data.deck_id}`, {
+        method: "GET"
+    });
+
+    if (httpResponse.status === 404) 
+        throw new NotFoundError();
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        const res = await httpResponse.json() as LibraryDeckResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
+export async function deleteLibraryDeckRequest(deck_id: string) : Promise<void> {
+    const httpResponse = await fetch(`/api/decks/library/${deck_id}`, {
+        method: "DELETE"
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        return;
+    }
+
+    throw new Error("Http Exception");
+}
+
+export type LibraryDecksResponse = {
+    decks: LibraryDeckListItem[],
+}
+
+export type LibraryDeckListItem = {
+    deck_id: string,
+    deck_name: string,
+    format: string,
+    format_name: string,
+    has_warnings: boolean,
+}
+
+export async function getLibraryDecksRequest() : Promise<LibraryDecksResponse> {
+    const httpResponse = await fetch(`/api/decks/library`, {
+        method: "GET"
+    });
+
+    await ThrowIfValidationErrors(httpResponse);
+    
+    if(httpResponse.ok) {
+        const res = await httpResponse.json() as LibraryDecksResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
 export async function deleteDeckRequest(eventId: string) {
     const httpResponse = await fetch(`/api/events/${eventId}/deck`, {
         method: "DELETE",
@@ -422,6 +530,7 @@ export type FormatResponse = {
 export type Format = {
     name: string;
     format: string;
+    decklist_style: 'commander' | 'sixty';
 }
 
 export type EventListItem = {
@@ -491,6 +600,11 @@ export class NotAuthenticatedError extends Error {
 
 }
 
+export class NotFoundError extends Error {
+
+}
+
+
 type SetDeckCheckedRequest = {
     event_id: string;
     user_id: string;
@@ -515,3 +629,4 @@ export async function setDeckChecked(data: SetDeckCheckedRequest) {
 
     throw new Error("Http Exception");
 }
+
