@@ -177,9 +177,9 @@ function NavBar()
   }
 
   return <>
-    <Navbar collapseOnSelect expand="md" className="bg-body-tertiary">
+    <Navbar collapseOnSelect expand="md">
       <Container>
-        <Navbar.Brand href="/">decklist.lol</Navbar.Brand>
+        <Navbar.Brand href="/" className="ps-2">decklist.lol</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="ms-auto">
