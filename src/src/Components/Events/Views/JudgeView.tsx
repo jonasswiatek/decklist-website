@@ -29,13 +29,9 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     });
 
     const copyToClipboard = async () => {
-        try {
-            await navigator.clipboard.writeText(inviteLink);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-            console.error('Failed to copy:', err);
-        }
+        await navigator.clipboard.writeText(inviteLink);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     const toggleEventState = async () => {

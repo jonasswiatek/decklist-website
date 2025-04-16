@@ -54,7 +54,6 @@ export function LoginScreen() {
                   <GoogleLogin
                     onSuccess={credentialResponse => {
                       googleLogin(credentialResponse.credential!);
-                      console.log(credentialResponse);
                     }}
                     onError={() => {
                       console.log('Login Failed');

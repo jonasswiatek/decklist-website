@@ -7,6 +7,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTable } from '../Events/DecklistTable';
 import { LoadingScreen } from '../Login/LoadingScreen';
+import { HandleValidation } from '../../Util/Validators';
 
 export const LibraryDeckEditorPage: React.FC = () => {
   const { deck_id } = useParams();
@@ -122,7 +123,7 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
 
   const [decklistStyle, setDecklistStyle] = useState<string | undefined>(undefined);
 
-  const { register, handleSubmit, clearErrors, watch, reset, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>({
+  const { register, handleSubmit, clearErrors, watch, setError, reset, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>({
     defaultValues: {
       deck_name: props.deck_name,
       format: props.format,
@@ -149,8 +150,13 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
   }, [props.format, props.formats]);
 
   const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
-    props.onDeckUpdate(data.deck_name, data.format, data.decklist_text);
-    reset(data);
+    try {
+      await props.onDeckUpdate(data.deck_name, data.format, data.decklist_text);
+      reset(data);  
+    }
+    catch (e) {
+      HandleValidation(setError, e);
+    }
   }
 
   const handleDeleteDeck = async () => {

@@ -107,7 +107,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
             }, 3000);
         }
         catch(e) {
-            console.log("handle val", e);
             HandleValidation(setError, e);
         }
     }
