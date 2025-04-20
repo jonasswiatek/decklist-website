@@ -5,7 +5,7 @@ import { LoadingScreen } from './LoadingScreen';
 import { AuthContext } from './useAuth';
 
 export const AuthProvider = (props: { children: ReactNode }): ReactElement => {
-    const { authState, checkAuth, email } = useDecklistStore();
+    const { authState, checkAuth, email, userId } = useDecklistStore();
     const [showLogin, setShowLogin] = useState(false);
   
     useEffect(() => {
@@ -33,6 +33,7 @@ export const AuthProvider = (props: { children: ReactNode }): ReactElement => {
     return <AuthContext.Provider {...props} value={{ 
         login,
         authorized: authState === AuthState.Authorized,
-        email: email
+        email: email,
+        userId: userId
     }} />;
 };

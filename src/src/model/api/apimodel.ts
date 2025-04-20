@@ -1,6 +1,7 @@
 type MeResponse = {
     authorized: boolean;
     email?: string;
+    user_id?: string;
 }
 
 export async function meRequest(): Promise<MeResponse> {
@@ -572,6 +573,7 @@ export type LoginContinueResponse = {
     success: boolean,
     error_type: string,
     email: string
+    user_id: string,
 }
 
 export type ValidationErrorResponse = {

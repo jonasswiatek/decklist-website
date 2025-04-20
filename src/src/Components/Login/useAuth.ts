@@ -3,6 +3,7 @@ import { createContext, useContext } from 'react';
 export type AuthContextType = {
     authorized?: boolean,
     email?: string,
+    userId?: string,
     login: () => void
 }
 

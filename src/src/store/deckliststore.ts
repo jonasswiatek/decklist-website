@@ -15,6 +15,7 @@ export enum AuthState {
 type DecklistStore = {
     authState: AuthState,
     email?: string,
+    userId?: string
 }
 
 type Actions = {
@@ -38,7 +39,8 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
             if (me.authorized) {
                 set({
                     authState: AuthState.Authorized,
-                    email: me.email
+                    email: me.email,
+                    userId: me.user_id
                 })
             }
             else {
@@ -58,7 +60,8 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
             if (res.success) {
                 set({
                     authState: AuthState.Authorized,
-                    email: email
+                    email: res.email,
+                    userId: res.user_id
                 })
             }
 
@@ -70,7 +73,8 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
             if (res.success) {
                 set({
                     authState: AuthState.Authorized,
-                    email: res.email
+                    email: res.email,
+                    userId: res.user_id
                 })
             }
 

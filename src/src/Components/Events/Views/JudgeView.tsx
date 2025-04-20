@@ -5,6 +5,7 @@ import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsP
 import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent, addUserToEvent } from '../../../model/api/apimodel';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
+import { useAuth } from '../../Login/useAuth';
 
 export const JudgeView: React.FC<EventViewProps> = (e) => {
     const players = e.event.participants.filter(a => a.role === "player");
@@ -15,6 +16,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const [showAddJudgeForm, setShowAddJudgeForm] = useState(false);
     const inviteLink = `${window.location.origin}/e/${e.event.event_id}`;
     const navigate = useNavigate();
+    const auth = useAuth();
     const [filterByDeckStatus, setFilterByDeckStatus] = useState<'all' | 'checked' | 'unchecked' | 'warnings'>('all');
 
     // Filtered players based on search term and deck status
@@ -117,6 +119,15 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         if (confirmed) {
             await deleteEventUser(e.event.event_id, userId);
             e.refetch!();
+        }
+    }
+
+    const onDisassociateSelf = async () => {
+        const confirmed = window.confirm(`Are you sure you want to leave this event?`);
+        
+        if (confirmed) {
+            await deleteEventUser(e.event.event_id, auth.userId!);
+            navigate('/');
         }
     }
 
@@ -433,13 +444,13 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                     </div>
                 </div>
                 
-                {(e.event.role === "owner") && (
-                    <>
-                        <div className="card mb-4">
-                            <div className="card-header">
-                                <strong>Danger Zone</strong>
-                            </div>
-                            <div className="card-body">
+                <div className="card mb-4">
+                    <div className="card-header">
+                        <strong>Danger Zone</strong>
+                    </div>
+                    <div className="card-body">
+                        {e.event.role === "owner" ? (
+                            <>
                                 <p className="text-muted mb-3">
                                     Deleting a tournament will permanently remove all related data including decks and user registrations.
                                 </p>
@@ -449,9 +460,25 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     onClick={handleDeleteEvent}>
                                     Delete Tournament
                                 </button>
-                            </div>
-                        </div>
-                        
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-muted mb-3">
+                                    Leaving the event will remove you as a judge. You will no longer have access to manage this tournament.
+                                </p>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-danger"
+                                    onClick={onDisassociateSelf}>
+                                    Leave Event
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+                
+                {(e.event.role === "owner") && (
+                    <>
                         <h2 className="mb-3">Judges</h2>
 
                         <div className="card mt-4">
