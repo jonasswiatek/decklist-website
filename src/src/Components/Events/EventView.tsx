@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { EventDetails, getEvent } from '../../model/api/apimodel';
 import { JudgeView } from './Views/JudgeView';
@@ -6,14 +6,25 @@ import { DeckEditor } from './DeckView';
 import { EventViewProps } from './EventTypes';
 import { useAuth } from '../Login/useAuth';
 import { LoadingScreen } from '../Login/LoadingScreen';
+import { BsArrowLeft } from 'react-icons/bs';
 
 // New EventHeader component
 const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string }> = ({ eventName, eventId, role }) => {
     const showEventId = role === "owner" || role === "judge";
-    
+    const navigate = useNavigate();
+
     return (
         <div className='row'>
             <div className='col'>
+                <div className="mb-3">
+                    <button 
+                        type="button" 
+                        className="btn btn-link text-decoration-none p-0" 
+                        onClick={() => navigate('/')}
+                    >
+                        <BsArrowLeft className="me-1" /> Events
+                    </button>
+                </div>
                 <h1>
                     <span>{eventName}</span>
                     {showEventId && (

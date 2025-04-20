@@ -1,6 +1,25 @@
 @import '~bootstrap/scss/bootstrap.scss';
+
+// Dark mode overrides for Bootstrap components
+.table {
+  --bs-table-bg: rgb(10, 0, 15);
+  --bs-table-striped-bg: rgb(10, 0, 15);
+  --bs-table-hover-bg: rgb(20, 25, 55);
+  color: #fff;
+}
+
+.card {
+  background-color: rgb(10, 0, 15);
+  border-color: rgb(25, 35, 60);
+}
+
+.card-header, .card-footer {
+  background-color: rgb(18, 25, 50);
+  border-color: rgb(25, 35, 60);
+}
+
 body {
-  background-color: rgb(40, 40, 40);
+  background-color: rgb(10, 0, 15);
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',

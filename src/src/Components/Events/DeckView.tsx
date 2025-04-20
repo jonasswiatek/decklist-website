@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest, setDeckChecked } from '../../model/api/apimodel';
+import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest, getAllEventsRequest, EventListItem } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsPerson } from 'react-icons/bs';
+import { BsArrowLeft, BsPerson, BsTrash } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
 
@@ -65,13 +65,28 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         queryFn: () => getDecklistRequest(props.event.event_id, props.user_id),
     });
 
+    const { data: library, error: libraryError, isLoading: libraryLoading } = useQuery<LibraryDecksResponse>({
+        queryKey: [`library-decks`],
+        retry: false,
+        refetchOnWindowFocus: false,
+        queryFn: () => getLibraryDecksRequest(),
+    });
+
+    const { data: events, isLoading: eventsLoading } = useQuery<EventListItem[]>({
+        queryKey: ['my-events'],
+        refetchOnWindowFocus: false,
+        retry: false,
+        queryFn: () => getAllEventsRequest()
+    })
+    
+    
     type Inputs = {
         user_id?: string,
         player_name: string,
         decklist_text: string
     };
  
-    const { register, setError, handleSubmit, clearErrors, reset, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>();
+    const { register, setError, handleSubmit, clearErrors, reset, setValue, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>();
     const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
         try {
             await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, decklist_text: data.decklist_text });
@@ -92,7 +107,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
             }, 3000);
         }
         catch(e) {
-            console.log("handle val", e);
             HandleValidation(setError, e);
         }
     }
@@ -105,15 +119,45 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         }
     };
 
+    const handleImportDeck = async (selectedDeck: string) => {
+        if (selectedDeck === 'none') {
+            setValue("decklist_text", '', { 
+                shouldDirty: true,
+                shouldValidate: true
+            });
+            return;
+        }
+        const [source, id] = selectedDeck.split(':');
+        switch (source) {
+            case 'saved': {
+                const savedDeck = await getLibraryDeckRequest({ deck_id: id });
+                setValue("decklist_text", savedDeck.decklist_text, { 
+                    shouldDirty: true,
+                    shouldValidate: true
+                });
+                break;
+            }
+
+            case 'event': {
+                const decklist = await getDecklistRequest(id, null);
+                setValue("decklist_text", decklist!.decklist_text, { 
+                    shouldDirty: true,
+                    shouldValidate: true
+                });
+                break;
+            }
+        }
+    };
+
     const handleBackToEvent = () => {
         navigate(`/e/${props.event.event_id}`);
     };
 
-    if (isLoading) {
+    if (isLoading || libraryLoading || eventsLoading) {
         return <LoadingScreen />
     }
 
-    if (error != null) {
+    if (error || libraryError) {
         return <p>Error, try later</p>
     }
 
@@ -136,6 +180,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         : 0;
 
     const inputDisabled = (isJudge && !isEditing) || !isOpen;
+    const availableSavedDecks = library?.decks.filter(deck => deck.format === props.event.format) ?? [];
+    const pastEvents = events?.filter(
+        event => event.role === "player" &&
+        event.format === props.event.format &&
+        event.event_id != props.event.event_id) ?? [];
 
     return (
         <>
@@ -144,10 +193,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 <div className='col-12 mb-3 d-flex justify-content-between align-items-center'>
                     <button 
                         type="button" 
-                        className="btn btn-secondary" 
+                        className="btn btn-link text-decoration-none p-0" 
                         onClick={handleBackToEvent}
                     >
-                        Back to Tournament
+                        <BsArrowLeft className="me-1" /> Back
                     </button>
                     <FlagCheckedButton 
                         eventId={props.event.event_id} 
@@ -172,15 +221,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 <div className='col-lg-4 col-sm-12'>
                     <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                         <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
-                        {data && !isJudge && (
-                            <button 
-                                type="button" 
-                                className="btn btn-danger btn-sm" 
-                                onClick={handleDeleteDeck}
-                            >
-                                Delete Deck
-                            </button>
-                        )}
                     </div>
                     {!isOpen && (
                         <div className="alert alert-info mb-3">The event is closed. Decklist cannot be modified.</div>
@@ -200,6 +240,15 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                 {...register("player_name", { value: data?.player_name })} 
                                 disabled={inputDisabled} // Disable for players if the event is closed
                             />
+                            {data && !isJudge && (
+                                <button 
+                                    type="button" 
+                                    className="btn btn-danger" 
+                                    onClick={handleDeleteDeck}
+                                >
+                                    <BsTrash />
+                                </button>
+                            )}
                             {errors.player_name && (
                                 <div className="alert alert-danger py-1 mt-1 mb-0 small">
                                     <span>{errors.player_name.message}</span>
@@ -229,6 +278,46 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     </div>
                                 )}
                             </div>
+
+                            {!isJudge && (
+                                <div className="mb-1">
+                                    <select 
+                                        className="form-select" 
+                                        onChange={(e) => {
+                                            const selectedDeckId = e.target.value;
+                                            if (selectedDeckId) {
+                                                handleImportDeck(selectedDeckId);
+                                            }
+                                        }}
+                                        disabled={(availableSavedDecks.length === 0 && pastEvents.length === 0) || inputDisabled}
+                                    >
+                                        <option key="none" value="none">
+                                            {availableSavedDecks.length === 0 && pastEvents.length === 0
+                                                ? "No saved decks for this format" 
+                                                : "Import from..."}
+                                        </option>
+                                        {availableSavedDecks.length > 0 && (
+                                            <optgroup label="My Decks">
+                                                {availableSavedDecks.map(deck => (
+                                                    <option key={`saved-${deck.deck_id}`} value={`saved:${deck.deck_id}`}>
+                                                        {deck.deck_name}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+                                        {pastEvents && pastEvents.length > 0 && (
+                                            <optgroup label="Other Events">
+                                                {pastEvents.map(event => (
+                                                    <option key={`event-${event.event_id}`} value={`event:${event.event_id}`}>
+                                                        {event.event_name}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+                                    </select>
+                                </div>
+                            )}
+
                             <textarea 
                                 id='decklist_text' 
                                 className="form-control" 
@@ -243,6 +332,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     <span>{errors.decklist_text.message}</span>
                                 </div>
                             )}
+                            
                         </div>
                     </div>
                     <div 
@@ -318,7 +408,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 </div>
                 
                 <div className='col-lg-8 col-sm-12 decklist-table-container' style={{ marginTop: '10px' }}>
-                    {data && <DecklistTable decklistData={data} allowChecklist={isJudge} />}
+                    {data && <DecklistTable cardGroups={data.groups} allowChecklist={isJudge} />}
                 </div>
             </div>
         </form>
