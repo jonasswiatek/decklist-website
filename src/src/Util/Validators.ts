@@ -11,7 +11,6 @@ export function HandleValidation<T extends FieldValues>(setError: UseFormSetErro
                 continue;
 
             const message = val[0];
-            //console.log(key, message, val);
             setError(key as Path<T>,  { type: 'custom', message: message })
         }
     }
