@@ -5,7 +5,7 @@ import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, 
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsArrowLeft, BsPerson, BsTrash } from 'react-icons/bs';
+import { BsArrowLeft, BsPerson, BsTrash, BsCardText } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
 
@@ -83,13 +83,14 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     type Inputs = {
         user_id?: string,
         player_name: string,
+        deck_name?: string,
         decklist_text: string
     };
  
     const { register, setError, handleSubmit, clearErrors, reset, setValue, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>();
     const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
         try {
-            await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, decklist_text: data.decklist_text });
+            await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, deck_name: data.deck_name, decklist_text: data.decklist_text });
             refetch();
             reset(data);
             
@@ -131,6 +132,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         switch (source) {
             case 'saved': {
                 const savedDeck = await getLibraryDeckRequest({ deck_id: id });
+                setValue("deck_name", savedDeck.deck_name, { 
+                    shouldDirty: true,
+                    shouldValidate: true
+                });
+
                 setValue("decklist_text", savedDeck.decklist_text, { 
                     shouldDirty: true,
                     shouldValidate: true
@@ -140,6 +146,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
             case 'event': {
                 const decklist = await getDecklistRequest(id, null);
+                setValue("deck_name", decklist!.deck_name, { 
+                    shouldDirty: true,
+                    shouldValidate: true
+                });
+
                 setValue("decklist_text", decklist!.decklist_text, { 
                     shouldDirty: true,
                     shouldValidate: true
@@ -252,6 +263,26 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             {errors.player_name && (
                                 <div className="alert alert-danger py-1 mt-1 mb-0 small">
                                     <span>{errors.player_name.message}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="form-group position-relative mt-2">
+                        <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
+                            <span className="input-group-text" id="basic-addon2">
+                                <BsCardText />
+                            </span>
+                            <input 
+                                type='text' 
+                                id="deck_name" 
+                                className='form-control' 
+                                placeholder='Deck Name (Optional)' 
+                                {...register("deck_name", { value: data?.deck_name })} 
+                                disabled={inputDisabled}
+                            />
+                            {errors.deck_name && (
+                                <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                                    <span>{errors.deck_name.message}</span>
                                 </div>
                             )}
                         </div>

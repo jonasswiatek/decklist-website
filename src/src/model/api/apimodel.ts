@@ -251,6 +251,7 @@ export async function deleteEventUser(event_id: string, user_id: string) {
 
 export type DecklistResponse = {
     player_name: string;
+    deck_name?: string;
     groups: DecklistGroup[],
     deck_warnings: string[],
     is_deck_checked: boolean,
@@ -296,6 +297,7 @@ type SubmitDecklistRequest = {
     event_id: string,
     user_id?: string | null,
     player_name: string,
+    deck_name?: string,
     decklist_text: string,
 }
 
@@ -308,6 +310,7 @@ export async function submitDecklistRequest(data: SubmitDecklistRequest) {
         body: JSON.stringify({
             user_id: data.user_id,
             player_name: data.player_name.trim(),
+            deck_name: data.deck_name?.trim(),
             decklist_text: data.decklist_text,
         })
     });
