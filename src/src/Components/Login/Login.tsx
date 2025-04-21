@@ -72,9 +72,15 @@ export function LoginScreen() {
         <div className="col-md-4 mt-3 mt-md-0">
           <div className="card shadow h-100">
             <div className="card-body">
-              <h5 className="card-title">Please consider Google Login</h5>
+              <h5 className="card-title">Privacy</h5>
               <p className="card-text">
-                Sending emails isn't free, so unless you absolutely can't make yourself do it, please use Google Login.
+                You can't anonymously submit a decklist, because this would put unreasonable load on event staff if you submit what later turns out to be an incorrect decklist, or you later wish to change it prior to event start.
+                <br />
+                <br />
+                Regardless of if you log in with email or a google account, we do not store any personal information - not even your email address is stored.
+                <br />
+                <br />
+                I only need to be able to authenticate you later so you can view, alter or delete your decklist.
               </p>
             </div>
           </div>
