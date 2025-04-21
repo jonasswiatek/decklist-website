@@ -180,6 +180,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         navigate(`/e/${props.event.event_id}`);
     };
 
+    const handleDeckChecked = () => {
+        refetch();
+        refetchEvent();
+    }
+
     if (isLoading || libraryLoading || eventsLoading) {
         return <LoadingScreen />
     }
@@ -229,7 +234,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                         eventId={props.event.event_id} 
                         userId={props.user_id!} 
                         isChecked={data?.is_deck_checked || false} 
-                        refetch={refetch} 
+                        refetch={handleDeckChecked} 
                     />
                 </div>
                 {data?.player_name && (
