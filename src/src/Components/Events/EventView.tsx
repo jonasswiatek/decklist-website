@@ -1,12 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
-import { EventDetails, getEvent } from '../../model/api/apimodel';
 import { JudgeView } from './Views/JudgeView';
 import { DeckEditor } from './DeckView';
 import { EventViewProps } from './EventTypes';
 import { useAuth } from '../Login/useAuth';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { BsArrowLeft } from 'react-icons/bs';
+import { useEventDetails } from '../Hooks/useEventDetails';
 
 // New EventHeader component
 const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string }> = ({ eventName, eventId, role }) => {
@@ -61,12 +60,7 @@ export function EventView() {
     const { event_id } = useParams();
     const { authorized } = useAuth();
 
-    const { data, error, isLoading, refetch } = useQuery<EventDetails>({
-        queryKey: [`event-${event_id}`],
-        retry: false,
-        refetchOnWindowFocus: false,
-        queryFn: () => getEvent(event_id!),
-    });
+    const { data, error, isLoading, refetch } = useEventDetails(event_id!);
     
     if (isLoading) {
         return (

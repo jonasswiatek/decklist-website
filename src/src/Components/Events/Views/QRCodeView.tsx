@@ -1,20 +1,14 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import QRCode from 'qrcode.react';
-import { EventDetails, getEvent } from '../../../model/api/apimodel';
-import { useQuery } from 'react-query';
 import { LoadingScreen } from '../../Login/LoadingScreen';
+import { useEventDetails } from '../../Hooks/useEventDetails';
 
 export const QRCodeView: React.FC = () => {
     const { eventId } = useParams<{ eventId: string }>();
     const inviteLink = `${window.location.origin}/e/${eventId}`;
 
-    const { data, error, isLoading } = useQuery<EventDetails>({
-        queryKey: [`event-${eventId}`],
-        retry: false,
-        refetchOnWindowFocus: false,
-        queryFn: () => getEvent(eventId!),
-    });
+    const { data, error, isLoading } = useEventDetails(eventId!);
 
     if (isLoading) {
         return <LoadingScreen />

@@ -8,6 +8,7 @@ import { Spinner, Table } from 'react-bootstrap';
 export function EventList() : ReactElement {
   const { data, isLoading } = useQuery<EventListItem[]>({
     queryKey: ['my-events'],
+    staleTime: 1000 * 30, // 1 minute
     refetchOnWindowFocus: false,
     retry: false,
     queryFn: () => getAllEventsRequest()

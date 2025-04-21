@@ -3,12 +3,14 @@ import { EventListItem, getAllEventsRequest, getDecklistRequest, getEvent, getLi
 import { LoadingScreen } from "../Login/LoadingScreen";
 import { PlusCircle, ExclamationTriangle } from 'react-bootstrap-icons';
 import { useNavigate } from "react-router";
+import { BsArrowLeft } from "react-icons/bs";
 
 export const LibraryOverview: React.FC = () => {
   const navigate = useNavigate();
 
   const { data, error, isLoading } = useQuery<LibraryDecksResponse>({
       queryKey: [`library-decks`],
+      staleTime: 1000 * 30, // 30 seconds
       retry: false,
       refetchOnWindowFocus: false,
       queryFn: () => getLibraryDecksRequest(),
@@ -18,6 +20,7 @@ export const LibraryOverview: React.FC = () => {
     queryKey: ['my-events'],
     refetchOnWindowFocus: false,
     retry: false,
+    staleTime: 1000 * 30, // 1 minute
     queryFn: () => getAllEventsRequest()
   })
 
@@ -56,6 +59,15 @@ export const LibraryOverview: React.FC = () => {
 
   return (
     <>
+      <div className="mb-3">
+        <button 
+          type="button" 
+          className="btn btn-link text-decoration-none ps-0" 
+          onClick={() => navigate('/')}
+        >
+          <BsArrowLeft className="me-1" /> Back to Events
+        </button>
+      </div>
       <div className="mb-4">
         <h2>Your saved decks</h2>
         <p className="text-muted">You can quickly reuse these decklists when signing up for events</p>
@@ -109,7 +121,7 @@ export const LibraryOverview: React.FC = () => {
               {data.decks.map((deck) => (
                 <tr key={deck.deck_name}>
                   <td>
-                    <a href={`/library/deck/${deck.deck_id}`} className="text-decoration-none text-light">
+                    <a onClick={() => navigate(`/library/deck/${deck.deck_id}`)} className="text-decoration-none text-light">
                       {deck.deck_name}
                     </a>
                   </td>

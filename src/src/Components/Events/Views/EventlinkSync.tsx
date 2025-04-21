@@ -1,18 +1,12 @@
 import { useState } from "react";
 import { useParams } from "react-router";
-import { EventDetails, getEvent } from "../../../model/api/apimodel";
 import { LoadingScreen } from "../../Login/LoadingScreen";
-import { useQuery } from "react-query";
+import { useEventDetails } from "../../Hooks/useEventDetails";
 
 export const EventlinkSync: React.FC = () => {
     const { event_id } = useParams();
 
-    const { data, error, isLoading} = useQuery<EventDetails>({
-        queryKey: [`event-${event_id}`],
-        retry: false,
-        refetchOnWindowFocus: false,
-        queryFn: () => getEvent(event_id!),
-    });
+    const { data, error, isLoading} = useEventDetails(event_id!);
         
     const [pastedText, setPastedText] = useState<string>("");
     const [parsedPlayers, setParsedPlayers] = useState<string[]>([]);

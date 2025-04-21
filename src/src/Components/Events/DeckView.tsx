@@ -8,18 +8,14 @@ import { HandleValidation } from '../../Util/Validators';
 import { BsArrowLeft, BsPerson, BsTrash, BsCardText } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
+import { useEventDetails } from '../Hooks/useEventDetails';
 
 export function DeckView() {
     const { event_id } = useParams();
     const [ searchParams ] = useSearchParams();
     const id = searchParams.get('id');
 
-    const { data, error, isLoading } = useQuery<EventDetails>({
-        queryKey: [`event-${event_id}`],
-        retry: false,
-        refetchOnWindowFocus: false,
-        queryFn: () => getEvent(event_id!)
-    });
+    const { data, error, isLoading } = useEventDetails(event_id!);
     
     if (isLoading) {
         return (
@@ -49,6 +45,7 @@ type DeckEditorProps = {
 
 export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isJudge = props.user_id != null;
+    const isPlayer = !isJudge;
     const isOpen = props.event.status === "open" || isJudge;
 
     const [showToast, setShowToast] = useState(false);
@@ -57,6 +54,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     const navigate = useNavigate();
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const {refetch: refetchEvent} = useEventDetails(props.event.event_id, false);
 
     const { data, error, isLoading, refetch } = useQuery<DecklistResponse | null>({
         queryKey: [`deck-${props.event.event_id}-${props.user_id}`],
@@ -69,16 +68,19 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         queryKey: [`library-decks`],
         retry: false,
         refetchOnWindowFocus: false,
+        enabled: isPlayer,
+        staleTime: 1000 * 30, // 30 seconds
         queryFn: () => getLibraryDecksRequest(),
     });
 
-    const { data: events, isLoading: eventsLoading } = useQuery<EventListItem[]>({
+    const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useQuery<EventListItem[]>({
         queryKey: ['my-events'],
         refetchOnWindowFocus: false,
         retry: false,
+        staleTime: 1000 * 30, // 1 minute
+        enabled: isPlayer,
         queryFn: () => getAllEventsRequest()
     })
-    
     
     type Inputs = {
         user_id?: string,
@@ -92,6 +94,15 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         try {
             await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, deck_name: data.deck_name, decklist_text: data.decklist_text });
             refetch();
+
+            if (isPlayer) {
+                // Refetch the library decks to ensure the latest data is shown
+                refetchMyEvents();
+            }
+            else {
+                refetchEvent();
+            }
+
             reset(data);
             
             // Show toast notification
@@ -116,6 +127,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         if (window.confirm("Are you sure you want to delete this deck? This action cannot be undone.")) {
             await deleteDeckRequest(props.event.event_id);
             refetch();
+            if (isPlayer) {
+                // Refetch the library decks to ensure the latest data is shown
+                refetchMyEvents();
+            }
+            
             reset({ player_name: '', decklist_text: '' });
         }
     };

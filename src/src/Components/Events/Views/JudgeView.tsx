@@ -18,7 +18,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const navigate = useNavigate();
     const auth = useAuth();
     const [filterByDeckStatus, setFilterByDeckStatus] = useState<'all' | 'checked' | 'unchecked' | 'warnings'>('all');
-
+    
     // Filtered players based on search term and deck status
     const filteredPlayers = players.filter(player => {
         const matchesSearch = player.player_name.toLowerCase().includes(searchTerm.trim().toLowerCase());
@@ -260,7 +260,14 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 {(searchTerm !== '' ? filteredPlayers : filteredPlayers.slice(0, 50)).map((p) => {
                     return (
                         <tr key={p.user_id}>
-                            <td className="align-middle">{p.player_name}</td>
+                            <td 
+                                className="align-middle" 
+                                onClick={() => navigate('/e/' + e.event.event_id + '/deck?id=' + p.user_id)}
+                                style={{ cursor: 'pointer' }}
+                                title="View deck"
+                            >
+                                {p.player_name}
+                            </td>
                             <td className="text-end align-middle">
                                 <div className="d-flex justify-content-end align-items-center">
                                     {p.has_deck_warning && (

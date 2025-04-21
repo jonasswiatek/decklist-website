@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
-import { DecklistGroup, deleteLibraryDeckRequest, Format, FormatResponse, getFormatsRequest, getLibraryDeckRequest, LibraryDeckResponse, NotFoundError, saveLibraryDeckRequest } from '../../model/api/apimodel';
+import { DecklistGroup, deleteLibraryDeckRequest, Format, FormatResponse, getFormatsRequest, getLibraryDeckRequest, getLibraryDecksRequest, LibraryDeckResponse, LibraryDecksResponse, NotFoundError, saveLibraryDeckRequest } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -23,14 +23,22 @@ export const LibraryDeckEditorPage: React.FC = () => {
       queryFn: () => getLibraryDeckRequest({  deck_id: deck_id! }),
   });
 
-  const { data: formats, isLoading: formatsLoading, error: formatsError } = useQuery<FormatResponse>(
-    'formats',
-    () => getFormatsRequest(),
-    {
+  const { refetch: refetchDeckLibrary } = useQuery<LibraryDecksResponse>({
+      queryKey: [`library-decks`],
+      staleTime: 1000 * 30, // 30 seconds
       retry: false,
       refetchOnWindowFocus: false,
-    }
-  );
+      enabled: false,
+      queryFn: () => getLibraryDecksRequest(),
+  });
+
+  const { data: formats, isLoading: formatsLoading, error: formatsError } = useQuery<FormatResponse>({
+    queryKey: [`formats`],
+    staleTime: Infinity, // 1 minute
+    retry: false,
+    refetchOnWindowFocus: false,
+    queryFn: () => getFormatsRequest(),
+  });
 
   if (isLoading || formatsLoading) {
       return <LoadingScreen />
@@ -68,6 +76,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
       refetch();
     }
     else {
+      refetchDeckLibrary();
       navigate('/library/deck/' + result.deck_id);
     }
   };
@@ -75,6 +84,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
   const handleDeleteDeck = async () => {
     // Implement deck deletion logic here
     await deleteLibraryDeckRequest(deck_id!);
+    refetchDeckLibrary();
     navigate('/library');
   };
 
