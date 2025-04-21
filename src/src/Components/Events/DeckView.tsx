@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, getEvent, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest, getAllEventsRequest, EventListItem } from '../../model/api/apimodel';
+import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest, getAllEventsRequest, EventListItem } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
