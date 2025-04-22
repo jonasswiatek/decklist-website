@@ -1,22 +1,15 @@
-import { useQuery } from "react-query";
-import { getDecklistRequest, getEvent, getLibraryDecksRequest, LibraryDecksResponse } from "../../model/api/apimodel";
+import { getDecklistRequest, getEvent } from "../../model/api/apimodel";
 import { LoadingScreen } from "../Login/LoadingScreen";
 import { PlusCircle, ExclamationTriangle } from 'react-bootstrap-icons';
 import { useNavigate } from "react-router";
 import { BsArrowLeft } from "react-icons/bs";
 import { useEventListQuery } from "../../Hooks/useEventListQuery";
+import { useLibraryDecksQuery } from "../../Hooks/useLibraryDecksQuery";
 
 export const LibraryOverview: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data, error, isLoading } = useQuery<LibraryDecksResponse>({
-      queryKey: [`library-decks`],
-      staleTime: 1000 * 30, // 30 seconds
-      retry: false,
-      refetchOnWindowFocus: false,
-      queryFn: () => getLibraryDecksRequest(),
-  });
-
+  const { data, error, isLoading } = useLibraryDecksQuery();
   const { data: events, isLoading: eventsLoading } = useEventListQuery();
 
   const onImportDeck = async (eventId: string) => {

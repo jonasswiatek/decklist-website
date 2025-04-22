@@ -1,9 +1,8 @@
 import { useParams } from "react-router";
 import { useEventDetailsQuery } from "../../../Hooks/useEventDetailsQuery";
 import { useSearchParams } from "react-router-dom";
-import { DecklistResponse, getDecklistRequest } from "../../../model/api/apimodel";
-import { useQuery } from "react-query";
 import React, { useEffect } from "react";
+import { useDecklistQuery } from "../../../Hooks/useDecklistQuery";
 
 export const PrintDecklistView: React.FC = () => {
     const { event_id } = useParams();
@@ -12,12 +11,7 @@ export const PrintDecklistView: React.FC = () => {
 
     const { data: eventDetailsData, error: eventError, isLoading: eventLoading } = useEventDetailsQuery(event_id!);
     
-    const { data, error, isLoading } = useQuery<DecklistResponse | null>({
-        queryKey: [`deck-${event_id}-${userId}`],
-        retry: false,
-        refetchOnWindowFocus: false,
-        queryFn: () => getDecklistRequest(event_id!, userId),
-    });
+    const { data, error, isLoading } = useDecklistQuery(event_id!, userId);
 
     // Apply proper class to body for print styling
     useEffect(() => {

@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest } from '../../model/api/apimodel';
+import { deleteDeckRequest, EventDetails, getDecklistRequest, submitDecklistRequest, setDeckChecked, getLibraryDeckRequest } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
@@ -10,6 +9,8 @@ import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
 import { useEventListQuery } from '../../Hooks/useEventListQuery';
+import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
+import { useDecklistQuery } from '../../Hooks/useDecklistQuery';
 
 export function DeckView() {
     const { event_id } = useParams();
@@ -50,30 +51,14 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isOpen = props.event.status === "open" || isJudge;
 
     const [showToast, setShowToast] = useState(false);
-    
     const [isEditing, setIsEditing] = useState(false); // New state to track if the judge is editing
 
     const navigate = useNavigate();
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const {refetch: refetchEvent} = useEventDetailsQuery(props.event.event_id, false);
-
-    const { data, error, isLoading, refetch } = useQuery<DecklistResponse | null>({
-        queryKey: [`deck-${props.event.event_id}-${props.user_id}`],
-        retry: false,
-        refetchOnWindowFocus: false,
-        queryFn: () => getDecklistRequest(props.event.event_id, props.user_id),
-    });
-
-    const { data: library, error: libraryError, isLoading: libraryLoading } = useQuery<LibraryDecksResponse>({
-        queryKey: [`library-decks`],
-        retry: false,
-        refetchOnWindowFocus: false,
-        enabled: isPlayer,
-        staleTime: 1000 * 30, // 30 seconds
-        queryFn: () => getLibraryDecksRequest(),
-    });
-
+    const { data, error, isLoading, refetch } = useDecklistQuery(props.event.event_id, props.user_id);
+    const { data: library, error: libraryError, isLoading: libraryLoading } = useLibraryDecksQuery();
     const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useEventListQuery();
     
     type Inputs = {

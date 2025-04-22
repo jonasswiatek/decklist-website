@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
-import { DecklistGroup, deleteLibraryDeckRequest, Format, getLibraryDeckRequest, getLibraryDecksRequest, LibraryDeckResponse, LibraryDecksResponse, NotFoundError, saveLibraryDeckRequest } from '../../model/api/apimodel';
-import { useQuery } from 'react-query';
+import { DecklistGroup, deleteLibraryDeckRequest, Format, NotFoundError, saveLibraryDeckRequest } from '../../model/api/apimodel';
 import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
@@ -9,6 +8,8 @@ import { DecklistTable } from '../Events/DecklistTable';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { HandleValidation } from '../../Util/Validators';
 import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
+import { useLibraryDeckQuery } from '../../Hooks/useLibraryDeckQuery';
+import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
 
 export const LibraryDeckEditorPage: React.FC = () => {
   const { deck_id } = useParams();
@@ -16,23 +17,8 @@ export const LibraryDeckEditorPage: React.FC = () => {
   const location = useLocation();
   const importedDeck = location.state?.importedDeck;
 
-  const { data, error, isLoading, refetch } = useQuery<LibraryDeckResponse>({
-      queryKey: [`library-deck-${deck_id}`],
-      retry: false,
-      refetchOnWindowFocus: false,
-      enabled: !!deck_id,
-      queryFn: () => getLibraryDeckRequest({  deck_id: deck_id! }),
-  });
-
-  const { refetch: refetchDeckLibrary } = useQuery<LibraryDecksResponse>({
-      queryKey: [`library-decks`],
-      staleTime: 1000 * 30, // 30 seconds
-      retry: false,
-      refetchOnWindowFocus: false,
-      enabled: false,
-      queryFn: () => getLibraryDecksRequest(),
-  });
-
+  const { data, error, isLoading, refetch } = useLibraryDeckQuery(deck_id);
+  const { refetch: refetchDeckLibrary } = useLibraryDecksQuery();
   const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
 
   if (isLoading || formatsLoading) {
