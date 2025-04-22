@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
-import { DecklistGroup, deleteLibraryDeckRequest, Format, FormatResponse, getFormatsRequest, getLibraryDeckRequest, getLibraryDecksRequest, LibraryDeckResponse, LibraryDecksResponse, NotFoundError, saveLibraryDeckRequest } from '../../model/api/apimodel';
+import { DecklistGroup, deleteLibraryDeckRequest, Format, getLibraryDeckRequest, getLibraryDecksRequest, LibraryDeckResponse, LibraryDecksResponse, NotFoundError, saveLibraryDeckRequest } from '../../model/api/apimodel';
 import { useQuery } from 'react-query';
 import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -8,6 +8,7 @@ import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTable } from '../Events/DecklistTable';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { HandleValidation } from '../../Util/Validators';
+import { useFormats } from '../Hooks/useFormats';
 
 export const LibraryDeckEditorPage: React.FC = () => {
   const { deck_id } = useParams();
@@ -32,13 +33,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
       queryFn: () => getLibraryDecksRequest(),
   });
 
-  const { data: formats, isLoading: formatsLoading, error: formatsError } = useQuery<FormatResponse>({
-    queryKey: [`formats`],
-    staleTime: Infinity, // 1 minute
-    retry: false,
-    refetchOnWindowFocus: false,
-    queryFn: () => getFormatsRequest(),
-  });
+  const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormats();
 
   if (isLoading || formatsLoading) {
       return <LoadingScreen />

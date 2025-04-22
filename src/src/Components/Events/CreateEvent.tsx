@@ -1,24 +1,18 @@
 import '../../App.scss'
 import { useForm, SubmitHandler } from "react-hook-form";
 import { HandleValidation } from '../../Util/Validators';
-import { createEventRequest, getFormatsRequest, FormatResponse } from '../../model/api/apimodel';
+import { createEventRequest } from '../../model/api/apimodel';
 import { useNavigate } from "react-router-dom";
 import { ReactElement } from 'react';
-import { useQuery } from 'react-query';
 import { BsArrowLeft } from 'react-icons/bs';
+import { useFormats } from '../Hooks/useFormats';
 
 
 export function CreateEvent() : ReactElement {
     const { register, handleSubmit, setError, clearErrors, formState: { errors, isSubmitting } } = useForm<Inputs>();
     const navigate = useNavigate();
 
-    const { data: formats, isLoading: formatsLoading, error: formatsError } = useQuery<FormatResponse>({
-        queryKey: [`formats`],
-        staleTime: Infinity, // 1 minute
-        retry: false,
-        refetchOnWindowFocus: false,
-        queryFn: () => getFormatsRequest(),
-    });
+    const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormats();
     
     const onSubmit: SubmitHandler<Inputs> = async data => {
       try {

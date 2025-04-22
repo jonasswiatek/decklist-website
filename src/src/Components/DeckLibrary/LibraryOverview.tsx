@@ -80,9 +80,9 @@ export const LibraryOverview: React.FC = () => {
         ) : (
           <div className="row g-3">
             <div className="col-12 col-md-auto">
-              <a href="/library/deck" className="btn btn-primary w-100">
+              <button onClick={() => navigate('/library/deck')} className="btn btn-primary w-100">
                 <PlusCircle className="me-2" /> Create New Deck
-              </a>
+              </button>
             </div>
             <div className="col-12 col-md-auto">
               <select 
