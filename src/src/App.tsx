@@ -37,7 +37,6 @@ const queryClient = new QueryClient()
 const router = createBrowserRouter([
   {
     path: "/",
-    
     element: 
       <ScrollToTop>
         <LandingPage />
@@ -187,15 +186,22 @@ function NavBar()
     return null;
   }
 
+  // Custom navigation function to avoid full page reloads
+  const handleNavigate = (path: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    history.pushState(null, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
+
   return <>
     <Navbar collapseOnSelect expand="md">
       <Container>
-        <Navbar.Brand href="/" className="ps-2">decklist.lol</Navbar.Brand>
+        <Navbar.Brand onClick={handleNavigate('/')} href="/" className="ps-2">decklist.lol</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="ms-auto">
-            <Nav.Link href="/e/new">Create Tournament</Nav.Link>
-            <Nav.Link href="/library">My Decks</Nav.Link>
+            <Nav.Link onClick={handleNavigate('/e/new')} href="/e/new">Create Tournament</Nav.Link>
+            <Nav.Link onClick={handleNavigate('/library')} href="/library">My Decks</Nav.Link>
             {authorized ? (
               <>
                 <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
