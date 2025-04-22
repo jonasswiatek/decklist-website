@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest, getAllEventsRequest, EventListItem } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsArrowLeft, BsPerson, BsTrash, BsCardText } from 'react-icons/bs';
+import { BsArrowLeft, BsPerson, BsTrash, BsCardText, BsPrinter } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { useEventDetails } from '../Hooks/useEventDetails';
@@ -253,6 +253,15 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 <div className='col-lg-4 col-sm-12'>
                     <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                         <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
+                        <Link 
+                            to={`/e/${props.event.event_id}/deck/print${props.user_id ? `?id=${props.user_id}` : ''}`}
+                            className="btn btn-sm btn-outline-secondary"
+                            title="Print Decklist"
+                            target="_blank" // Add this to open in a new window
+                            rel="noopener noreferrer" // Add this for security best practices
+                        >
+                            <BsPrinter className="me-1" /> Print Decklist
+                        </Link>
                     </div>
                     {!isOpen && (
                         <div className="alert alert-info mb-3">The event is closed. Decklist cannot be modified.</div>

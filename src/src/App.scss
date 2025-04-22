@@ -12,9 +12,6 @@
   color: wheat;
 }
 
-body {
-}
-
 .float-bottom {
   position: fixed;
   bottom: 0px; /* Adjust this value as needed */
@@ -99,4 +96,47 @@ body {
 
 .textarea-container {
   position: relative;
+}
+
+@media print {
+  body, #root {
+    background-color: white !important;
+    color: black !important;
+    font-size: 90% !important; /* Reduce font size for printing */
+    margin-left: 0 !important; /* Reduce left margin when printing */
+    padding-left: 0 !important; /* Ensure no left padding */
+  }
+  
+  .container, .container-fluid, .row, .col, div {
+    margin-left: 0 !important;
+    padding-left: 5px !important; /* Minimal padding for readability */
+  }
+  
+  // Add multi-column layout for printing decklist
+  .print-decklist-container {
+    column-count: 2;
+    column-gap: 20px;
+    column-fill: auto; // Ensures columns are balanced
+    width: 100%;
+    page-break-inside: auto; // Allow page breaks between columns
+  }
+  
+  .print-decklist-group {
+    break-inside: avoid; // Prevent a card group from breaking across columns
+    display: inline-block; // Helps with column flow
+    width: 100%; // Full width within its column
+  }
+  
+  // Add other print-specific styles
+  // Hide navigation, buttons, etc.
+  nav, button, .no-print {
+    display: none !important;
+  }
+  
+  // Ensure text is visible on white background
+  * {
+    color: black !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
 }

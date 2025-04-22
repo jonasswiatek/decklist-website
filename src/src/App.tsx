@@ -30,6 +30,7 @@ import { EventlinkSync } from './Components/Events/Views/EventlinkSync.tsx';
 import { ScrollToTop } from './Util/ScrollToTop.tsx';
 import { LibraryDeckEditorPage } from './Components/DeckLibrary/LibraryDeckEditorPage.tsx';
 import { LibraryOverview } from './Components/DeckLibrary/LibraryOverview.tsx';
+import { PrintDecklistView } from './Components/Events/Views/PrintDecklistView.tsx';
 
 const queryClient = new QueryClient()
 
@@ -71,6 +72,15 @@ const router = createBrowserRouter([
     <LoggedIn>
       <ScrollToTop>
         <DeckView />
+      </ScrollToTop>
+    </LoggedIn>,
+  },
+  {
+    path: "/e/:event_id/deck/print",
+    element:
+    <LoggedIn>
+      <ScrollToTop>
+        <PrintDecklistView />
       </ScrollToTop>
     </LoggedIn>,
   },
@@ -171,8 +181,9 @@ function NavBar()
   const { logout } = useDecklistStore();
 
   const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
+  const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
   
-  if (isQRCodeRoute) {
+  if (isQRCodeRoute || isPrintDecklistRoute) {
     return null;
   }
 
@@ -206,8 +217,9 @@ function NavBar()
 
 function Footer() {
   const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
+  const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
   
-  if (isQRCodeRoute) {
+  if (isQRCodeRoute || isPrintDecklistRoute) {
     return null;
   }
 
