@@ -31,7 +31,7 @@ export const PrintDecklistView: React.FC = () => {
     }, []);
 
     // Auto-trigger print dialog when the component loads
-    /*useEffect(() => {
+    useEffect(() => {
         if (!isLoading && !eventLoading && !error && !eventError) {
             // Small delay to ensure rendering is complete
             const timer = setTimeout(() => {
@@ -40,7 +40,7 @@ export const PrintDecklistView: React.FC = () => {
             
             return () => clearTimeout(timer);
         }
-    }, [isLoading, eventLoading, error, eventError]);*/
+    }, [isLoading, eventLoading, error, eventError]);
 
     if (eventLoading || isLoading) {
         return <div className="loading-screen">Loading...</div>;
