@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { useEventDetails } from "../../Hooks/useEventDetails";
+import { useEventDetailsQuery } from "../../../Hooks/useEventDetailsQuery";
 import { useSearchParams } from "react-router-dom";
 import { DecklistResponse, getDecklistRequest } from "../../../model/api/apimodel";
 import { useQuery } from "react-query";
@@ -10,7 +10,7 @@ export const PrintDecklistView: React.FC = () => {
     const [ searchParams ] = useSearchParams();
     const userId = searchParams.get('id');
 
-    const { data: eventDetailsData, error: eventError, isLoading: eventLoading } = useEventDetails(event_id!);
+    const { data: eventDetailsData, error: eventError, isLoading: eventLoading } = useEventDetailsQuery(event_id!);
     
     const { data, error, isLoading } = useQuery<DecklistResponse | null>({
         queryKey: [`deck-${event_id}-${userId}`],

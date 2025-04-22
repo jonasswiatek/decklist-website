@@ -1,18 +1,11 @@
 import '../../App.scss'
-import { EventListItem, getAllEventsRequest } from '../../model/api/apimodel';
-import { useQuery } from 'react-query';
 import { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Spinner, Table } from 'react-bootstrap';
+import { useEventListQuery } from '../../Hooks/useEventListQuery';
 
 export function EventList() : ReactElement {
-  const { data, isLoading } = useQuery<EventListItem[]>({
-    queryKey: ['my-events'],
-    staleTime: 1000 * 30, // 1 minute
-    refetchOnWindowFocus: false,
-    retry: false,
-    queryFn: () => getAllEventsRequest()
-  })
+  const { data, isLoading } = useEventListQuery();
     
   return (
     <Table hover responsive>

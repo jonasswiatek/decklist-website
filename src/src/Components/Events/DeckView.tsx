@@ -1,21 +1,22 @@
 import React, { useState, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest, getAllEventsRequest, EventListItem } from '../../model/api/apimodel';
+import { DecklistResponse, deleteDeckRequest, EventDetails, getDecklistRequest, submitDecklistRequest, setDeckChecked, LibraryDecksResponse, getLibraryDecksRequest, getLibraryDeckRequest } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
 import { BsArrowLeft, BsPerson, BsTrash, BsCardText, BsPrinter } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
-import { useEventDetails } from '../Hooks/useEventDetails';
+import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
+import { useEventListQuery } from '../../Hooks/useEventListQuery';
 
 export function DeckView() {
     const { event_id } = useParams();
     const [ searchParams ] = useSearchParams();
     const id = searchParams.get('id');
 
-    const { data, error, isLoading } = useEventDetails(event_id!);
+    const { data, error, isLoading } = useEventDetailsQuery(event_id!);
     
     if (isLoading) {
         return (
@@ -55,7 +56,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const navigate = useNavigate();
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const {refetch: refetchEvent} = useEventDetails(props.event.event_id, false);
+    const {refetch: refetchEvent} = useEventDetailsQuery(props.event.event_id, false);
 
     const { data, error, isLoading, refetch } = useQuery<DecklistResponse | null>({
         queryKey: [`deck-${props.event.event_id}-${props.user_id}`],
@@ -73,14 +74,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         queryFn: () => getLibraryDecksRequest(),
     });
 
-    const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useQuery<EventListItem[]>({
-        queryKey: ['my-events'],
-        refetchOnWindowFocus: false,
-        retry: false,
-        staleTime: 1000 * 30, // 1 minute
-        enabled: isPlayer,
-        queryFn: () => getAllEventsRequest()
-    })
+    const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useEventListQuery();
     
     type Inputs = {
         user_id?: string,

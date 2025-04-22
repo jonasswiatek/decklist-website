@@ -8,7 +8,7 @@ import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTable } from '../Events/DecklistTable';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { HandleValidation } from '../../Util/Validators';
-import { useFormats } from '../Hooks/useFormats';
+import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
 
 export const LibraryDeckEditorPage: React.FC = () => {
   const { deck_id } = useParams();
@@ -33,7 +33,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
       queryFn: () => getLibraryDecksRequest(),
   });
 
-  const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormats();
+  const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
 
   if (isLoading || formatsLoading) {
       return <LoadingScreen />

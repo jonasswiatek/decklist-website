@@ -1,9 +1,10 @@
 import { useQuery } from "react-query";
-import { EventListItem, getAllEventsRequest, getDecklistRequest, getEvent, getLibraryDecksRequest, LibraryDecksResponse } from "../../model/api/apimodel";
+import { getDecklistRequest, getEvent, getLibraryDecksRequest, LibraryDecksResponse } from "../../model/api/apimodel";
 import { LoadingScreen } from "../Login/LoadingScreen";
 import { PlusCircle, ExclamationTriangle } from 'react-bootstrap-icons';
 import { useNavigate } from "react-router";
 import { BsArrowLeft } from "react-icons/bs";
+import { useEventListQuery } from "../../Hooks/useEventListQuery";
 
 export const LibraryOverview: React.FC = () => {
   const navigate = useNavigate();
@@ -16,13 +17,7 @@ export const LibraryOverview: React.FC = () => {
       queryFn: () => getLibraryDecksRequest(),
   });
 
-  const { data: events, isLoading: eventsLoading } = useQuery<EventListItem[]>({
-    queryKey: ['my-events'],
-    refetchOnWindowFocus: false,
-    retry: false,
-    staleTime: 1000 * 30, // 1 minute
-    queryFn: () => getAllEventsRequest()
-  })
+  const { data: events, isLoading: eventsLoading } = useEventListQuery();
 
   const onImportDeck = async (eventId: string) => {
     if (eventId) {

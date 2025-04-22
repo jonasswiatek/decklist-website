@@ -5,14 +5,14 @@ import { createEventRequest } from '../../model/api/apimodel';
 import { useNavigate } from "react-router-dom";
 import { ReactElement } from 'react';
 import { BsArrowLeft } from 'react-icons/bs';
-import { useFormats } from '../Hooks/useFormats';
+import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
 
 
 export function CreateEvent() : ReactElement {
     const { register, handleSubmit, setError, clearErrors, formState: { errors, isSubmitting } } = useForm<Inputs>();
     const navigate = useNavigate();
 
-    const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormats();
+    const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
     
     const onSubmit: SubmitHandler<Inputs> = async data => {
       try {

@@ -5,7 +5,7 @@ import { EventViewProps } from './EventTypes';
 import { useAuth } from '../Login/useAuth';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { BsArrowLeft } from 'react-icons/bs';
-import { useEventDetails } from '../Hooks/useEventDetails';
+import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
 
 // New EventHeader component
 const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string }> = ({ eventName, eventId, role }) => {
@@ -60,7 +60,7 @@ export function EventView() {
     const { event_id } = useParams();
     const { authorized } = useAuth();
 
-    const { data, error, isLoading, refetch } = useEventDetails(event_id!);
+    const { data, error, isLoading, refetch } = useEventDetailsQuery(event_id!);
     
     if (isLoading) {
         return (

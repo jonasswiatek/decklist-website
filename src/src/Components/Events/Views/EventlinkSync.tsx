@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useParams } from "react-router";
 import { LoadingScreen } from "../../Login/LoadingScreen";
-import { useEventDetails } from "../../Hooks/useEventDetails";
+import { useEventDetailsQuery } from "../../../Hooks/useEventDetailsQuery";
 
 export const EventlinkSync: React.FC = () => {
     const { event_id } = useParams();
 
-    const { data, error, isLoading} = useEventDetails(event_id!);
+    const { data, error, isLoading} = useEventDetailsQuery(event_id!);
         
     const [pastedText, setPastedText] = useState<string>("");
     const [parsedPlayers, setParsedPlayers] = useState<string[]>([]);
