@@ -108,17 +108,19 @@ export const LibraryOverview: React.FC = () => {
             <tbody>
               {data.decks.map((deck) => (
                 <tr key={deck.deck_name}>
-                  <td>
-                    <a onClick={() => navigate(`/library/deck/${deck.deck_id}`)} className="text-decoration-none text-light">
+                  <td 
+                      className="align-middle" 
+                      onClick={() => navigate(`/library/deck/${deck.deck_id}`)}
+                      style={{ cursor: 'pointer' }}
+                      title="View deck"
+                  >
                       {deck.deck_name}
-                    </a>
                   </td>
-                <td className="text-end">
-                    <div>
-                        {deck.has_warnings && <ExclamationTriangle className="text-warning" />}
-                    </div>
-                </td>
-
+                  <td className="text-end">
+                      <div>
+                          {deck.has_warnings && <ExclamationTriangle className="text-warning" />}
+                      </div>
+                  </td>
                   <td>{deck.format_name || "-"}</td>
                 </tr>
               ))}

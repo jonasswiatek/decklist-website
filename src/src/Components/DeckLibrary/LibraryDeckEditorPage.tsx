@@ -53,11 +53,11 @@ export const LibraryDeckEditorPage: React.FC = () => {
       decklist_text: decklist_text,
     });
 
+    refetchDeckLibrary();
     if (deck_id) {
       refetch();
     }
     else {
-      refetchDeckLibrary();
       navigate('/library/deck/' + result.deck_id);
     }
   };
