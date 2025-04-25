@@ -1,6 +1,28 @@
-import { ReactElement } from "react";
+import { ReactElement, useState, useEffect } from "react";
 
 export const LoadingScreen = (): ReactElement => {
+    const [message, setMessage] = useState<string>("");
+
+    useEffect(() => {
+        const loadingMessages = [
+            "Checking sleeves",
+            "Passing turn",
+            "Waiting for the next round to start",
+            "Sideboarding",
+            "Missing Triggers",
+            "Holding priority",
+            "Contemplating life choices",
+            "Fetching for a Mountain",
+            "Paying the one",
+            "Drawing for turn",
+            "Thoughtseize?",
+            "Mulling to 5"
+        ];
+    
+        const randomIndex = Math.floor(Math.random() * loadingMessages.length);
+        setMessage(loadingMessages[randomIndex]);
+    }, [setMessage]);
+
     return (
         <div style={{
             display: 'flex',
@@ -18,6 +40,16 @@ export const LoadingScreen = (): ReactElement => {
                 height: '50px',
                 animation: 'spin 1s linear infinite',
             }}></div>
+            
+            <p style={{
+                marginTop: '20px',
+                color: '#3498db',
+                fontSize: '16px',
+                fontWeight: 'medium'
+            }}>
+                {message}
+            </p>
+            
             <style>
                 {`
                     @keyframes spin {

@@ -157,19 +157,19 @@ const router = createBrowserRouter([
 function App() {
   return (
     <>
-    <AuthProvider>
-      <div className="d-flex flex-column min-vh-100">
-        <NavBar />
-        <div className="py-3 py-md-3 flex-grow-1">
-          <div className='container'>
-            <QueryClientProvider client={queryClient}>
-              <RouterProvider router={router} />
-            </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <div className="d-flex flex-column min-vh-100">
+            <NavBar />
+            <div className="py-3 py-md-3 flex-grow-1">
+              <div className='container'>
+                  <RouterProvider router={router} />
+              </div>
+            </div>
+            <Footer />
           </div>
-        </div>
-        <Footer />
-      </div>
-    </AuthProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </>
   );
 }

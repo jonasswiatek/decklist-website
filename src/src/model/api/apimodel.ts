@@ -1,4 +1,4 @@
-type MeResponse = {
+export type MeResponse = {
     authorized: boolean;
     email?: string;
     user_id?: string;
