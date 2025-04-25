@@ -6,6 +6,7 @@ import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent, addUserToE
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
 import { useAuth } from '../../Login/useAuth';
+import { useEventListQuery } from '../../../Hooks/useEventListQuery';
 
 export const JudgeView: React.FC<EventViewProps> = (e) => {
     const players = e.event.participants.filter(a => a.role === "player");
@@ -18,7 +19,8 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const navigate = useNavigate();
     const auth = useAuth();
     const [filterByDeckStatus, setFilterByDeckStatus] = useState<'all' | 'checked' | 'unchecked' | 'warnings'>('all');
-    
+    const { refetch: refetchMyEvents } = useEventListQuery(false);
+
     // Filtered players based on search term and deck status
     const filteredPlayers = players.filter(player => {
         const matchesSearch = player.player_name.toLowerCase().includes(searchTerm.trim().toLowerCase());
@@ -66,6 +68,9 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         const confirmed = window.confirm("Are you sure you want to delete this tournament? This action cannot be undone.");
         if (confirmed) {
             await deleteEvent({ event_id: e.event.event_id });
+
+            refetchMyEvents();
+
             // Navigate back to the events list using React Router
             navigate('/');
         }

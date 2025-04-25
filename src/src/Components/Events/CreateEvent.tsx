@@ -6,17 +6,20 @@ import { useNavigate } from "react-router-dom";
 import { ReactElement } from 'react';
 import { BsArrowLeft } from 'react-icons/bs';
 import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
+import { useEventListQuery } from '../../Hooks/useEventListQuery';
 
 
 export function CreateEvent() : ReactElement {
     const { register, handleSubmit, setError, clearErrors, formState: { errors, isSubmitting } } = useForm<Inputs>();
     const navigate = useNavigate();
+    const { refetch: refetchMyEvents } = useEventListQuery(false);
 
     const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
     
     const onSubmit: SubmitHandler<Inputs> = async data => {
       try {
         const createdEvent = await createEventRequest({ event_name: data.event_name, format: data.format, event_date: data.event_date });
+        refetchMyEvents();
         navigate('/e/' + createdEvent.event_id);
       }
       catch(e) {
