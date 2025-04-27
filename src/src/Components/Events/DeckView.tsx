@@ -230,6 +230,13 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmitDecklist)(e); }} >
             <div className='row'>
                 <div className='col-lg-4 col-sm-12'>
+                    {!isOpen && (
+                        <div className="alert alert-info mb-3"><b>Your decklist is submitted</b>, but can no longer be modified because the submission deadline has passed.</div>
+                    )}
+                    {!isJudge && isOpen && data?.groups && (
+                        <div className="alert alert-success mb-3"><b>Your decklist is submitted</b>, and can be modified until the submission deadline.</div>
+                    )}
+
                     <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                         <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
                         <Link 
@@ -242,10 +249,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             <BsPrinter className="me-1" /> Print Decklist
                         </Link>
                     </div>
-                    {!isOpen && (
-                        <div className="alert alert-info mb-3">The event is closed. Decklist cannot be modified.</div>
-                    )}
-                    
                     <div className="form-group position-relative">
                         <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
                             <span className="input-group-text" id="basic-addon1">
