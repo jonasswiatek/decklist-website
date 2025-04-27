@@ -4,9 +4,16 @@ import { HandleValidation } from "../../Util/Validators";
 import { useState } from "react";
 import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
+import { useQueryClient } from "react-query";
 
 export function LoginScreen() {
   const { authState, logout, googleLogin } = useDecklistStore();
+  const queryClient = useQueryClient();
+
+  const handleGoogleLogin = async (credentialResponse: string) => {
+    await googleLogin(credentialResponse);
+    queryClient.clear();
+  }
 
   if (authState == AuthState.Authorized) {
     return (
@@ -53,7 +60,7 @@ export function LoginScreen() {
                 <div className="d-flex justify-content-center">
                   <GoogleLogin
                     onSuccess={credentialResponse => {
-                      googleLogin(credentialResponse.credential!);
+                      handleGoogleLogin(credentialResponse.credential!);
                     }}
                     onError={() => {
                       console.log('Login Failed');
@@ -95,6 +102,7 @@ const LoginForm: React.FC = () => {
   const [email, setEmail] = useState("");
   const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<Inputs>();
   const { startLogin, continueLogin } = useDecklistStore();
+    const queryClient = useQueryClient();
   
   type Inputs = {
     email: string;
@@ -109,6 +117,7 @@ const LoginForm: React.FC = () => {
         setIsVerifying(true);
       } else {
         await continueLogin(email, data.code!);
+        queryClient.clear();
       }
     }
     catch(e) {

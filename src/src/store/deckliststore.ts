@@ -1,10 +1,5 @@
 import { create } from 'zustand'
 import { LoginContinueResponse, startLoginRequest, continueLoginRequest, logoutRequest, meRequest, googleLoginRequest } from '../model/api/apimodel';
-import { QueryClient } from '@tanstack/react-query';
-
-// Create or import your QueryClient instance
-// If you already have a QueryClient defined elsewhere, import it instead
-const queryClient = new QueryClient();
 
 export enum AuthState {
     Loading,
@@ -81,17 +76,10 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
             return res;
         },    
         logout: async() => {
-            await logoutRequest();
-            
-            // Clear React Query cache
-            Promise.resolve().then(() => queryClient.clear());
-            
+            await logoutRequest();            
             set(initialState);
         },
-        reset: () => {
-            // Clear React Query cache
-            Promise.resolve().then(() => queryClient.clear());
-            
+        reset: () => {            
             set(initialState)
         },
     })

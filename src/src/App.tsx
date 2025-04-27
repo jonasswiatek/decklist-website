@@ -9,7 +9,8 @@ import { LoggedIn } from './Components/Login/LoggedIn.tsx';
 import { LandingPage } from './Components/LandingPage/LandingPage.tsx';
 import {
   QueryClient,
-  QueryClientProvider
+  QueryClientProvider,
+  useQueryClient
 } from 'react-query'
 
 import Container from 'react-bootstrap/Container';
@@ -178,6 +179,7 @@ function NavBar()
 {
   const { login, authorized } = useAuth();
   const { logout } = useDecklistStore();
+  const queryClient = useQueryClient();
 
   const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
   const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
@@ -193,6 +195,11 @@ function NavBar()
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
+  const handleLogout = async() => {
+    queryClient.clear();
+    logout();
+  }
+
   return <>
     <Navbar collapseOnSelect expand="md">
       <Container>
@@ -204,7 +211,7 @@ function NavBar()
             <Nav.Link onClick={handleNavigate('/library')} href="/library">My Decks</Nav.Link>
             {authorized ? (
               <>
-                <Nav.Link onClick={() => logout()}>Log out</Nav.Link>
+                <Nav.Link onClick={() => handleLogout()}>Log out</Nav.Link>
               </>
               ) :
               (

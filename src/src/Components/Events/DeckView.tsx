@@ -111,7 +111,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 refetchMyEvents();
             }
             
-            reset({ player_name: '', decklist_text: '' });
+            reset({ player_name: '', deck_name: '', decklist_text: '' });
         }
     };
 
@@ -190,6 +190,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
             .reduce((sum, card) => sum + card.quantity, 0) || 0
         : 0;
 
+    const hasSubmission = !!data;
     const inputDisabled = (isJudge && !isEditing) || !isOpen;
     const availableSavedDecks = library?.decks.filter(deck => deck.format === props.event.format) ?? [];
     const pastEvents = events?.filter(
@@ -230,10 +231,13 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmitDecklist)(e); }} >
             <div className='row'>
                 <div className='col-lg-4 col-sm-12'>
-                    {!isOpen && (
+                    {!isOpen && !hasSubmission && (
+                        <div className="alert alert-info mb-3">This tournament is past it's decklist submission deadline.</div>
+                    )}
+                    {!isOpen && hasSubmission && (
                         <div className="alert alert-info mb-3"><b>Your decklist is submitted</b>, but can no longer be modified because the submission deadline has passed.</div>
                     )}
-                    {!isJudge && isOpen && data?.groups && (
+                    {!isJudge && isOpen && hasSubmission && (
                         <div className="alert alert-success mb-3"><b>Your decklist is submitted</b>, and can be modified until the submission deadline.</div>
                     )}
 
