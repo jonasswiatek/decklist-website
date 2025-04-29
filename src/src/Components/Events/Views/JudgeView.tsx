@@ -20,7 +20,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const auth = useAuth();
     const [filterByDeckStatus, setFilterByDeckStatus] = useState<'all' | 'checked' | 'unchecked' | 'warnings'>('all');
     const { refetch: refetchMyEvents } = useEventListQuery(false);
-
+    
     // Filtered players based on search term and deck status
     const filteredPlayers = players.filter(player => {
         const matchesSearch = player.player_name.toLowerCase().includes(searchTerm.trim().toLowerCase());
