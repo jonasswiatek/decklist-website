@@ -27,6 +27,7 @@
     "react-query": "^3.39.3",
     "react-router": "^6.26.0",
     "react-router-dom": "^6.26.0",
+    "react-use-websocket": "^4.13.0",
     "zustand": "^4.5.4"
   },
   "devDependencies": {

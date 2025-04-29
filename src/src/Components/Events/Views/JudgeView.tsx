@@ -7,6 +7,7 @@ import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
 import { useAuth } from '../../Login/useAuth';
 import { useEventListQuery } from '../../../Hooks/useEventListQuery';
+import { useEventUpdated } from '../../../Hooks/useWebsocketConnection';
 
 export const JudgeView: React.FC<EventViewProps> = (e) => {
     const players = e.event.participants.filter(a => a.role === "player");
@@ -20,7 +21,15 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const auth = useAuth();
     const [filterByDeckStatus, setFilterByDeckStatus] = useState<'all' | 'checked' | 'unchecked' | 'warnings'>('all');
     const { refetch: refetchMyEvents } = useEventListQuery(false);
-    
+    const { refetch: refetchEvent } = e;
+
+    useEventUpdated((message) => {
+        if(refetchEvent && message.refresh && message.updatedBy != auth.userId) {
+            console.log("Refetching event");
+            refetchEvent();
+        }
+    }, e.event.event_id);
+
     // Filtered players based on search term and deck status
     const filteredPlayers = players.filter(player => {
         const matchesSearch = player.player_name.toLowerCase().includes(searchTerm.trim().toLowerCase());
@@ -204,57 +213,59 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                 </tr>
                 </thead>
                 <tbody>
-                <tr className="bg-light">
-                    <td colSpan={2}>
-                        <div className="input-group my-2">
-                            <span className="input-group-text">
-                                <BsSearch />
-                            </span>
-                            <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Search by player name"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            {searchTerm && (
+                {players.length > 0 && (
+                    <tr className="bg-light">
+                        <td colSpan={2}>
+                            <div className="input-group my-2">
+                                <span className="input-group-text">
+                                    <BsSearch />
+                                </span>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Search by player name"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                {searchTerm && (
+                                    <button 
+                                        className="btn btn-outline-secondary" 
+                                        type="button"
+                                        onClick={() => setSearchTerm('')}
+                                    >
+                                        Clear
+                                    </button>
+                                )}
+                            </div>
+                            <div className="btn-group w-100 mt-2">
                                 <button 
-                                    className="btn btn-outline-secondary" 
-                                    type="button"
-                                    onClick={() => setSearchTerm('')}
+                                    className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'all' ? 'active' : ''}`} 
+                                    onClick={() => setFilterByDeckStatus('all')}
                                 >
-                                    Clear
+                                    All
                                 </button>
-                            )}
-                        </div>
-                        <div className="btn-group w-100 mt-2">
-                            <button 
-                                className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'all' ? 'active' : ''}`} 
-                                onClick={() => setFilterByDeckStatus('all')}
-                            >
-                                All
-                            </button>
-                            <button 
-                                className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'checked' ? 'active' : ''}`} 
-                                onClick={() => setFilterByDeckStatus('checked')}
-                            >
-                                Checked
-                            </button>
-                            <button 
-                                className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'unchecked' ? 'active' : ''}`} 
-                                onClick={() => setFilterByDeckStatus('unchecked')}
-                            >
-                                Unchecked
-                            </button>
-                            <button 
-                                className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'warnings' ? 'active' : ''}`} 
-                                onClick={() => setFilterByDeckStatus('warnings')}
-                            >
-                                Warnings
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                                <button 
+                                    className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'checked' ? 'active' : ''}`} 
+                                    onClick={() => setFilterByDeckStatus('checked')}
+                                >
+                                    Checked
+                                </button>
+                                <button 
+                                    className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'unchecked' ? 'active' : ''}`} 
+                                    onClick={() => setFilterByDeckStatus('unchecked')}
+                                >
+                                    Unchecked
+                                </button>
+                                <button 
+                                    className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'warnings' ? 'active' : ''}`} 
+                                    onClick={() => setFilterByDeckStatus('warnings')}
+                                >
+                                    Warnings
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                )}
                 {filteredPlayers.length > 50 && searchTerm === '' && (
                     <tr>
                         <td colSpan={2} className="text-center py-3 bg-warning-subtle">
