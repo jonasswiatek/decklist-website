@@ -11,8 +11,8 @@ export function LoginScreen() {
   const queryClient = useQueryClient();
 
   const handleGoogleLogin = async (credentialResponse: string) => {
-    await googleLogin(credentialResponse);
     queryClient.clear();
+    await googleLogin(credentialResponse);
   }
 
   if (authState == AuthState.Authorized) {
@@ -116,8 +116,8 @@ const LoginForm: React.FC = () => {
         setEmail(data.email);
         setIsVerifying(true);
       } else {
-        await continueLogin(email, data.code!);
         queryClient.clear();
+        await continueLogin(email, data.code!);
       }
     }
     catch(e) {

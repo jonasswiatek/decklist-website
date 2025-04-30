@@ -9,8 +9,8 @@ import { useLibraryDecksQuery } from "../../Hooks/useLibraryDecksQuery";
 export const LibraryOverview: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data, error, isLoading } = useLibraryDecksQuery();
-  const { data: events, isLoading: eventsLoading } = useEventListQuery();
+  const { data: library, error: decksError, isLoading: isLibraryLoading } = useLibraryDecksQuery();
+  const { data: events, error: eventsError, isLoading: isEventsLoading } = useEventListQuery();
 
   const onImportDeck = async (eventId: string) => {
     if (eventId) {
@@ -29,11 +29,11 @@ export const LibraryOverview: React.FC = () => {
     }
   };
 
-  if (isLoading || eventsLoading) {
-      return <LoadingScreen />
+  if (isLibraryLoading || isEventsLoading) {
+      return <LoadingScreen />;
   }
   
-  if(error) {
+  if(decksError || eventsError) {
       return (
           <div className="alert alert-danger" role="alert">
             <h4 className="alert-heading">Error loading deck</h4>
@@ -61,7 +61,7 @@ export const LibraryOverview: React.FC = () => {
         <p className="text-muted">You can quickly reuse these decklists when signing up for events</p>
       </div>
       <div className="mb-4">
-        {data && data.decks.length >= 20 ? (
+        {library && library.decks.length >= 20 ? (
           <div className="alert alert-warning">
             You can only have a maximum of 20 saved decks. Please delete some decks before creating new ones.
           </div>
@@ -90,7 +90,7 @@ export const LibraryOverview: React.FC = () => {
           </div>
         )}
       </div>
-      {!data || data.decks.length === 0 ? (
+      {!library || library.decks.length === 0 ? (
         <div className="text-center mt-5">
           <h3>No decks found in your library</h3>
           <p>Create a deck to get started.</p>
@@ -106,7 +106,7 @@ export const LibraryOverview: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.decks.map((deck) => (
+              {library.decks.map((deck) => (
                 <tr key={deck.deck_name}>
                   <td 
                       className="align-middle" 
