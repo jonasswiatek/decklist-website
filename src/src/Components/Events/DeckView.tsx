@@ -58,8 +58,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     const {refetch: refetchEvent} = useEventDetailsQuery(props.event.event_id, false);
     const { data, error, isLoading, refetch } = useDecklistQuery(props.event.event_id, props.user_id);
-    const { data: library, error: libraryError, isLoading: libraryLoading } = useLibraryDecksQuery();
-    const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useEventListQuery();
+    const { data: library, error: libraryError, isLoading: libraryLoading } = useLibraryDecksQuery(isPlayer);
+    const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useEventListQuery(isPlayer);
     
     type Inputs = {
         user_id?: string,
