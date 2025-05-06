@@ -3,22 +3,17 @@ import useWebSocket from 'react-use-websocket';
 
 const WEBSOCKET_URL = 'wss://decklist.lol/ws';
 export const useDecklistWebSocketConnection = <T>(channelName: string) => {
-  const isPingMessage = (message: string) => {
-    try {
-      const parsedMessage = JSON.parse(message);
-      return parsedMessage && parsedMessage.message === 'Forbidden' && parsedMessage.connectionId && parsedMessage.requestId;
-    } catch (e) {
-      return false;
-    }
-  };
-
   return useWebSocket<T | undefined>(WEBSOCKET_URL, {
     queryParams: { channel: channelName },
     onOpen: () => console.log('WebSocket: opened connection'),
     onClose: () => console.log('WebSocket: closed connection'),
     onError: (event) => console.error('WebSocket: error:', event),
     shouldReconnect: () => true,
-    filter: (message) => !isPingMessage(message.data),
+    heartbeat: {
+      message: "PING",
+      interval: 50000,
+      timeout: 60000,
+    }
   });
 };
 
@@ -27,8 +22,24 @@ type EventUpdatedMessage = {
   refresh: boolean;
 }
 
+type ForbiddenMessage = {
+  message: string;
+  connectionId: string;
+  requestId: string;
+}
+
+export const isForbiddenMessage = (data: unknown): data is ForbiddenMessage => {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'message' in data &&
+    'connectionId' in data &&
+    'requestId' in data
+  );
+};
+
 export const useEventUpdated = (effect: (message: EventUpdatedMessage) => void, eventId: string) => {
-  const { lastJsonMessage } = useDecklistWebSocketConnection<EventUpdatedMessage>(`decklist.lol:event:${eventId}`);
+  const { lastJsonMessage } = useDecklistWebSocketConnection<EventUpdatedMessage | ForbiddenMessage>(`decklist.lol:event:${eventId}`);
   
   const effectRef = useRef(effect);
   useEffect(() => {
@@ -36,9 +47,11 @@ export const useEventUpdated = (effect: (message: EventUpdatedMessage) => void, 
   }, [effect]);
 
   useEffect(() => {
-    if (lastJsonMessage) {
+    if (lastJsonMessage && !isForbiddenMessage(lastJsonMessage) && 'updatedBy' in lastJsonMessage) {
       console.log("WebSocket: EventUpdateEvent Received", lastJsonMessage);
-      effectRef.current(lastJsonMessage);
+      effectRef.current(lastJsonMessage as EventUpdatedMessage);
+    } else if (lastJsonMessage && isForbiddenMessage(lastJsonMessage)) {
+      console.warn("WebSocket: Pong Received");
     }
   }, [lastJsonMessage]); 
 }
