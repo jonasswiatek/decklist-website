@@ -51,7 +51,7 @@ export const useEventUpdated = (effect: (message: EventUpdatedMessage) => void, 
       console.log("WebSocket: EventUpdateEvent Received", lastJsonMessage);
       effectRef.current(lastJsonMessage as EventUpdatedMessage);
     } else if (lastJsonMessage && isForbiddenMessage(lastJsonMessage)) {
-      console.warn("WebSocket: Pong Received");
+      console.log("WebSocket: Ping/Pong");
     }
   }, [lastJsonMessage]); 
 }
