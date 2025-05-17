@@ -19,6 +19,19 @@ export interface UserTournamentsResponse {
     tournaments: UserTournamentsResponseItem[];
 }
 
+export interface TournamentManager {
+    user_id: string;
+    user_name: string;
+    role: string;
+}
+
+export interface TournamentDetailsResponse {
+    tournament_id: string;
+    tournament_name: string;
+    role: string | null;
+    managers: TournamentManager[];
+}
+
 const API_BASE_URL = '/api/timers';
 
 export async function createTournament(request: CreateTournamentRequest): Promise<CreateTournamentResponse> {
@@ -44,6 +57,16 @@ export async function getUserTournaments(): Promise<UserTournamentsResponse> {
     });
     if (!response.ok) {
         throw new Error(`Error fetching user tournaments: ${response.statusText}`);
+    }
+    return response.json();
+}
+
+export async function getTournamentDetails(tournamentId: string): Promise<TournamentDetailsResponse> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}`, {
+        method: 'GET',
+    });
+    if (!response.ok) {
+        throw new Error(`Error fetching tournament details: ${response.statusText}`);
     }
     return response.json();
 }
