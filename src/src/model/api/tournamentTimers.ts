@@ -25,11 +25,30 @@ export interface TournamentManager {
     role: string;
 }
 
+export interface TournamentTimerClock {
+    clock_id: string;
+    clock_name: string;
+    is_running: boolean;
+    seconds_remaining: number;
+}
+
 export interface TournamentDetailsResponse {
     tournament_id: string;
     tournament_name: string;
     role: string | null;
     managers: TournamentManager[];
+    clocks: TournamentTimerClock[];
+}
+
+export interface CreateClockRequest {
+    clock_name: string;
+    duration_seconds: number;
+}
+
+export interface CreateClockResponse {
+    clock_id: string;
+    clock_name: string;
+    duration_seconds: number;
 }
 
 const API_BASE_URL = '/api/timers';
@@ -78,4 +97,21 @@ export async function deleteTournament(tournamentId: string): Promise<void> {
     if (!response.ok) {
         throw new Error(`Error deleting tournament: ${response.statusText}`);
     }
+}
+
+export async function createClock(tournamentId: string, request: CreateClockRequest): Promise<CreateClockResponse> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+    });
+
+    await ThrowIfValidationErrors(response);
+
+    if (!response.ok) {
+        throw new Error(`Error creating clock: ${response.statusText}`);
+    }
+    return response.json();
 }

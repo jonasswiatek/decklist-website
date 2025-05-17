@@ -34,7 +34,7 @@ import { LibraryOverview } from './Components/DeckLibrary/LibraryOverview.tsx';
 import { PrintDecklistView } from './Components/Events/Views/PrintDecklistView.tsx';
 import MyTournaments from './Components/TournamentTimers/MyTournaments.tsx';
 import { CreateTournament } from './Components/TournamentTimers/CreateTournament.tsx';
-import { Tournament } from './Components/TournamentTimers/Tournament.tsx';
+import { TournamentWrapper } from './Components/TournamentTimers/Tournament.tsx';
 
 const queryClient = new QueryClient()
 
@@ -144,7 +144,7 @@ const router = createBrowserRouter([
     element:
       <LoggedIn>
         <ScrollToTop>
-          <Tournament />
+          <TournamentWrapper />
         </ScrollToTop>
       </LoggedIn>,
   },
