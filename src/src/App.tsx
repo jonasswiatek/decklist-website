@@ -32,6 +32,9 @@ import { ScrollToTop } from './Util/ScrollToTop.tsx';
 import { LibraryDeckEditorPage } from './Components/DeckLibrary/LibraryDeckEditorPage.tsx';
 import { LibraryOverview } from './Components/DeckLibrary/LibraryOverview.tsx';
 import { PrintDecklistView } from './Components/Events/Views/PrintDecklistView.tsx';
+import MyTournaments from './Components/TournamentTimers/MyTournaments.tsx';
+import { CreateTournament } from './Components/TournamentTimers/CreateTournament.tsx';
+import { Tournament } from './Components/TournamentTimers/Tournament.tsx';
 
 const queryClient = new QueryClient()
 
@@ -115,6 +118,33 @@ const router = createBrowserRouter([
       <LoggedIn>
         <ScrollToTop>
           <LibraryDeckEditorPage />
+        </ScrollToTop>
+      </LoggedIn>,
+  },
+  {
+    path: "/timers",
+    element:
+      <LoggedIn>
+        <ScrollToTop>
+          <MyTournaments />
+        </ScrollToTop>
+      </LoggedIn>,
+  },
+  {
+    path: "/timers/new",
+    element:
+      <LoggedIn>
+        <ScrollToTop>
+          <CreateTournament />
+        </ScrollToTop>
+      </LoggedIn>,
+  },
+  {
+    path: "/timers/:tournament_id",
+    element:
+      <LoggedIn>
+        <ScrollToTop>
+          <Tournament />
         </ScrollToTop>
       </LoggedIn>,
   },
@@ -209,6 +239,7 @@ function NavBar()
           <Nav className="ms-auto">
             <Nav.Link onClick={handleNavigate('/e/new')} href="/e/new">Create Tournament</Nav.Link>
             <Nav.Link onClick={handleNavigate('/library')} href="/library">My Decks</Nav.Link>
+            <Nav.Link onClick={handleNavigate('/timers')} href="/timers">Tournament Timers</Nav.Link>
             {authorized ? (
               <>
                 <Nav.Link onClick={() => handleLogout()}>Log out</Nav.Link>

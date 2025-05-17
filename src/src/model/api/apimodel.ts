@@ -585,7 +585,7 @@ export type ValidationErrorResponse = {
     errors: { [index:string] : string[] }
 }
 
-async function ThrowIfValidationErrors(response: Response) {
+export async function ThrowIfValidationErrors(response: Response) {
     if (response.status == 400 && response.headers.get("Content-Type") === "application/problem+json") {
         const errors = await response.json() as ValidationErrorResponse;
         throw new ValidationError(errors);
