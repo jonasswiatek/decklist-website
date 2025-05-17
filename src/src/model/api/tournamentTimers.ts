@@ -51,6 +51,15 @@ export interface CreateClockResponse {
     duration_seconds: number;
 }
 
+export interface UpdateClockRequest {
+    is_running: boolean;
+}
+
+export interface AddManagerRequest {
+    user_email: string;
+    user_name: string;
+}
+
 const API_BASE_URL = '/api/timers';
 
 export async function createTournament(request: CreateTournamentRequest): Promise<CreateTournamentResponse> {
@@ -114,4 +123,54 @@ export async function createClock(tournamentId: string, request: CreateClockRequ
         throw new Error(`Error creating clock: ${response.statusText}`);
     }
     return response.json();
+}
+
+export async function deleteClock(tournamentId: string, clockId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}`, {
+        method: 'DELETE',
+    });
+    if (!response.ok) {
+        throw new Error(`Error deleting clock: ${response.statusText}`);
+    }
+}
+
+export async function updateClock(tournamentId: string, clockId: string, request: UpdateClockRequest): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+    });
+
+    await ThrowIfValidationErrors(response);
+
+    if (!response.ok) {
+        throw new Error(`Error updating clock: ${response.statusText}`);
+    }
+}
+
+export async function addManager(tournamentId: string, request: AddManagerRequest): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}/managers`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+    });
+
+    await ThrowIfValidationErrors(response);
+
+    if (!response.ok) {
+        throw new Error(`Error adding manager: ${response.statusText}`);
+    }
+}
+
+export async function deleteManager(tournamentId: string, userId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}/managers/${userId}`, {
+        method: 'DELETE',
+    });
+    if (!response.ok) {
+        throw new Error(`Error deleting manager: ${response.statusText}`);
+    }
 }

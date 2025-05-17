@@ -1,16 +1,10 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill } from 'react-icons/bs';
 import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
-import { createClock, TournamentTimerClock } from '../../model/api/tournamentTimers';
-
-interface Manager {
-  id: string;
-  name: string;
-  email: string;
-}
+import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock } from '../../model/api/tournamentTimers';
 
 interface AddManagerFormInputs {
   name: string;
@@ -36,7 +30,6 @@ export function TournamentWrapper(): ReactElement {
 
 export function Tournament({ tournament_id }: TournamentProps): ReactElement {
   const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id);
-  const [managers, setManagers] = useState<Manager[]>([]); // Mock data, replace with API data later
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<AddManagerFormInputs>();
   const { register: registerClock, handleSubmit: handleSubmitClock, reset: resetClockForm, formState: { errors: clockErrors, isSubmitting: isSubmittingClock } } = useForm<AddClockFormInputs>({
     defaultValues: {
@@ -45,13 +38,18 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
   });
 
   const onAddManager: SubmitHandler<AddManagerFormInputs> = async (data) => {
-    setManagers(prevManagers => [...prevManagers, { ...data, id: Date.now().toString() }]);
+    await addManager(tournament_id, {
+      user_email: data.email,
+      user_name: data.name,
+    });
+    refetch();
     reset();
   };
 
   const onRemoveManager = async (managerId: string) => {
     if (window.confirm("Are you sure you want to remove this manager?")) {
-      setManagers(prevManagers => prevManagers.filter(manager => manager.id !== managerId));
+      deleteManager(tournament_id, managerId);
+      refetch();
     }
   };
 
@@ -66,19 +64,15 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
   };
 
   const onToggleClock = async (clockId: string, currentState: boolean) => {
-    // Placeholder for API call to toggle clock state
     console.log(`Toggling clock ${clockId}. Current state: ${currentState ? 'running' : 'paused'}`);
-    // Example: await toggleClockAPI(tournament_id, clockId, !currentState);
-    // After API call, refetch data
+    await updateClock(tournament_id, clockId, { is_running: !currentState });
     refetch();
   };
 
   const onDeleteClock = async (clockId: string) => {
     if (window.confirm("Are you sure you want to delete this clock?")) {
       console.log(`Deleting clock ${clockId}`);
-      // TODO: Implement API call to delete clock
-      // Example: await deleteClockAPI(tournament_id, clockId);
-      // After API call, refetch data
+      await deleteClock(tournament_id, clockId);
       refetch();
     }
   };
@@ -282,25 +276,23 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
                   To use server data, it should use tournamentDetails.managers 
                   and API calls for add/remove, then refetch tournamentDetails.
               */}
-              {managers.length > 0 ? (
+              {tournamentDetails.managers.length > 0 ? (
                 <Table striped bordered hover responsive size="sm">
                   <thead>
                     <tr>
                       <th>Name</th>
-                      <th>Email</th>
                       <th className="text-end">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {managers.map(manager => (
-                      <tr key={manager.id}>
-                        <td>{manager.name}</td>
-                        <td>{manager.email}</td>
+                    {tournamentDetails.managers.map(manager => (
+                      <tr key={manager.user_id}>
+                        <td>{manager.user_name}</td>
                         <td className="text-end">
                           <Button
                             variant="danger"
                             size="sm"
-                            onClick={() => onRemoveManager(manager.id)}
+                            onClick={() => onRemoveManager(manager.user_id)}
                             title="Remove Manager"
                           >
                             <BsTrash />
