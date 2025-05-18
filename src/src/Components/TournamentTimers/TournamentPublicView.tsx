@@ -70,19 +70,10 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
         <div className="mb-4">
           {/* Optional: <h3 className="text-light mb-3">High Priority</h3> */}
           <div
-            className="d-flex flex-row flex-nowrap" // Ensures items are in a single row and shrink to fit
-            style={{ gap: '1rem' }} // Spacing between clock items
+            className="row g-3" // Ensures items wrap and use grid gutter
           >
             {highPriorityClocks.map((clock) => (
-              <div
-                key={clock.clock_id}
-                className="d-flex" // Make this wrapper a flex container for h-100 on child
-                style={{
-                  flex: '1 1 0%', // Each item shares width equally, allows shrinking
-                  minHeight: '20vh', // Adjust '20vh' as needed for desired vertical space
-                }}
-              >
-                {/* Assumes ClockComponent is modified to accept and apply className */}
+              <div key={clock.clock_id} className="col-12 col-md-6">
                 <ClockComponent clock={clock} className="h-100 w-100" priority="high" />
               </div>
             ))}
@@ -125,18 +116,31 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
 
 export function ClockComponent({ clock, className, priority }: { clock: TournamentTimerClock, className?: string, priority?: 'high' | 'medium' | 'low' }): ReactElement {
   let backgroundColor = '#212529'; // Default Bootstrap bg-dark color
+  let clockNameClass = '';
+  let timerClass = 'fs-1'; // Default timer font size
 
   if (priority === 'high') {
     backgroundColor = '#382424'; // Dark, slightly reddish
+    clockNameClass = 'display-4'; // Larger clock name for high priority
+    timerClass = 'display-1'; // Larger timer font size for high priority
   } else if (priority === 'medium') {
     backgroundColor = '#383124'; // Dark, slightly yellowish
+    // clockNameClass remains default (h1 styling)
+    // timerClass remains fs-1
   } else if (priority === 'low') {
     backgroundColor = '#24382b'; // Dark, slightly greenish
+    // clockNameClass remains default (h1 styling)
+    // timerClass can be made smaller if needed, e.g., fs-2 or fs-3
   }
 
-  return <div style={{ backgroundColor }} className={`rounded p-3 mb-3 text-light ${className || ''}`}>
-    <h1>{clock.clock_name}</h1>
-    <div className="fs-1">
+  let conditionalClasses = className || '';
+  if (priority === 'high' && clock.ms_remaining < 0) {
+    conditionalClasses += ' border border-danger border-3'; // Added border-3 for thickness
+  }
+
+  return <div style={{ backgroundColor }} className={`rounded p-3 mb-3 text-light ${conditionalClasses}`}>
+    <h1 className={clockNameClass}>{clock.clock_name}</h1>
+    <div className={timerClass}>
       <CountdownTimer initialMilliseconds={clock.ms_remaining} isRunning={clock.is_running} />
     </div>
   </div>;
