@@ -55,3 +55,28 @@ export const useEventUpdated = (effect: (message: EventUpdatedMessage) => void, 
     }
   }, [lastJsonMessage]); 
 }
+
+type TournamentTimersUpdatedMessage = {
+  tournamentId: string;
+  updatedBy: string;
+  refresh: boolean;
+}
+
+
+export const useTournamentTimersUpdated = (effect: (message: TournamentTimersUpdatedMessage) => void, tournamentId: string) => {
+  const { lastJsonMessage } = useDecklistWebSocketConnection<TournamentTimersUpdatedMessage | ForbiddenMessage>(`decklist.lol:timers:tournament:${tournamentId}`);
+  
+  const effectRef = useRef(effect);
+  useEffect(() => {
+    effectRef.current = effect;
+  }, [effect]);
+
+  useEffect(() => {
+    if (lastJsonMessage && !isForbiddenMessage(lastJsonMessage) && 'updatedBy' in lastJsonMessage) {
+      console.log("WebSocket: Tournament Timers Updated Received", lastJsonMessage);
+      effectRef.current(lastJsonMessage as TournamentTimersUpdatedMessage);
+    } else if (lastJsonMessage && isForbiddenMessage(lastJsonMessage)) {
+      console.log("WebSocket: Ping/Pong");
+    }
+  }, [lastJsonMessage]); 
+}

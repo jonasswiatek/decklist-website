@@ -35,6 +35,7 @@ import { PrintDecklistView } from './Components/Events/Views/PrintDecklistView.t
 import MyTournaments from './Components/TournamentTimers/MyTournaments.tsx';
 import { CreateTournament } from './Components/TournamentTimers/CreateTournament.tsx';
 import { TournamentWrapper } from './Components/TournamentTimers/Tournament.tsx';
+import { TournamentPublicViewWrapper } from './Components/TournamentTimers/TournamentPublicView.tsx';
 
 const queryClient = new QueryClient()
 
@@ -148,6 +149,14 @@ const router = createBrowserRouter([
         </ScrollToTop>
       </LoggedIn>,
   },
+  { // New route for public timer view
+  path: "/timers/:tournament_id/view",
+  element:
+    // No LoggedIn wrapper for public view
+    <ScrollToTop>
+      <TournamentPublicViewWrapper />
+    </ScrollToTop>,
+  },
   {
     path: "/help/decklist",
     element: 
@@ -213,8 +222,9 @@ function NavBar()
 
   const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
   const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
-  
-  if (isQRCodeRoute || isPrintDecklistRoute) {
+  const isTournamentPublicViewRoute = window.location.pathname.match(/\/timers\/.*\/view$/i) !== null;
+
+  if (isQRCodeRoute || isPrintDecklistRoute || isTournamentPublicViewRoute) {
     return null;
   }
 
@@ -239,7 +249,7 @@ function NavBar()
           <Nav className="ms-auto">
             <Nav.Link onClick={handleNavigate('/e/new')} href="/e/new">Create Tournament</Nav.Link>
             <Nav.Link onClick={handleNavigate('/library')} href="/library">My Decks</Nav.Link>
-            <Nav.Link onClick={handleNavigate('/timers')} href="/timers">Tournament Timers</Nav.Link>
+            {/* <Nav.Link onClick={handleNavigate('/timers')} href="/timers">Tournament Timers</Nav.Link> */}
             {authorized ? (
               <>
                 <Nav.Link onClick={() => handleLogout()}>Log out</Nav.Link>
@@ -262,8 +272,9 @@ function NavBar()
 function Footer() {
   const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
   const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
+  const isTournamentPublicViewRoute = window.location.pathname.match(/\/timers\/.*\/view$/i) !== null;
   
-  if (isQRCodeRoute || isPrintDecklistRoute) {
+  if (isQRCodeRoute || isPrintDecklistRoute || isTournamentPublicViewRoute) {
     return null;
   }
 

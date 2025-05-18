@@ -29,7 +29,8 @@ export interface TournamentTimerClock {
     clock_id: string;
     clock_name: string;
     is_running: boolean;
-    seconds_remaining: number;
+    duration_seconds: number;
+    ms_remaining: number;
 }
 
 export interface TournamentDetailsResponse {
@@ -147,6 +148,19 @@ export async function updateClock(tournamentId: string, clockId: string, request
 
     if (!response.ok) {
         throw new Error(`Error updating clock: ${response.statusText}`);
+    }
+}
+
+export async function resetClock(tournamentId: string, clockId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}/reset`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error resetting clock: ${response.statusText}`);
     }
 }
 

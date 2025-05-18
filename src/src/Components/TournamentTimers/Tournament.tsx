@@ -1,10 +1,11 @@
-import { ReactElement } from 'react';
-import { useParams } from 'react-router-dom';
+import { ReactElement, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill } from 'react-icons/bs';
-import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
-import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock } from '../../model/api/tournamentTimers';
+import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard } from 'react-icons/bs';
+import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournamentTimers';
+import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock } from '../../model/api/tournamentTimers';
+import { CountdownTimer } from './CountdownTimer';
 
 interface AddManagerFormInputs {
   name: string;
@@ -16,10 +17,6 @@ interface AddClockFormInputs {
   duration_minutes: number;
 }
 
-interface TournamentProps {
-  tournament_id: string;
-}
-
 export function TournamentWrapper(): ReactElement {
   const { tournament_id } = useParams<{ tournament_id: string }>();
   if (!tournament_id) {
@@ -28,14 +25,24 @@ export function TournamentWrapper(): ReactElement {
   return <Tournament tournament_id={tournament_id} />;
 }
 
-export function Tournament({ tournament_id }: TournamentProps): ReactElement {
+export function Tournament({ tournament_id }: {tournament_id: string}): ReactElement {
   const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id);
+  const { refetch: refetchUserTournaments } = useUserTournaments();
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<AddManagerFormInputs>();
   const { register: registerClock, handleSubmit: handleSubmitClock, reset: resetClockForm, formState: { errors: clockErrors, isSubmitting: isSubmittingClock } } = useForm<AddClockFormInputs>({
     defaultValues: {
       duration_minutes: 50
     }
   });
+  const navigate = useNavigate();
+  const publicLink = `${window.location.origin}/timers/${tournamentDetails?.tournament_id}/view`;
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async () => {
+      await navigator.clipboard.writeText(publicLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+  };
 
   const onAddManager: SubmitHandler<AddManagerFormInputs> = async (data) => {
     await addManager(tournament_id, {
@@ -48,7 +55,7 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
 
   const onRemoveManager = async (managerId: string) => {
     if (window.confirm("Are you sure you want to remove this manager?")) {
-      deleteManager(tournament_id, managerId);
+      await deleteManager(tournament_id, managerId);
       refetch();
     }
   };
@@ -69,6 +76,15 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
     refetch();
   };
 
+  const onResetClock = async (clockId: string, durationSeconds: number) => {
+    const durationMinutes = Math.floor(durationSeconds / 60);
+    if (window.confirm(`Are you sure you want to reset this clock to ${durationMinutes} minutes?`)) {
+      console.log(`Resetting clock ${clockId}`);
+      await resetClock(tournament_id, clockId);
+      refetch();
+    }
+  };
+
   const onDeleteClock = async (clockId: string) => {
     if (window.confirm("Are you sure you want to delete this clock?")) {
       console.log(`Deleting clock ${clockId}`);
@@ -77,10 +93,12 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
     }
   };
 
-  const formatDuration = (totalSeconds: number): string => {
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}m ${seconds < 10 ? '0' : ''}${seconds}s`;
+  const onDeleteTournament = async () => {
+    if (window.confirm("Are you sure you want to permanently delete this tournament and all its clocks? This action cannot be undone.")) {
+      await deleteTournament(tournament_id);
+      refetchUserTournaments();
+      navigate('/timers');
+    }
   };
 
   if (isLoading) {
@@ -187,7 +205,7 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
                 {tournamentDetails.clocks.map((clock: TournamentTimerClock) => (
                   <tr key={clock.clock_id}>
                     <td className="align-middle">{clock.clock_name}</td>
-                    <td className="align-middle">{formatDuration(clock.seconds_remaining)}</td>
+                    <td className="align-middle"><CountdownTimer initialMilliseconds={clock.ms_remaining} isRunning={clock.is_running} /></td>
                     <td className="text-end align-middle">
                       <Button
                         variant={clock.is_running ? "warning" : "success"}
@@ -197,6 +215,15 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
                         className="me-1"
                       >
                         {clock.is_running ? <BsPauseFill /> : <BsPlayFill />}
+                      </Button>
+                      <Button
+                        variant="info"
+                        size="sm"
+                        onClick={() => onResetClock(clock.clock_id, clock.duration_seconds)}
+                        title="Reset Clock"
+                        className="me-1"
+                      >
+                        <BsArrowCounterclockwise />
                       </Button>
                       <Button
                         variant="danger"
@@ -216,6 +243,36 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
           )}
         </Col>
         <Col md={6}>
+          <div className="alert alert-info d-flex justify-content-between align-items-center mb-4">
+              <div style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '70%'
+              }}>
+                  <strong>Public Link:</strong> {publicLink}
+              </div>
+              <div className="d-flex align-items-center">
+                  <button 
+                      onClick={copyToClipboard} 
+                      className="btn btn-primary d-flex align-items-center me-2"
+                      title="Copy to clipboard"
+                  >
+                    {copied ? <BsCheck /> : <BsClipboard />}    
+                  </button>
+                  
+                  <Link 
+                      to={publicLink} 
+                      className="btn btn-primary d-flex align-items-center"
+                      title="Open public view"
+                      target="_blank" // Add this to open in a new window
+                      rel="noopener noreferrer" // Add this for security best practices
+                  >
+                      <BsBoxArrowUpRight />
+                  </Link>
+              </div>
+          </div>
+        
           <Card className="mb-3">
             <Card.Header className="d-flex justify-content-between align-items-center">
               <div>
@@ -269,44 +326,67 @@ export function Tournament({ tournament_id }: TournamentProps): ReactElement {
             </Card.Body>
           </Card>
 
-          <Card>
-            <Card.Header as="h5">Current Managers</Card.Header>
-            <Card.Body>
-              {/* This part still uses local mock 'managers' state. 
-                  To use server data, it should use tournamentDetails.managers 
-                  and API calls for add/remove, then refetch tournamentDetails.
-              */}
-              {tournamentDetails.managers.length > 0 ? (
-                <Table striped bordered hover responsive size="sm">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th className="text-end">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tournamentDetails.managers.map(manager => (
-                      <tr key={manager.user_id}>
-                        <td>{manager.user_name}</td>
-                        <td className="text-end">
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => onRemoveManager(manager.user_id)}
-                            title="Remove Manager"
-                          >
-                            <BsTrash />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              ) : (
-                <p>No managers assigned to this tournament yet. (Using mock data)</p>
-              )}
-            </Card.Body>
-          </Card>
+          {/* Current Managers Section - Restructured */}
+          <h4 className="mt-4 mb-3">
+            <BsPersonPlus className="me-2" />
+            Current Managers
+          </h4>
+          {/* This part still uses local mock 'managers' state. 
+              To use server data, it should use tournamentDetails.managers 
+              and API calls for add/remove, then refetch tournamentDetails.
+          */}
+          {tournamentDetails.managers.length > 0 ? (
+            <Table striped hover responsive size="sm" className="mb-0">
+              <thead className="table-dark">
+                <tr>
+                  <th>Name</th>
+                  <th className="text-end"></th> {/* Actions column - no title */}
+                </tr>
+              </thead>
+              <tbody>
+                {tournamentDetails.managers.map(manager => (
+                  <tr key={manager.user_id}>
+                    <td className="align-middle">{manager.user_name}</td>
+                    <td className="text-end align-middle">
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => onRemoveManager(manager.user_id)}
+                        title="Remove Manager"
+                      >
+                        <BsTrash />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          ) : (
+            <p>No managers assigned to this tournament yet.</p>
+          )}
+
+          {/* Danger Zone Section */}
+          {tournamentDetails.role === "owner" && (
+            <Card className="mt-4">
+              <Card.Header className="text-white d-flex justify-content-between align-items-center">
+                <div>
+                  <BsExclamationTriangleFill className="me-2" />
+                  <strong>Danger Zone</strong>
+                </div>
+              </Card.Header>
+              <Card.Body>
+                <p>Be careful, these actions are irreversible.</p>
+                <Button
+                  variant="danger"
+                  onClick={onDeleteTournament}
+                  className="w-100"
+                >
+                  <BsTrash className="me-2" />
+                  Delete This Tournament
+                </Button>
+              </Card.Body>
+            </Card>
+          )}
         </Col>
       </Row>
     </Container>
