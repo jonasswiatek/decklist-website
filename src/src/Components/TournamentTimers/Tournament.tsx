@@ -2,9 +2,9 @@ import { ReactElement, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard } from 'react-icons/bs';
+import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsPlusCircle, BsDashCircle } from 'react-icons/bs';
 import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournamentTimers';
-import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock } from '../../model/api/tournamentTimers';
+import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock, adjustClock } from '../../model/api/tournamentTimers';
 import { CountdownTimer } from './CountdownTimer';
 
 interface AddManagerFormInputs {
@@ -83,6 +83,12 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       await resetClock(tournament_id, clockId);
       refetch();
     }
+  };
+
+  const onAdjustClockTime = async (clockId: string, msAdjustment: number) => {
+    console.log(`Adjusting clock ${clockId} by ${msAdjustment} ms`);
+    await adjustClock(tournament_id, clockId, { ms_adjustment: msAdjustment });
+    refetch();
   };
 
   const onDeleteClock = async (clockId: string) => {
@@ -224,6 +230,24 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                         className="me-1"
                       >
                         <BsArrowCounterclockwise />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => onAdjustClockTime(clock.clock_id, 60000)}
+                        title="Increment by 1 min"
+                        className="me-1"
+                      >
+                        <BsPlusCircle />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => onAdjustClockTime(clock.clock_id, -60000)}
+                        title="Decrement by 1 min"
+                        className="me-1"
+                      >
+                        <BsDashCircle />
                       </Button>
                       <Button
                         variant="danger"

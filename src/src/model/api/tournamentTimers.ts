@@ -56,6 +56,10 @@ export interface UpdateClockRequest {
     is_running: boolean;
 }
 
+export interface AdjustClockRequest {
+    ms_adjustment: number;
+}
+
 export interface AddManagerRequest {
     user_email: string;
     user_name: string;
@@ -161,6 +165,22 @@ export async function resetClock(tournamentId: string, clockId: string): Promise
 
     if (!response.ok) {
         throw new Error(`Error resetting clock: ${response.statusText}`);
+    }
+}
+
+export async function adjustClock(tournamentId: string, clockId: string, request: AdjustClockRequest): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}/adjust`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+    });
+
+    await ThrowIfValidationErrors(response);
+
+    if (!response.ok) {
+        throw new Error(`Error adjusting clock: ${response.statusText}`);
     }
 }
 
