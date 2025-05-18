@@ -1,8 +1,8 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, Fragment } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsPlusCircle, BsDashCircle } from 'react-icons/bs';
+import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsSliders } from 'react-icons/bs';
 import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournamentTimers';
 import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock, adjustClock } from '../../model/api/tournamentTimers';
 import { CountdownTimer } from './CountdownTimer';
@@ -37,6 +37,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const navigate = useNavigate();
   const publicLink = `${window.location.origin}/timers/${tournamentDetails?.tournament_id}/view`;
   const [copied, setCopied] = useState(false);
+  const [expandedClockId, setExpandedClockId] = useState<string | null>(null);
 
   const copyToClipboard = async () => {
       await navigator.clipboard.writeText(publicLink);
@@ -74,6 +75,10 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     console.log(`Toggling clock ${clockId}. Current state: ${currentState ? 'running' : 'paused'}`);
     await updateClock(tournament_id, clockId, { is_running: !currentState });
     refetch();
+  };
+
+  const handleToggleAdjustPanel = (clockId: string) => {
+    setExpandedClockId(prevId => (prevId === clockId ? null : clockId));
   };
 
   const onResetClock = async (clockId: string, durationSeconds: number) => {
@@ -136,7 +141,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
         </Col>
       </Row>
       <Row>
-        <Col md={6} className="mb-3 mb-md-0">
+        <Col lg={6} className="mb-3 mb-lg-0">
           <Card className="mb-3">
             <Card.Header className="d-flex justify-content-between align-items-center">
               <div>
@@ -200,65 +205,77 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
           </h4>
           {tournamentDetails?.clocks && tournamentDetails.clocks.length > 0 ? (
             <Table striped hover responsive size="sm" className="mb-0"> {/* Removed bordered prop */}
-              <thead className="table-dark">
-                <tr>
-                  <th>Clock</th>
-                  <th>Remainder</th>
-                  <th className="text-end"></th> {/* Actions column - no title */}
-                </tr>
-              </thead>
               <tbody>
                 {tournamentDetails.clocks.map((clock: TournamentTimerClock) => (
-                  <tr key={clock.clock_id}>
-                    <td className="align-middle">{clock.clock_name}</td>
-                    <td className="align-middle"><CountdownTimer initialMilliseconds={clock.ms_remaining} isRunning={clock.is_running} /></td>
-                    <td className="text-end align-middle">
-                      <Button
-                        variant={clock.is_running ? "warning" : "success"}
-                        size="sm"
-                        onClick={() => onToggleClock(clock.clock_id, clock.is_running)}
-                        title={clock.is_running ? "Pause Clock" : "Start Clock"}
-                        className="me-1"
-                      >
-                        {clock.is_running ? <BsPauseFill /> : <BsPlayFill />}
-                      </Button>
-                      <Button
-                        variant="info"
-                        size="sm"
-                        onClick={() => onResetClock(clock.clock_id, clock.duration_seconds)}
-                        title="Reset Clock"
-                        className="me-1"
-                      >
-                        <BsArrowCounterclockwise />
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => onAdjustClockTime(clock.clock_id, 60000)}
-                        title="Increment by 1 min"
-                        className="me-1"
-                      >
-                        <BsPlusCircle />
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => onAdjustClockTime(clock.clock_id, -60000)}
-                        title="Decrement by 1 min"
-                        className="me-1"
-                      >
-                        <BsDashCircle />
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => onDeleteClock(clock.clock_id)}
-                        title="Delete Clock"
-                      >
-                        <BsTrash />
-                      </Button>
-                    </td>
-                  </tr>
+                  <Fragment key={clock.clock_id}>
+                    <tr>
+                      <td className="align-middle">{clock.clock_name}</td>
+                      <td className="align-middle"><CountdownTimer initialMilliseconds={clock.ms_remaining} isRunning={clock.is_running} /></td>
+                      <td className="text-end align-middle">
+                        <Button
+                          variant={clock.is_running ? "warning" : "success"}
+                          size="sm"
+                          onClick={() => onToggleClock(clock.clock_id, clock.is_running)}
+                          title={clock.is_running ? "Pause Clock" : "Start Clock"}
+                          className="me-1"
+                        >
+                          {clock.is_running ? <BsPauseFill /> : <BsPlayFill />}
+                        </Button>
+                        <Button
+                          variant="info"
+                          size="sm"
+                          onClick={() => onResetClock(clock.clock_id, clock.duration_seconds)}
+                          title="Reset Clock"
+                          className="me-1"
+                        >
+                          <BsArrowCounterclockwise />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleToggleAdjustPanel(clock.clock_id)}
+                          title="Adjust Time"
+                          className="me-1"
+                          aria-expanded={expandedClockId === clock.clock_id}
+                        >
+                          <BsSliders />
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => onDeleteClock(clock.clock_id)}
+                          title="Delete Clock"
+                        >
+                          <BsTrash />
+                        </Button>
+                      </td>
+                    </tr>
+                    {expandedClockId === clock.clock_id && (
+                      <tr>
+                        <td colSpan={3} className="p-2">
+                          <div className="d-flex justify-content-center flex-wrap">
+                            {[
+                              { label: "-1m", ms: -60000 },
+                              { label: "-30s", ms: -30000 }, { label: "-10s", ms: -10000 },
+                              { label: "+10s", ms: 10000 }, { label: "+30s", ms: 30000 },
+                              { label: "+1m", ms: 60000 },
+                            ].map(adj => (
+                              <Button
+                                key={adj.label}
+                                variant="outline-secondary"
+                                size="sm"
+                                onClick={() => onAdjustClockTime(clock.clock_id, adj.ms)}
+                                className="m-1"
+                                style={{ minWidth: '50px' }}
+                              >
+                                {adj.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
               </tbody>
             </Table>
@@ -266,7 +283,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
             <p>No clocks created for this tournament yet.</p>
           )}
         </Col>
-        <Col md={6}>
+        <Col lg={6}>
           <div className="alert alert-info d-flex justify-content-between align-items-center mb-4">
               <div style={{
                   whiteSpace: 'nowrap',
