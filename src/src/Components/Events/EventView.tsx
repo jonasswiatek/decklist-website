@@ -13,26 +13,28 @@ const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string 
     const navigate = useNavigate();
 
     return (
-        <div className='row'>
-            <div className='col'>
-                <div className="mb-3">
-                    <button 
-                        type="button" 
-                        className="btn btn-link text-decoration-none p-0" 
-                        onClick={() => navigate('/')}
-                    >
-                        <BsArrowLeft className="me-1" /> Events
-                    </button>
+        <div className="container">
+            <div className='row'>
+                <div className='col'>
+                    <div className="mb-3">
+                        <button 
+                            type="button" 
+                            className="btn btn-link text-decoration-none p-0" 
+                            onClick={() => navigate('/')}
+                        >
+                            <BsArrowLeft className="me-1" /> Events
+                        </button>
+                    </div>
+                    <h1>
+                        <span>{eventName}</span>
+                        {showEventId && (
+                            <small className="text-muted float-end d-none d-md-inline">
+                                <span className="badge bg-primary user-select-all">{eventId.toUpperCase()}</span>
+                            </small>
+                        )}
+                    </h1>
+                    <br></br>
                 </div>
-                <h1>
-                    <span>{eventName}</span>
-                    {showEventId && (
-                        <small className="text-muted float-end d-none d-md-inline">
-                            <span className="badge bg-primary user-select-all">{eventId.toUpperCase()}</span>
-                        </small>
-                    )}
-                </h1>
-                <br></br>
             </div>
         </div>
     );

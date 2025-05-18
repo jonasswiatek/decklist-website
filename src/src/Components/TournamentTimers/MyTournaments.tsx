@@ -28,7 +28,7 @@ const MyTournaments: React.FC = () => {
       <Row className="mb-4">
         <Col>
           <h1 className="display-5">Round timers for your tournaments</h1>
-          <p className="lead text-muted">Always up to date, with websocket push and judge access via mobile.</p>
+          <p className="lead text-muted">Synchronized with WebSockets and judge access via mobile.</p>
         </Col>
       </Row>
 

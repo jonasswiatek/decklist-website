@@ -199,13 +199,13 @@ function App() {
     <>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <div className="d-flex flex-column min-vh-100">
+          {/* This div acts as the main flex container for the page */}
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <NavBar />
-            <div className="py-3 py-md-3 flex-grow-1">
-              <div className='container'>
-                  <RouterProvider router={router} />
-              </div>
-            </div>
+            {/* This main element will grow to fill available space, pushing the footer down */}
+            <main style={{ flex: '1 0 auto' }}>
+              <RouterProvider router={router} />
+            </main>
             <Footer />
           </div>
         </AuthProvider>
@@ -279,7 +279,7 @@ function Footer() {
   }
 
   return (
-    <footer className="py-3 mt-auto">
+    <footer className="py-3 mt-auto"> {/* mt-auto will now work as expected */}
       <Container className="text-center">
         <div className="mt-2">
           Brought to you with love, for free and with no guarantees.

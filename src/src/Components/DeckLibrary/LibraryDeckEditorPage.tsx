@@ -71,25 +71,27 @@ export const LibraryDeckEditorPage: React.FC = () => {
 
   return (
     <>
-      <div className="mb-3">
-        <button 
-          type="button" 
-          className="btn btn-link text-decoration-none p-0" 
-          onClick={() => navigate('/library')}
-        >
-          <BsArrowLeft className="me-1" /> Back to Library
-        </button>
+      <div className="container">
+        <div className="mb-3">
+          <button 
+            type="button" 
+            className="btn btn-link text-decoration-none p-0" 
+            onClick={() => navigate('/library')}
+          >
+            <BsArrowLeft className="me-1" /> Back to Library
+          </button>
+        </div>
+        <LibraryDeckEditor 
+          deck_name={data?.deck_name}
+          format={data?.format ?? importedDeck?.format}
+          formats={formats!.formats}
+          groups={data?.groups}
+          deck_warnings={data?.deck_warnings}
+          decklist_text={data?.decklist_text ?? importedDeck?.decklist_text}
+          onDeckUpdate={handleDeckUpdate}
+          onDeleteDeck={handleDeleteDeck}
+        />
       </div>
-      <LibraryDeckEditor 
-        deck_name={data?.deck_name}
-        format={data?.format ?? importedDeck?.format}
-        formats={formats!.formats}
-        groups={data?.groups}
-        deck_warnings={data?.deck_warnings}
-        decklist_text={data?.decklist_text ?? importedDeck?.decklist_text}
-        onDeckUpdate={handleDeckUpdate}
-        onDeleteDeck={handleDeleteDeck}
-      />
     </>
   );
 }

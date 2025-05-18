@@ -200,6 +200,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     return (
         <>
+        <div className="container">
         {isJudge && (
             <div className='row'>
                 <div className='col-12 mb-3 d-flex justify-content-between align-items-center'>
@@ -459,6 +460,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                 </div>
             </div>
         </form>
+        </div>
         </>
     )
 }
