@@ -74,11 +74,14 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
           <div
             className="row g-3" // Ensures items wrap and use grid gutter
           >
-            {highPriorityClocks.map((clock) => (
-              <div key={clock.clock_id} className="col-12 col-md-6">
-                <ClockComponent clock={clock} className="h-100 w-100" priority="high" />
-              </div>
-            ))}
+            {highPriorityClocks.map((clock) => {
+              const columnClass = highPriorityClocks.length === 1 ? "col-12" : "col-12 col-md-6";
+              return (
+                <div key={clock.clock_id} className={columnClass}>
+                  <ClockComponent clock={clock} className="h-100 w-100" priority="high" />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -86,11 +89,22 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
         <div className="mb-4">
           {/* Optional: <h3 className="text-light mb-3">Medium Priority</h3> */}
           <div className="row g-3">
-            {mediumPriorityClocks.map((clock) => (
-              <div key={clock.clock_id} className="col-12 col-md-6 col-lg-4">
-                <ClockComponent clock={clock} priority="medium" />
-              </div>
-            ))}
+            {mediumPriorityClocks.map((clock) => {
+              let columnClass = "col-12"; // Default: 1 per row on mobile (xs, sm)
+              if (mediumPriorityClocks.length > 1) { // More than 1 item
+                if (mediumPriorityClocks.length === 2) {
+                  columnClass += " col-md-6"; // 2 per row on md+
+                } else { // 3 or more items
+                  columnClass += " col-md-6 col-lg-4"; // 2 per row on md, 3 per row on lg+
+                }
+              }
+              // If length is 1, it remains "col-12" (full width)
+              return (
+                <div key={clock.clock_id} className={columnClass}>
+                  <ClockComponent clock={clock} priority="medium" />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -98,11 +112,24 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
         <div className="mb-4">
           {/* Optional: <h3 className="text-light mb-3">Low Priority</h3> */}
           <div className="row g-3">
-            {lowPriorityClocks.map((clock) => (
-              <div key={clock.clock_id} className="col-12 col-sm-6 col-md-4 col-lg-3">
-                <ClockComponent clock={clock} priority="low" />
-              </div>
-            ))}
+            {lowPriorityClocks.map((clock) => {
+              let columnClass = "col-12"; // Default: 1 per row on mobile (xs, sm)
+              if (lowPriorityClocks.length > 1) { // More than 1 item
+                if (lowPriorityClocks.length === 2) {
+                  columnClass += " col-md-6"; // 2 per row on md+
+                } else if (lowPriorityClocks.length === 3) {
+                  columnClass += " col-md-4"; // 3 per row on md+
+                } else { // 4 or more items
+                  columnClass += " col-md-4 col-lg-3"; // 3 per row on md, 4 per row on lg+
+                }
+              }
+              // If length is 1, it remains "col-12" (full width)
+              return (
+                <div key={clock.clock_id} className={columnClass}>
+                  <ClockComponent clock={clock} priority="low" />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
