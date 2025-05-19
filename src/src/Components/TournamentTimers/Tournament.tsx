@@ -224,7 +224,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                         {clock.clock_name}
                       </td>
                       <td 
-                        className="align-middle text-end" 
+                        className="align-middle text-end timer-display-font-table" 
                       >
                         <TimerDisplay msRemaining={clock.ms_remaining} />
                       </td>

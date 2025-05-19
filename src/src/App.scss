@@ -147,6 +147,16 @@
   font-size: 3.5rem; /* Added to make font bigger */
 }
 
+.timer-display-font-table {
+  font-family: "M PLUS Code Latin", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+  font-size: 1.1rem; /* More standard font size for table view */
+}
+
 /* Updated definition for shake-warning to make it periodic */
 /* Shakes for 0.5s, then pauses for 2.5s. Total cycle: 3s. */
 @keyframes shake-warning {
