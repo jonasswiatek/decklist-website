@@ -46,12 +46,6 @@ export interface CreateClockRequest {
     duration_seconds: number;
 }
 
-export interface CreateClockResponse {
-    clock_id: string;
-    clock_name: string;
-    duration_seconds: number;
-}
-
 export interface UpdateClockRequest {
     is_running: boolean;
 }
@@ -113,7 +107,7 @@ export async function deleteTournament(tournamentId: string): Promise<void> {
     }
 }
 
-export async function createClock(tournamentId: string, request: CreateClockRequest): Promise<CreateClockResponse> {
+export async function createClock(tournamentId: string, request: CreateClockRequest): Promise<TournamentTimerClock> {
     const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks`, {
         method: 'POST',
         headers: {
@@ -139,7 +133,7 @@ export async function deleteClock(tournamentId: string, clockId: string): Promis
     }
 }
 
-export async function updateClock(tournamentId: string, clockId: string, request: UpdateClockRequest): Promise<void> {
+export async function updateClock(tournamentId: string, clockId: string, request: UpdateClockRequest): Promise<TournamentTimerClock> {
     const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}`, {
         method: 'POST',
         headers: {
@@ -153,9 +147,11 @@ export async function updateClock(tournamentId: string, clockId: string, request
     if (!response.ok) {
         throw new Error(`Error updating clock: ${response.statusText}`);
     }
+
+    return response.json();
 }
 
-export async function resetClock(tournamentId: string, clockId: string): Promise<void> {
+export async function resetClock(tournamentId: string, clockId: string): Promise<TournamentTimerClock> {
     const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}/reset`, {
         method: 'POST',
         headers: {
@@ -166,9 +162,11 @@ export async function resetClock(tournamentId: string, clockId: string): Promise
     if (!response.ok) {
         throw new Error(`Error resetting clock: ${response.statusText}`);
     }
+
+    return response.json();
 }
 
-export async function adjustClock(tournamentId: string, clockId: string, request: AdjustClockRequest): Promise<void> {
+export async function adjustClock(tournamentId: string, clockId: string, request: AdjustClockRequest): Promise<TournamentTimerClock> {
     const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}/adjust`, {
         method: 'POST',
         headers: {
@@ -182,6 +180,8 @@ export async function adjustClock(tournamentId: string, clockId: string, request
     if (!response.ok) {
         throw new Error(`Error adjusting clock: ${response.statusText}`);
     }
+
+    return response.json();
 }
 
 export async function addManager(tournamentId: string, request: AddManagerRequest): Promise<void> {

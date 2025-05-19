@@ -24,7 +24,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const { refetch: refetchEvent } = e;
 
     useEventUpdated((message) => {
-        if(refetchEvent && message.refresh && message.updatedBy != auth.userId) {
+        if(refetchEvent && message.refresh && message.updated_by_session_id != auth.sessionId) {
             console.log("Refetching event");
             refetchEvent();
         }

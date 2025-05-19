@@ -4,6 +4,7 @@ export type AuthContextType = {
     authorized?: boolean,
     email?: string,
     userId?: string,
+    sessionId?: string,
     login: () => void
 }
 

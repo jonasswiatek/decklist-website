@@ -7,6 +7,8 @@ import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournam
 import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock, adjustClock } from '../../model/api/tournamentTimers';
 import { TimerDisplay } from './TimerDisplay';
 import { useTournamentClocks } from './useTournamentClocks';
+import { useTournamentTimersUpdated } from '../../Hooks/useWebsocketConnection';
+import { useAuth } from '../Login/useAuth';
 
 interface AddManagerFormInputs {
   name: string;
@@ -27,6 +29,7 @@ export function TournamentWrapper(): ReactElement {
 }
 
 export function Tournament({ tournament_id }: {tournament_id: string}): ReactElement {
+  const { sessionId } = useAuth();
   const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id);
   const { refetch: refetchUserTournaments } = useUserTournaments();
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<AddManagerFormInputs>();
@@ -39,7 +42,19 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const publicLink = `${window.location.origin}/timers/${tournamentDetails?.tournament_id}/view`;
   const [copied, setCopied] = useState(false);
   const [expandedClockId, setExpandedClockId] = useState<string | null>(null);
+  
   const timers = useTournamentClocks(tournamentDetails?.clocks);
+
+  useTournamentTimersUpdated(
+    (message) => {
+      if (message.updated_by_session_id == sessionId)
+        return; // Ignore updates from the same session
+
+      console.log("Tournament Clock Updated", message);
+      refetch();
+    },
+    tournament_id
+  );
 
   const copyToClipboard = async () => {
       await navigator.clipboard.writeText(publicLink);
@@ -69,12 +84,11 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       duration_seconds: data.duration_minutes * 60,
     });
 
-    resetClockForm({ clock_name: '', duration_minutes: 50 });
     refetch();
+    resetClockForm({ clock_name: '', duration_minutes: 50 });
   };
 
   const onToggleClock = async (clockId: string, currentState: boolean) => {
-    console.log(`Toggling clock ${clockId}. Current state: ${currentState ? 'running' : 'paused'}`);
     await updateClock(tournament_id, clockId, { is_running: !currentState });
     refetch();
   };
@@ -86,7 +100,6 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const onResetClock = async (clockId: string, durationSeconds: number) => {
     const durationMinutes = Math.floor(durationSeconds / 60);
     if (window.confirm(`Are you sure you want to reset this clock to ${durationMinutes} minutes?`)) {
-      console.log(`Resetting clock ${clockId}`);
       await resetClock(tournament_id, clockId);
       refetch();
     }
@@ -130,6 +143,16 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       <Container className="py-3">
         <Alert variant="danger">
           Error loading tournament details: {error?.message}
+        </Alert>
+      </Container>
+    );
+  }
+
+  if (tournamentDetails.role !== "owner" && tournamentDetails.role !== "manager") {
+    return (
+      <Container className="py-3">
+        <Alert variant="warning">
+          You do not have permission to view this tournament.
         </Alert>
       </Container>
     );
@@ -343,37 +366,42 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
             </Card.Header>
             <Card.Body>
               <Form onSubmit={handleSubmit(onAddManager)}>
-                <Form.Group className="mb-3" controlId="managerName">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter manager's name"
-                    {...register("name", { required: "Name is required" })}
-                    isInvalid={!!errors.name}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.name?.message}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="managerEmail">
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    placeholder="Enter manager's email"
-                    {...register("email", { 
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: "Invalid email address"
-                      }
-                    })}
-                    isInvalid={!!errors.email}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.email?.message}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <Form.Group controlId="managerName">
+                      <Form.Label>Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter manager's name"
+                        {...register("name", { required: "Name is required" })}
+                        isInvalid={!!errors.name}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.name?.message}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group controlId="managerEmail">
+                      <Form.Label>Email</Form.Label>
+                      <Form.Control
+                        type="email"
+                        placeholder="Enter manager's email"
+                        {...register("email", { 
+                          required: "Email is required",
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Invalid email address"
+                          }
+                        })}
+                        isInvalid={!!errors.email}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.email?.message}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
                 <Button variant="success" type="submit" disabled={isSubmitting}>
                   {isSubmitting ? (
@@ -387,21 +415,16 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
             </Card.Body>
           </Card>
 
-          {/* Current Managers Section - Restructured */}
           <h4 className="mt-4 mb-3">
             <BsPersonPlus className="me-2" />
             Current Managers
           </h4>
-          {/* This part still uses local mock 'managers' state. 
-              To use server data, it should use tournamentDetails.managers 
-              and API calls for add/remove, then refetch tournamentDetails.
-          */}
           {tournamentDetails.managers.length > 0 ? (
             <Table striped hover responsive size="sm" className="mb-0">
               <thead className="table-dark">
                 <tr>
                   <th>Name</th>
-                  <th className="text-end"></th> {/* Actions column - no title */}
+                  <th className="text-end"></th>
                 </tr>
               </thead>
               <tbody>

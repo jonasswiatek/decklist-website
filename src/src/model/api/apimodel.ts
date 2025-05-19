@@ -2,6 +2,7 @@ export type MeResponse = {
     authorized: boolean;
     email?: string;
     user_id?: string;
+    session_id?: string;
 }
 
 export async function meRequest(): Promise<MeResponse> {
@@ -575,7 +576,8 @@ export type LoginStartResponse = {
 export type LoginContinueResponse = {
     success: boolean,
     error_type: string,
-    email: string
+    email: string,
+    session_id: string,
     user_id: string,
 }
 

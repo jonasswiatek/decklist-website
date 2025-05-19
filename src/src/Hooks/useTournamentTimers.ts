@@ -20,7 +20,7 @@ export function useUserTournaments(): UseQueryResult<UserTournamentsResponse, Er
     );
 }
 
-export function useTournamentDetails(tournamentId: string): UseQueryResult<TournamentDetailsResponse, Error> {
+export function useTournamentDetails(tournamentId: string, enabled : boolean = true): UseQueryResult<TournamentDetailsResponse, Error> {
     return useQuery<TournamentDetailsResponse, Error>(
         [TOURNAMENT_TIMERS_QUERY_KEY, 'tournamentDetails', tournamentId],
         () => getTournamentDetails(tournamentId),
@@ -28,6 +28,7 @@ export function useTournamentDetails(tournamentId: string): UseQueryResult<Tourn
             staleTime: Infinity,
             retry: false,
             refetchOnWindowFocus: false,
+            enabled: enabled,
         }
     );
 }

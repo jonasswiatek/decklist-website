@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Spinner, Alert, Button } from 'react-bootstrap';
 import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
@@ -20,31 +20,35 @@ export function TournamentPublicViewWrapper(): ReactElement {
 }
 
 export function TournamentPublicView({ tournament_id }: { tournament_id: string }): ReactElement {
-  const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id);
+  const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
   const timers = useTournamentClocks(tournamentDetails?.clocks);
 
-  useTournamentTimersUpdated(
+  const { readyState } = useTournamentTimersUpdated(
     (message) => {
-      if (message.tournamentId === tournament_id) {
-        console.log("Tournament Timers Updated: ", message);
+        console.log("Tournament Clock Updated", message);
         refetch();
-      }
     },
     tournament_id
   );
 
-  if (isLoading) {
+  useEffect(() => {
+    if (readyState === WebSocket.OPEN) {
+      console.log("WebSocket: Tournament timers connection opened, fetching timers");
+      refetch();
+    }},
+    [readyState, refetch]
+  );
+
+  if(!tournamentDetails || readyState !== WebSocket.OPEN || isLoading) {
     return (
-      <>
-        <Spinner animation="border" role="status" style={{ width: '4rem', height: '4rem' }} variant="primary">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <p className="mt-3 fs-4 text-light">Loading tournament timers...</p>
-      </>
+      <Container fluid className="py-3 vh-100 d-flex flex-column justify-content-center align-items-center bg-dark">
+        <Spinner animation="border" variant="light" className="mb-3" style={{ width: '3rem', height: '3rem' }} />
+        <p className="text-light fs-5 text-center">Connecting to server...</p>
+      </Container>
     );
   }
 
-  if (error || !tournamentDetails) {
+  if (error) {
     return (
         <Alert variant="danger" className="w-75 text-center shadow-sm">
           <Alert.Heading as="h4">Error Loading Tournament Timers</Alert.Heading>
