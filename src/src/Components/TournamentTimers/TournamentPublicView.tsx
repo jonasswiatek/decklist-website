@@ -61,38 +61,68 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
 
   const runningClocks = timers
     .filter(clock => clock.is_running);
+  const count = runningClocks.length;
 
-  const getColumnClass = (count: number): string => {
+  let numRows = 0;
+  let numColsInGrid = 0; // Number of columns in the conceptual grid
+  let bootstrapColClass = ""; // Bootstrap class like "col-6"
+
+  if (count > 0) {
     if (count === 1) {
-      return "col-12";
+      numRows = 1;
+      numColsInGrid = 1;
+    } else if (count === 2) {
+      // Special case: 2 items stacked vertically
+      numRows = 2;
+      numColsInGrid = 1;
+    } else {
+      // For count >= 3, create a squarish grid
+      numColsInGrid = Math.ceil(Math.sqrt(count));
+      numRows = Math.ceil(count / numColsInGrid);
     }
-    if (count === 2) {
-      return "col-12 col-md-6";
+
+    if (numColsInGrid > 0) {
+      const bsCols = Math.max(1, Math.floor(12 / numColsInGrid));
+      bootstrapColClass = `col-${bsCols}`;
     }
-    // 3 or more items
-    return "col-12 col-md-6 col-lg-4";
-  };
+  }
+
+  const rowsOfClocks = [];
+  if (count > 0) {
+    let clockIndex = 0;
+    for (let r = 0; r < numRows && clockIndex < count; r++) {
+      const clocksInCurrentRow = [];
+      for (let c = 0; c < numColsInGrid && clockIndex < count; c++) {
+        clocksInCurrentRow.push(runningClocks[clockIndex]);
+        clockIndex++;
+      }
+      if (clocksInCurrentRow.length > 0) {
+        rowsOfClocks.push(clocksInCurrentRow);
+      }
+    }
+  }
 
   return (
-    <div className="container-fluid px-3 py-3">
-      {runningClocks.length > 0 && (
-        <div className="mb-4">
-          <div className="row g-4"> {/* Changed g-3 to g-4 */}
-            {runningClocks.map((clock) => {
-              const columnClass = getColumnClass(runningClocks.length);
-              return (
-                <div key={clock.clock_id} className={columnClass}>
-                  <ClockComponent clock={clock} className="h-100" /> {/* Pass h-100 if clocks should fill height of grid cell */}
-                </div>
-              );
-            })}
-          </div>
+    <div className="container-fluid px-0 py-0 vh-100 d-flex flex-column bg-dark"> {/* Full screen, flex column for rows, no padding */}
+      {count > 0 && rowsOfClocks.map((clocksInRow, rowIndex) => (
+        <div key={rowIndex} className="row g-0 flex-grow-1"> {/* Row takes available height, no gutters */}
+          {clocksInRow.map((clock) => (
+            <div key={clock.clock_id} className={`${bootstrapColClass} d-flex p-1`}> {/* Cell with padding, d-flex for child fill */}
+              <ClockComponent clock={clock} className="w-100 h-100" /> {/* Clock fills the padded cell */}
+            </div>
+          ))}
+          {/* Fill remaining columns in the last row if it's not full, to maintain structure (optional) */}
+          {clocksInRow.length < numColsInGrid && Array.from({ length: numColsInGrid - clocksInRow.length }).map((_, i) => (
+            <div key={`empty-${i}`} className={`${bootstrapColClass} p-1`}></div>
+          ))}
         </div>
-      )}
-      {runningClocks.length === 0 && !isLoading && (
-         <Alert variant="info" className="w-75 text-center mx-auto mt-4">
-            No active timers for this tournament at the moment.
-         </Alert>
+      ))}
+      {count === 0 && !isLoading && (
+         <div className="vh-100 d-flex justify-content-center align-items-center"> {/* Centering the alert */}
+           <Alert variant="info" className="w-75 text-center mx-auto">
+              No active timers for this tournament at the moment.
+           </Alert>
+         </div>
       )}
     </div>
   );
