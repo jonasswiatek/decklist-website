@@ -102,41 +102,91 @@
   body, #root {
     background-color: white !important;
     color: black !important;
-    font-size: 90% !important; /* Reduce font size for printing */
-    margin-left: 0 !important; /* Reduce left margin when printing */
-    padding-left: 0 !important; /* Ensure no left padding */
+    font-size: 90% !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
   }
   
   .container, .container-fluid, .row, .col, div {
     margin-left: 0 !important;
-    padding-left: 5px !important; /* Minimal padding for readability */
+    padding-left: 5px !important;
   }
   
-  // Add multi-column layout for printing decklist
   .print-decklist-container {
     column-count: 2;
     column-gap: 20px;
-    column-fill: auto; // Ensures columns are balanced
+    column-fill: auto;
     width: 100%;
-    page-break-inside: auto; // Allow page breaks between columns
+    page-break-inside: auto;
   }
   
   .print-decklist-group {
-    break-inside: avoid; // Prevent a card group from breaking across columns
-    display: inline-block; // Helps with column flow
-    width: 100%; // Full width within its column
+    break-inside: avoid;
+    display: inline-block;
+    width: 100%;
   }
   
-  // Add other print-specific styles
-  // Hide navigation, buttons, etc.
   nav, button, .no-print {
     display: none !important;
   }
   
-  // Ensure text is visible on white background
   * {
     color: black !important;
     text-shadow: none !important;
     box-shadow: none !important;
   }
+}
+
+.timer-display-font {
+  font-family: "M PLUS Code Latin", monospace;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+  font-size: 3.5rem; /* Added to make font bigger */
+}
+
+/* Updated definition for shake-warning to make it periodic */
+/* Shakes for 0.5s, then pauses for 2.5s. Total cycle: 3s. */
+@keyframes shake-warning {
+  0% { transform: translateX(0); }
+  /* Shake phase (first 0.5s of 3s cycle) - percentages are original_percentage * (0.5s / 3s) */
+  1.67% { transform: translateX(-2px); }  /* Original 10% */
+  3.33% { transform: translateX(2px); }   /* Original 20% */
+  5.00% { transform: translateX(-2px); }  /* Original 30% */
+  6.67% { transform: translateX(2px); }   /* Original 40% */
+  8.33% { transform: translateX(-2px); }  /* Original 50% */
+  10.00% { transform: translateX(2px); }  /* Original 60% */
+  11.67% { transform: translateX(-2px); } /* Original 70% */
+  13.33% { transform: translateX(2px); }  /* Original 80% */
+  15.00% { transform: translateX(-2px); } /* Original 90% */
+  16.67% { transform: translateX(0); }    /* Original 100%, end of 0.5s shake */
+  
+  /* Pause phase: remains at translateX(0) from 16.67% to 100% */
+  100% { transform: translateX(0); }
+}
+
+.shake-warning-border {
+  border: 3px solid #ffc107 !important; /* Bootstrap warning color for the border */
+  animation: shake-warning 3s infinite; /* Updated total duration for the periodic animation */
+}
+
+.clock-name-font {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700; /* Adjust weight as needed, e.g., 400 for regular, 700 for bold */
+  font-style: normal;
+  text-align: center; /* Center the text */
+  
+  /* Add properties for responsive font size and to prevent wrapping */
+  white-space: nowrap; /* Prevent text from wrapping to a new line */
+  overflow: hidden; /* Hide the part of the text that overflows */
+  text-overflow: ellipsis; /* Display an ellipsis (...) for overflowed text */
+  width: 100%; /* Ensure the element respects parent's width for overflow calculation */
+  
+  /* Adjust font size dynamically */
+  /* Values: clamp(MINIMUM_SIZE, PREFERRED_SIZE (viewport-based), MAXIMUM_SIZE) */
+  /* Increased preferred (5vw) and maximum (3rem) size */
+  font-size: clamp(1.25rem, 5vw, 3rem); 
 }

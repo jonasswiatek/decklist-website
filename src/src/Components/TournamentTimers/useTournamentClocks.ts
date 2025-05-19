@@ -46,11 +46,9 @@ export function useTournamentClocks(
             setClocks(
                 initialClocks.map(initialClock => {
                     if (initialClock.is_running) {
-                        const originalMs = initialClock.ms_remaining;
-                        const newMsRemaining = originalMs - elapsedTime;
                         return {
                             ...initialClock, // Spread all properties from the original clock
-                            ms_remaining: newMsRemaining, // Update ms_remaining
+                            ms_remaining: initialClock.ms_remaining - elapsedTime, // Update ms_remaining
                         };
                     }
                     // If the clock was not running as per initialClocks, return it as is.

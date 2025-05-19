@@ -211,9 +211,27 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                 {timers.map((clock: TournamentTimerClock) => (
                   <Fragment key={clock.clock_id}>
                     <tr>
-                      <td className="align-middle">{clock.clock_name}</td>
-                      <td className="align-middle"><TimerDisplay msRemaining={clock.ms_remaining} /></td>
-                      <td className="text-end align-middle">
+                      <td 
+                        className="align-middle"
+                        style={{ 
+                          maxWidth: '150px', // Adjust as needed
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={clock.clock_name} // Show full name on hover
+                      >
+                        {clock.clock_name}
+                      </td>
+                      <td 
+                        className="align-middle text-end" 
+                      >
+                        <TimerDisplay msRemaining={clock.ms_remaining} />
+                      </td>
+                      <td 
+                        className="text-end align-middle"
+                        style={{ whiteSpace: 'nowrap', width: '1%' }}
+                      >
                         <Button
                           variant={clock.is_running ? "warning" : "success"}
                           size="sm"

@@ -9,7 +9,9 @@ const formatDuration = (totalMilliseconds: number): string => {
   const totalSeconds = Math.floor(totalMilliseconds / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return `${prefix}${minutes}m ${seconds < 10 ? '0' : ''}${seconds}s`;
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+  const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
+  return `${prefix}${formattedMinutes}:${formattedSeconds}`;
 };
 
 export const TimerDisplay: React.FC<{msRemaining: number}> = ({ msRemaining }) => {
