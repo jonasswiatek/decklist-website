@@ -3,11 +3,12 @@ import { useParams } from 'react-router-dom';
 import { Container, Spinner, Alert, Button } from 'react-bootstrap';
 import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
 import { useTournamentTimersUpdated } from '../../Hooks/useWebsocketConnection';
-import { CountdownTimer } from './CountdownTimer';
+import {  TimerDisplay } from './TimerDisplay';
 import { TournamentTimerClock } from '../../model/api/tournamentTimers';
+import { useTournamentClocks } from './useTournamentClocks';
 
-const HIGH_PRIORITY_MS = 10 * 60 * 1000; // 10 minutes
-const MEDIUM_PRIORITY_MS = 20 * 60 * 1000; // 20 minutes
+const HIGH_PRIORITY_MS = 5 * 60 * 1000; // 5 minutes
+const MEDIUM_PRIORITY_MS = 10 * 60 * 1000; // 10 minutes
 
 export function TournamentPublicViewWrapper(): ReactElement {
   const { tournament_id } = useParams<{ tournament_id: string }>();
@@ -23,6 +24,7 @@ export function TournamentPublicViewWrapper(): ReactElement {
 
 export function TournamentPublicView({ tournament_id }: { tournament_id: string }): ReactElement {
   const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id);
+  const timers = useTournamentClocks(tournamentDetails?.clocks);
 
   useTournamentTimersUpdated(
     (message) => {
@@ -56,7 +58,7 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
     );
   }
 
-  const runningClocks = tournamentDetails.clocks
+  const runningClocks = timers
     .filter(clock => clock.is_running)
     .sort((a, b) => a.ms_remaining - b.ms_remaining);
 
@@ -141,7 +143,7 @@ export function ClockComponent({ clock, className, priority }: { clock: Tourname
   return <div style={{ backgroundColor }} className={`rounded p-3 mb-3 text-light ${conditionalClasses}`}>
     <h1 className={clockNameClass}>{clock.clock_name}</h1>
     <div className={timerClass}>
-      <CountdownTimer initialMilliseconds={clock.ms_remaining} isRunning={clock.is_running} />
+      <TimerDisplay msRemaining={clock.ms_remaining} />
     </div>
   </div>;
 

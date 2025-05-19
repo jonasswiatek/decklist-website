@@ -5,7 +5,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsSliders } from 'react-icons/bs';
 import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournamentTimers';
 import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock, adjustClock } from '../../model/api/tournamentTimers';
-import { CountdownTimer } from './CountdownTimer';
+import { TimerDisplay } from './TimerDisplay';
+import { useTournamentClocks } from './useTournamentClocks';
 
 interface AddManagerFormInputs {
   name: string;
@@ -38,6 +39,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const publicLink = `${window.location.origin}/timers/${tournamentDetails?.tournament_id}/view`;
   const [copied, setCopied] = useState(false);
   const [expandedClockId, setExpandedClockId] = useState<string | null>(null);
+  const timers = useTournamentClocks(tournamentDetails?.clocks);
 
   const copyToClipboard = async () => {
       await navigator.clipboard.writeText(publicLink);
@@ -203,14 +205,14 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
             <BsClockHistory className="me-2" />
             Current Clocks
           </h4>
-          {tournamentDetails?.clocks && tournamentDetails.clocks.length > 0 ? (
+          {timers && timers.length > 0 ? (
             <Table striped hover responsive size="sm" className="mb-0"> {/* Removed bordered prop */}
               <tbody>
-                {tournamentDetails.clocks.map((clock: TournamentTimerClock) => (
+                {timers.map((clock: TournamentTimerClock) => (
                   <Fragment key={clock.clock_id}>
                     <tr>
                       <td className="align-middle">{clock.clock_name}</td>
-                      <td className="align-middle"><CountdownTimer initialMilliseconds={clock.ms_remaining} isRunning={clock.is_running} /></td>
+                      <td className="align-middle"><TimerDisplay msRemaining={clock.ms_remaining} /></td>
                       <td className="text-end align-middle">
                         <Button
                           variant={clock.is_running ? "warning" : "success"}
