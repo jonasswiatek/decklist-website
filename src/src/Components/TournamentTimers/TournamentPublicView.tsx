@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Spinner, Alert, Button } from 'react-bootstrap';
 import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
@@ -22,6 +22,15 @@ export function TournamentPublicViewWrapper(): ReactElement {
 export function TournamentPublicView({ tournament_id }: { tournament_id: string }): ReactElement {
   const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
   const timers = useTournamentClocks(tournamentDetails?.clocks);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 950);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 950);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const { readyState } = useTournamentTimersUpdated(
     (message) => {
@@ -64,28 +73,26 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
   const count = runningClocks.length;
 
   let numRows = 0;
-  let numColsInGrid = 0; // Number of columns in the conceptual grid
-  let bootstrapColClass = ""; // Bootstrap class like "col-6"
+  let numColsInGrid = 0; 
+  let bootstrapColClass = ""; 
 
   if (count > 0) {
-    if (count === 1) {
-      numRows = 1;
+    if (isMobile || count <= 2) { // If mobile, or 1 or 2 items, always use a single column
       numColsInGrid = 1;
-    } else if (count === 2) {
-      // Special case: 2 items stacked vertically
-      numRows = 2;
-      numColsInGrid = 1;
-    } else {
-      // For count >= 3, create a squarish grid
+    } else { // For count > 2 on non-mobile devices, create a squarish grid
       numColsInGrid = Math.ceil(Math.sqrt(count));
-      numRows = Math.ceil(count / numColsInGrid);
     }
 
+    // Calculate numRows based on numColsInGrid and count
+    numRows = Math.ceil(count / numColsInGrid);
+
+    // Calculate bootstrapColClass. If numColsInGrid is 1, this will result in 'col-12'.
     if (numColsInGrid > 0) {
       const bsCols = Math.max(1, Math.floor(12 / numColsInGrid));
       bootstrapColClass = `col-${bsCols}`;
     }
   }
+
 
   const rowsOfClocks = [];
   if (count > 0) {
