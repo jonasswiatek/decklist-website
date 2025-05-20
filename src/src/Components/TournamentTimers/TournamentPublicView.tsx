@@ -20,8 +20,6 @@ export function TournamentPublicViewWrapper(): ReactElement {
 }
 
 export function TournamentPublicView({ tournament_id }: { tournament_id: string }): ReactElement {
-  const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
-  const timers = useTournamentClocks(tournamentDetails?.clocks);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 950);
 
   useEffect(() => {
@@ -32,10 +30,24 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const { readyState } = useTournamentTimersUpdated(
+  const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
+  const {clocks: timers, addClock, removeClock, initClocks} = useTournamentClocks();
+
+  useEffect(() => {
+    if (tournamentDetails?.clocks) {
+      initClocks(tournamentDetails.clocks);
+    }
+  }, [initClocks, tournamentDetails?.clocks]);
+
+  const { readyState } =   useTournamentTimersUpdated(
     (message) => {
-        console.log("Tournament Clock Updated", message);
-        refetch();
+      if (message.updated_clock) {
+        addClock(message.updated_clock);
+      } else {
+        removeClock(message.clock_id);
+      }
+
+      console.log("Tournament Clock Updated", message);
     },
     tournament_id
   );

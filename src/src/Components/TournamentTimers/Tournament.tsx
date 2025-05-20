@@ -1,4 +1,4 @@
-import { ReactElement, useState, Fragment } from 'react';
+import { ReactElement, useState, Fragment, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -43,15 +43,26 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const [copied, setCopied] = useState(false);
   const [expandedClockId, setExpandedClockId] = useState<string | null>(null);
   
-  const timers = useTournamentClocks(tournamentDetails?.clocks);
+  const {clocks: timers, addClock, removeClock, initClocks} = useTournamentClocks();
+
+  useEffect(() => {
+    if (tournamentDetails?.clocks) {
+      initClocks(tournamentDetails.clocks);
+    }
+  }, [initClocks, tournamentDetails?.clocks]);
 
   useTournamentTimersUpdated(
     (message) => {
       if (message.updated_by_session_id == sessionId)
         return; // Ignore updates from the same session
 
+      if (message.updated_clock) {
+        addClock(message.updated_clock);
+      } else {
+        removeClock(message.clock_id);
+      }
+
       console.log("Tournament Clock Updated", message);
-      refetch();
     },
     tournament_id
   );
@@ -79,18 +90,18 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   };
 
   const onAddClock: SubmitHandler<AddClockFormInputs> = async (data) => {
-    await createClock(tournament_id, {
+    const clock = await createClock(tournament_id, {
       clock_name: data.clock_name,
       duration_seconds: data.duration_minutes * 60,
     });
 
-    refetch();
+    addClock(clock);
     resetClockForm({ clock_name: '', duration_minutes: 50 });
   };
 
   const onToggleClock = async (clockId: string, currentState: boolean) => {
-    await updateClock(tournament_id, clockId, { is_running: !currentState });
-    refetch();
+    const clock = await updateClock(tournament_id, clockId, { is_running: !currentState });
+    addClock(clock);
   };
 
   const handleToggleAdjustPanel = (clockId: string) => {
@@ -100,22 +111,22 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const onResetClock = async (clockId: string, durationSeconds: number) => {
     const durationMinutes = Math.floor(durationSeconds / 60);
     if (window.confirm(`Are you sure you want to reset this clock to ${durationMinutes} minutes?`)) {
-      await resetClock(tournament_id, clockId);
-      refetch();
+      const clock = await resetClock(tournament_id, clockId);
+      addClock(clock);
     }
   };
 
   const onAdjustClockTime = async (clockId: string, msAdjustment: number) => {
     console.log(`Adjusting clock ${clockId} by ${msAdjustment} ms`);
-    await adjustClock(tournament_id, clockId, { ms_adjustment: msAdjustment });
-    refetch();
+    const clock = await adjustClock(tournament_id, clockId, { ms_adjustment: msAdjustment });
+    addClock(clock);
   };
 
   const onDeleteClock = async (clockId: string) => {
     if (window.confirm("Are you sure you want to delete this clock?")) {
       console.log(`Deleting clock ${clockId}`);
       await deleteClock(tournament_id, clockId);
-      refetch();
+      removeClock(clockId);
     }
   };
 
