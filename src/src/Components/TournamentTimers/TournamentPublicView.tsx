@@ -39,7 +39,7 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
     }
   }, [initClocks, tournamentDetails?.clocks]);
 
-  const { readyState } =   useTournamentTimersUpdated(
+  const { readyState } = useTournamentTimersUpdated(
     (message) => {
       if (message.updated_clock) {
         addClock(message.updated_clock);

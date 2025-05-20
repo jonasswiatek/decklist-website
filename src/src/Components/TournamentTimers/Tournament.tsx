@@ -30,7 +30,7 @@ export function TournamentWrapper(): ReactElement {
 
 export function Tournament({ tournament_id }: {tournament_id: string}): ReactElement {
   const { sessionId } = useAuth();
-  const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id);
+  const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
   const { refetch: refetchUserTournaments } = useUserTournaments();
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<AddManagerFormInputs>();
   const { register: registerClock, handleSubmit: handleSubmitClock, reset: resetClockForm, formState: { errors: clockErrors, isSubmitting: isSubmittingClock } } = useForm<AddClockFormInputs>({
@@ -51,7 +51,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     }
   }, [initClocks, tournamentDetails?.clocks]);
 
-  useTournamentTimersUpdated(
+  const { readyState } = useTournamentTimersUpdated(
     (message) => {
       if (message.updated_by_session_id == sessionId)
         return; // Ignore updates from the same session
@@ -65,6 +65,14 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       console.log("Tournament Clock Updated", message);
     },
     tournament_id
+  );
+
+    useEffect(() => {
+    if (readyState === WebSocket.OPEN) {
+      console.log("WebSocket: Tournament timers connection opened, fetching timers");
+      refetch();
+    }},
+    [readyState, refetch]
   );
 
   const copyToClipboard = async () => {
@@ -138,18 +146,16 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     }
   };
 
-  if (isLoading) {
+  if(!tournamentDetails || readyState !== WebSocket.OPEN || isLoading) {
     return (
-      <Container className="py-3 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <p>Loading tournament details...</p>
+      <Container fluid className="py-3 vh-100 d-flex flex-column justify-content-center align-items-center bg-dark">
+        <Spinner animation="border" variant="light" className="mb-3" style={{ width: '3rem', height: '3rem' }} />
+        <p className="text-light fs-5 text-center">Connecting to server...</p>
       </Container>
     );
   }
 
-  if (error || !tournamentDetails) {
+  if (error) {
     return (
       <Container className="py-3">
         <Alert variant="danger">
@@ -240,7 +246,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
             Current Clocks
           </h4>
           {timers && timers.length > 0 ? (
-            <Table striped hover responsive size="sm" className="mb-0"> {/* Removed bordered prop */}
+            <Table striped hover responsive size="sm" className="mb-0">
               <tbody>
                 {timers.map((clock: TournamentTimerClock) => (
                   <Fragment key={clock.clock_id}>
