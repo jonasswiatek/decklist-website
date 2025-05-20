@@ -44,7 +44,7 @@ export function useTournamentClocks(): TournamentTimersHook {
     }, [setLocalClocks]);
 
     const initialClocks = useMemo(() => {
-    return Array.from(localClocks.values());
+        return Array.from(localClocks.values());
     }, [localClocks]);
 
     useEffect(() => {

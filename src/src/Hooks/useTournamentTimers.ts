@@ -8,7 +8,7 @@ import {
 
 const TOURNAMENT_TIMERS_QUERY_KEY = 'tournamentTimers';
 
-export function useUserTournaments(): UseQueryResult<UserTournamentsResponse, Error> {
+export function useUserTournaments(enabled: boolean = true): UseQueryResult<UserTournamentsResponse, Error> {
     return useQuery<UserTournamentsResponse, Error>(
         [TOURNAMENT_TIMERS_QUERY_KEY, 'userTournaments'],
         () => getUserTournaments(),
@@ -16,6 +16,7 @@ export function useUserTournaments(): UseQueryResult<UserTournamentsResponse, Er
             staleTime: Infinity,
             retry: false,
             refetchOnWindowFocus: false,
+            enabled: enabled,
         }
     );
 }

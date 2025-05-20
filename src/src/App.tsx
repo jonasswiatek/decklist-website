@@ -36,6 +36,7 @@ import MyTournaments from './Components/TournamentTimers/MyTournaments.tsx';
 import { CreateTournament } from './Components/TournamentTimers/CreateTournament.tsx';
 import { TournamentWrapper } from './Components/TournamentTimers/Tournament.tsx';
 import { TournamentPublicViewWrapper } from './Components/TournamentTimers/TournamentPublicView.tsx';
+import { Tools } from './Components/LandingPage/Tools.tsx';
 
 const queryClient = new QueryClient()
 
@@ -123,13 +124,18 @@ const router = createBrowserRouter([
       </LoggedIn>,
   },
   {
+    path: "/tools",
+    element:
+      <ScrollToTop>
+        <Tools />
+      </ScrollToTop>,
+  },
+  {
     path: "/timers",
     element:
-      <LoggedIn>
-        <ScrollToTop>
-          <MyTournaments />
-        </ScrollToTop>
-      </LoggedIn>,
+      <ScrollToTop>
+        <MyTournaments />
+      </ScrollToTop>,
   },
   {
     path: "/timers/new",
@@ -249,7 +255,7 @@ function NavBar()
           <Nav className="ms-auto">
             <Nav.Link onClick={handleNavigate('/e/new')} href="/e/new">Create Tournament</Nav.Link>
             <Nav.Link onClick={handleNavigate('/library')} href="/library">My Decks</Nav.Link>
-            {/* <Nav.Link onClick={handleNavigate('/timers')} href="/timers">Tournament Timers</Nav.Link> */}
+            <Nav.Link onClick={handleNavigate('/tools')} href="/tools">Tools</Nav.Link>
             {authorized ? (
               <>
                 <Nav.Link onClick={() => handleLogout()}>Log out</Nav.Link>

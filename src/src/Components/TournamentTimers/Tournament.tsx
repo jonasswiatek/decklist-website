@@ -2,7 +2,7 @@ import { ReactElement, useState, Fragment, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsSliders } from 'react-icons/bs';
+import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsSliders, BsArrowLeft } from 'react-icons/bs';
 import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournamentTimers';
 import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock, adjustClock } from '../../model/api/tournamentTimers';
 import { TimerDisplay } from './TimerDisplay';
@@ -179,7 +179,16 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     <Container className="py-3">
       <Row className="mb-3">
         <Col>
-          <h2>Tournament: {tournamentDetails.tournament_name}</h2>
+          <div className="mb-3">
+              <button 
+                  type="button" 
+                  className="btn btn-link text-decoration-none p-0" 
+                  onClick={() => navigate('/timers')}
+              >
+                  <BsArrowLeft className="me-1" /> Back
+              </button>
+          </div>
+          <h2>{tournamentDetails.tournament_name}</h2>
         </Col>
       </Row>
       <Row>
@@ -374,96 +383,100 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
               </div>
           </div>
         
-          <Card className="mb-3">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <div>
+          {tournamentDetails.role === "owner" && (
+            <>
+              <Card className="mb-3">
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <BsPersonPlus className="me-2" />
+                    <strong>Add Manager</strong>
+                  </div>
+                </Card.Header>
+                <Card.Body>
+                  <Form onSubmit={handleSubmit(onAddManager)}>
+                    <Row className="mb-3">
+                      <Col md={6}>
+                        <Form.Group controlId="managerName">
+                          <Form.Label>Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            placeholder="Enter manager's name"
+                            {...register("name", { required: "Name is required" })}
+                            isInvalid={!!errors.name}
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {errors.name?.message}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group controlId="managerEmail">
+                          <Form.Label>Email</Form.Label>
+                          <Form.Control
+                            type="email"
+                            placeholder="Enter manager's email"
+                            {...register("email", {
+                              required: "Email is required",
+                              pattern: {
+                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                message: "Invalid email address"
+                              }
+                            })}
+                            isInvalid={!!errors.email}
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {errors.email?.message}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+
+                    <Button variant="success" type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? (
+                        <>
+                          <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                          Adding...
+                        </>
+                      ) : 'Add Manager'}
+                    </Button>
+                  </Form>
+                </Card.Body>
+              </Card>
+
+              <h4 className="mt-4 mb-3">
                 <BsPersonPlus className="me-2" />
-                <strong>Add Manager</strong>
-              </div>
-            </Card.Header>
-            <Card.Body>
-              <Form onSubmit={handleSubmit(onAddManager)}>
-                <Row className="mb-3">
-                  <Col md={6}>
-                    <Form.Group controlId="managerName">
-                      <Form.Label>Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter manager's name"
-                        {...register("name", { required: "Name is required" })}
-                        isInvalid={!!errors.name}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {errors.name?.message}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group controlId="managerEmail">
-                      <Form.Label>Email</Form.Label>
-                      <Form.Control
-                        type="email"
-                        placeholder="Enter manager's email"
-                        {...register("email", { 
-                          required: "Email is required",
-                          pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: "Invalid email address"
-                          }
-                        })}
-                        isInvalid={!!errors.email}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {errors.email?.message}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Button variant="success" type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                      Adding...
-                    </>
-                  ) : 'Add Manager'}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-
-          <h4 className="mt-4 mb-3">
-            <BsPersonPlus className="me-2" />
-            Current Managers
-          </h4>
-          {tournamentDetails.managers.length > 0 ? (
-            <Table striped hover responsive size="sm" className="mb-0">
-              <thead className="table-dark">
-                <tr>
-                  <th>Name</th>
-                  <th className="text-end"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {tournamentDetails.managers.map(manager => (
-                  <tr key={manager.user_id}>
-                    <td className="align-middle">{manager.user_name}</td>
-                    <td className="text-end align-middle">
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => onRemoveManager(manager.user_id)}
-                        title="Remove Manager"
-                      >
-                        <BsTrash />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <p>No managers assigned to this tournament yet.</p>
+                Current Managers
+              </h4>
+              {tournamentDetails.managers.length > 0 ? (
+                <Table striped hover responsive size="sm" className="mb-0">
+                  <thead className="table-dark">
+                    <tr>
+                      <th>Name</th>
+                      <th className="text-end"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tournamentDetails.managers.map(manager => (
+                      <tr key={manager.user_id}>
+                        <td className="align-middle">{manager.user_name}</td>
+                        <td className="text-end align-middle">
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => onRemoveManager(manager.user_id)}
+                            title="Remove Manager"
+                          >
+                            <BsTrash />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              ) : (
+                <p>No managers assigned to this tournament yet.</p>
+              )}
+            </>
           )}
 
           {/* Danger Zone Section */}

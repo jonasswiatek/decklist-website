@@ -136,6 +136,9 @@ export const EventlinkSync: React.FC = () => {
     };
     
     return (
+      <div className="container py-1">
+        <div className="mb-3">
+
         <div className="eventlink-sync-container">
             <h2>EventLink Player Sync</h2>
             
@@ -230,5 +233,7 @@ EventLink - Copyright © 2025 - Wizards of the Coast LLC"
                 </div>
             )}
         </div>
+    </div>
+    </div>
     );
 };
