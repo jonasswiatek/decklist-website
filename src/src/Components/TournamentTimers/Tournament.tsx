@@ -4,10 +4,10 @@ import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from '
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsSliders, BsArrowLeft } from 'react-icons/bs';
 import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournamentTimers';
-import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock, adjustClock } from '../../model/api/tournamentTimers';
+import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock, adjustClock, forceUpdate } from '../../model/api/tournamentTimers';
 import { TimerDisplay } from './TimerDisplay';
 import { useTournamentClocks } from './useTournamentClocks';
-import { useTournamentTimersUpdated } from '../../Hooks/useWebsocketConnection';
+import { useTournamentTimersUpdated, WebSocketTournamentTimersRefreshMessageType } from '../../Hooks/useWebsocketConnection';
 import { useAuth } from '../Login/useAuth';
 
 interface AddManagerFormInputs {
@@ -42,6 +42,8 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const publicLink = `${window.location.origin}/timers/${tournamentDetails?.tournament_id}/view`;
   const [copied, setCopied] = useState(false);
   const [expandedClockId, setExpandedClockId] = useState<string | null>(null);
+  const [syncStatusMessage, setSyncStatusMessage] = useState<string>("");
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const {clocks: timers, addClock, removeClock, initClocks} = useTournamentClocks();
 
@@ -53,13 +55,30 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
 
   const { readyState } = useTournamentTimersUpdated(
     (message) => {
+      if (message.message_type === WebSocketTournamentTimersRefreshMessageType.FORCE_UPDATE) {
+        refetch();
+        setSyncStatusMessage("Sync completed");
+        setTimeout(() => setSyncStatusMessage(""), 3000); // Clear message after 3 seconds
+        return;
+      }
+
       if (message.updated_by_session_id == sessionId)
         return; // Ignore updates from the same session
 
-      if (message.updated_clock) {
-        addClock(message.updated_clock);
-      } else {
-        removeClock(message.clock_id);
+      switch (message.message_type) {
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_ADDED:
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_RESET:
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_PAUSED:
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_RESUMED:
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_ADJUSTED:
+          if (message.updated_clock)
+            addClock(message.updated_clock);
+          break;
+
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_DELETED:
+          if (message.clock_id)
+            removeClock(message.clock_id);
+          break;
       }
 
       console.log("Tournament Clock Updated", message);
@@ -144,6 +163,16 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       refetchUserTournaments();
       navigate('/timers');
     }
+  };
+
+  const onForceSync = async () => {
+    setIsSyncing(true);
+    await forceUpdate(tournament_id);
+    setSyncStatusMessage("Sync requested");
+    setTimeout(() => {
+      setSyncStatusMessage("");
+      setIsSyncing(false); // Re-enable button after 3 seconds
+    }, 3000);
   };
 
   if(!tournamentDetails || readyState !== WebSocket.OPEN || isLoading) {
@@ -478,6 +507,36 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
               )}
             </>
           )}
+
+          <Card className="mb-3 mt-4">
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <div>
+                {/* Consider an icon for Utilities, e.g., BsGear or BsCloudSync */}
+                <strong>Utilities</strong>
+              </div>
+            </Card.Header>
+            <Card.Body>
+              <p>
+                Use this button in case one or more presentation screens have desynchronized, 
+                which can happen in case of intermittent connectivity issues. 
+                While they should automatically recover given time, you can attempt to force a sync here.
+              </p>
+              <Button
+                variant="primary"
+                onClick={onForceSync}
+                className="w-100"
+                disabled={isSyncing} // Disable button when syncing
+              >
+                {isSyncing ? (
+                  <>
+                    <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                    Syncing...
+                  </>
+                ) : 'Force Sync'}
+              </Button>
+              {syncStatusMessage && <p className="text-muted mt-2 text-center">{syncStatusMessage}</p>}
+            </Card.Body>
+          </Card>
 
           {/* Danger Zone Section */}
           {tournamentDetails.role === "owner" && (

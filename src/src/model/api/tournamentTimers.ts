@@ -208,3 +208,16 @@ export async function deleteManager(tournamentId: string, userId: string): Promi
         throw new Error(`Error deleting manager: ${response.statusText}`);
     }
 }
+
+export async function forceUpdate(tournamentId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/${tournamentId}/force-update`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error forcing update: ${response.statusText}`);
+    }
+}

@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Spinner, Alert, Button } from 'react-bootstrap';
 import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
-import { useTournamentTimersUpdated } from '../../Hooks/useWebsocketConnection';
+import { useTournamentTimersUpdated, WebSocketTournamentTimersRefreshMessageType } from '../../Hooks/useWebsocketConnection';
 import {  TimerDisplay } from './TimerDisplay';
 import { TournamentTimerClock } from '../../model/api/tournamentTimers';
 import { useTournamentClocks } from './useTournamentClocks';
@@ -21,6 +21,7 @@ export function TournamentPublicViewWrapper(): ReactElement {
 
 export function TournamentPublicView({ tournament_id }: { tournament_id: string }): ReactElement {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 950);
+  const [isSyncing, setIsSyncing] = useState(false); // New state for syncing message
 
   useEffect(() => {
     const handleResize = () => {
@@ -41,13 +42,30 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
 
   const { readyState } = useTournamentTimersUpdated(
     (message) => {
-      if (message.updated_clock) {
-        addClock(message.updated_clock);
-      } else {
-        removeClock(message.clock_id);
-      }
-
       console.log("Tournament Clock Updated", message);
+      switch (message.message_type) {
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_ADDED:
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_RESET:
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_PAUSED:
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_RESUMED:
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_ADJUSTED:
+          if (message.updated_clock)
+            addClock(message.updated_clock);
+          break;
+
+        case WebSocketTournamentTimersRefreshMessageType.CLOCK_DELETED:
+          if (message.clock_id)
+            removeClock(message.clock_id);
+          break;
+
+        case WebSocketTournamentTimersRefreshMessageType.FORCE_UPDATE:
+          setIsSyncing(true); // Show syncing message
+          refetch();
+          setTimeout(() => {
+            setIsSyncing(false); // Hide syncing message after 3 seconds
+          }, 3000);
+          break;
+      }
     },
     tournament_id
   );
@@ -59,6 +77,15 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
     }},
     [readyState, refetch]
   );
+
+  if (isSyncing) { // Conditional rendering for syncing overlay
+    return (
+      <Container fluid className="py-3 vh-100 d-flex flex-column justify-content-center align-items-center bg-dark">
+        <Spinner animation="border" variant="light" className="mb-3" style={{ width: '3rem', height: '3rem' }} />
+        <p className="text-light fs-1 text-center">Synchronising...</p>
+      </Container>
+    );
+  }
 
   if(!tournamentDetails || readyState !== WebSocket.OPEN || isLoading) {
     return (

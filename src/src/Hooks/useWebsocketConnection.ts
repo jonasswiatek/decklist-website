@@ -60,12 +60,23 @@ export const useEventUpdated = (effect: (message: EventUpdatedMessage) => void, 
   return { readyState };
 }
 
+export enum WebSocketTournamentTimersRefreshMessageType {
+  CLOCK_ADDED = "clock_added",
+  CLOCK_DELETED = "clock_deleted",
+  CLOCK_RESET = "clock_reset",
+  CLOCK_PAUSED = "clock_paused",
+  CLOCK_RESUMED = "clock_resumed",
+  CLOCK_ADJUSTED = "clock_adjusted",
+  FORCE_UPDATE = "force_update",
+}
+
 type TournamentTimersUpdatedMessage = {
   tournament_id: string;
   updated_by_user_id: string;
   updated_by_session_id: string;
-  clock_id: string;
-  updated_clock: TournamentTimerClock;
+  clock_id: string | null;
+  updated_clock: TournamentTimerClock | null;
+  message_type: WebSocketTournamentTimersRefreshMessageType;
 }
 
 export const useTournamentTimersUpdated = (effect: (message: TournamentTimersUpdatedMessage) => void, tournamentId: string) => {
