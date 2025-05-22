@@ -2,6 +2,7 @@ export type MeResponse = {
     authorized: boolean;
     email?: string;
     user_id?: string;
+    name?: string;
     session_id?: string;
 }
 
@@ -579,6 +580,7 @@ export type LoginContinueResponse = {
     email: string,
     session_id: string,
     user_id: string,
+    name?: string,
 }
 
 export type ValidationErrorResponse = {

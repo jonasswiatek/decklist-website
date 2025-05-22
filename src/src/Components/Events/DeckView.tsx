@@ -11,6 +11,7 @@ import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
 import { useEventListQuery } from '../../Hooks/useEventListQuery';
 import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
 import { useDecklistQuery } from '../../Hooks/useDecklistQuery';
+import { useAuth } from '../Login/useAuth';
 
 export function DeckView() {
     const { event_id } = useParams();
@@ -60,7 +61,8 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const { data, error, isLoading, refetch } = useDecklistQuery(props.event.event_id, props.user_id);
     const { data: library, error: libraryError, isLoading: libraryLoading } = useLibraryDecksQuery(isPlayer);
     const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useEventListQuery(isPlayer);
-    
+    const { name } = useAuth();
+
     type Inputs = {
         user_id?: string,
         player_name: string,
@@ -265,7 +267,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                 className='form-control' 
                                 placeholder='Player Name' 
                                 required 
-                                {...register("player_name", { value: data?.player_name })} 
+                                {...register("player_name", { value: data?.player_name ?? name })} 
                                 disabled={inputDisabled} // Disable for players if the event is closed
                             />
                             {data && !isJudge && (

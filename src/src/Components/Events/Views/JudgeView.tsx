@@ -172,7 +172,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                         <input 
                                             type="text" 
                                             className="form-control" 
-                                            placeholder="Player Name *" 
+                                            placeholder="Player Name" 
                                             required
                                             {...registerPlayer("player_name")} 
                                         />
@@ -505,7 +505,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         <>
                             <h2 className="mb-3">Judges</h2>
 
-                            <div className="card mt-4">
+                            <div className="card mb-3">
                                 <div 
                                     className="card-header d-flex align-items-center justify-content-between"
                                     onClick={() => setShowAddJudgeForm(!showAddJudgeForm)}

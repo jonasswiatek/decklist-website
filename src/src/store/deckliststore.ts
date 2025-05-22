@@ -12,6 +12,7 @@ type DecklistStore = {
     email?: string,
     userId?: string,
     sessionId?: string
+    name?: string,
 }
 
 type Actions = {
@@ -37,7 +38,8 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
                     authState: AuthState.Authorized,
                     email: me.email,
                     userId: me.user_id,
-                    sessionId: me.session_id
+                    sessionId: me.session_id,
+                    name: me.name
                 })
             }
             else {
@@ -59,7 +61,8 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
                     authState: AuthState.Authorized,
                     email: res.email,
                     userId: res.user_id,
-                    sessionId: res.session_id
+                    sessionId: res.session_id,
+                    name: res.name
                 })
             }
 
@@ -72,7 +75,9 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
                 set({
                     authState: AuthState.Authorized,
                     email: res.email,
-                    userId: res.user_id
+                    userId: res.user_id,
+                    sessionId: res.session_id,
+                    name: res.name
                 })
             }
 
