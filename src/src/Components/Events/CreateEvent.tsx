@@ -32,7 +32,16 @@ export function CreateEvent() : ReactElement {
       format: string
       event_date: Date;
     };
-        
+    
+    const today = new Date();
+    const minDate = new Date(today);
+    minDate.setDate(today.getDate() - 1);
+    const minDateString = minDate.toISOString().split('T')[0];
+
+    const maxDate = new Date(today);
+    maxDate.setDate(today.getDate() + 30);
+    const maxDateString = maxDate.toISOString().split('T')[0];
+
     return (
       <div className="container py-1">
         <div className="mb-3">
@@ -73,9 +82,14 @@ export function CreateEvent() : ReactElement {
                       type='date' 
                       className={`form-control ${errors.event_date ? 'is-invalid' : ''}`} 
                       required 
-                      {...register("event_date")} 
+                      {...register("event_date")}
+                      min={minDateString}
+                      max={maxDateString}
                     />
                     {errors.event_date && <div className="invalid-feedback">{errors.event_date?.message}</div>}
+                    <small className="form-text text-muted">
+                      Date can't be more than 30 days in the future.
+                    </small>
                   </div>
                                 
                   <div className="mb-3">
