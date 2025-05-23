@@ -639,3 +639,75 @@ export async function setDeckChecked(data: SetDeckCheckedRequest) {
     throw new Error("Http Exception");
 }
 
+export enum RevisionType {
+    submitted = "submitted",
+    deleted = "deleted"
+}
+
+export type DecklistRevision = {
+    revision_id: number;
+    revised_by: string;
+    revision_type: RevisionType;
+    created_at: string;
+    is_current: boolean;
+    decklist: DecklistResponse;
+}
+
+export type DecklistRevisionsResponse = {
+    event_id: string;
+    player_email_hash: string;
+    revisions: DecklistRevision[];
+}
+
+export async function getDecklistRevisionsRequest(eventId: string, userId?: string | null): Promise<DecklistRevisionsResponse | null> {
+    let url = `/api/events/${eventId}/deck/revisions`;
+    if (userId) {
+        url += `?user_id=${encodeURIComponent(userId)}`;
+    }
+
+    const httpResponse = await fetch(url);
+
+    if (httpResponse.status === 401) {
+        throw new NotAuthenticatedError();
+    }
+
+    if (httpResponse.status === 404) {
+        return null; 
+    }
+
+    if (httpResponse.ok) {
+        const res = await httpResponse.json() as DecklistRevisionsResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
+export async function getDecklistRevisionRequest(eventId: string, revisionId?: number | null, userId?: string | null): Promise<DecklistResponse | null> {
+    if (!revisionId) {
+        return null;
+    }
+
+    let url = `/api/events/${eventId}/deck/revisions/${revisionId}`;
+    if (userId) {
+        url += `?user_id=${encodeURIComponent(userId)}`;
+    }
+
+    const httpResponse = await fetch(url);
+
+    if (httpResponse.status === 401) {
+        throw new NotAuthenticatedError();
+    }
+
+    if (httpResponse.status === 404) {
+        return null;
+    }
+
+    if (httpResponse.ok) {
+        const res = await httpResponse.json() as DecklistResponse;
+        return res;
+    }
+
+    throw new Error("Http Exception");
+}
+
