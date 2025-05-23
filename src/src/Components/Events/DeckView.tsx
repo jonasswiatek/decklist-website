@@ -10,7 +10,7 @@ import { LoadingScreen } from '../Login/LoadingScreen';
 import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
 import { useEventListQuery } from '../../Hooks/useEventListQuery';
 import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
-import { useDecklistQuery, useDecklistRevisionQuery } from '../../Hooks/useDecklistQuery';
+import { useDecklistQuery } from '../../Hooks/useDecklistQuery';
 import { useAuth } from '../Login/useAuth';
 import { useDecklistRevisionsQuery } from '../../Hooks/useDecklistRevisionsQuery';
 
@@ -60,10 +60,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const navigate = useNavigate();
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const {refetch: refetchEvent} = useEventDetailsQuery(props.event.event_id, false);
+    const { refetch: refetchEvent } = useEventDetailsQuery(props.event.event_id, false);
     const { data: decklistData, error: decklistError, isLoading: decklistLoading, refetch: refetchDecklist } = useDecklistQuery(props.event.event_id, props.user_id);
     const { data: revisions, isLoading: revisionsLoading, refetch: refetchRevisions } = useDecklistRevisionsQuery(props.event.event_id, props.user_id, false);
-    const { data: currentRevisionData, isLoading: currentRevisionLoading } = useDecklistRevisionQuery(props.event.event_id, showRevisionId, props.user_id, true);  
     const { data: library, error: libraryError, isLoading: libraryLoading } = useLibraryDecksQuery(isPlayer);
     const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useEventListQuery(isPlayer);
     const { name } = useAuth();
@@ -168,7 +167,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     const handleShowRevisions = () => {
         const newShowState = !showRevisionsTable;
-        if (newShowState) {
+        if (newShowState && !revisions) {
             refetchRevisions();
         }
         else {
@@ -188,15 +187,17 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         refetchEvent();
     }
 
-    const data = showRevisionId ? currentRevisionData : decklistData;
-
-    if (decklistLoading || libraryLoading || eventsLoading || currentRevisionLoading) {
+    if (decklistLoading || libraryLoading || eventsLoading) {
         return <LoadingScreen />
     }
 
     if (decklistError || libraryError) {
         return <p>Error, try later</p>
     }
+
+    const selectedRevision = revisions?.revisions.find(revision => revision.revision_id === showRevisionId);
+    const data = selectedRevision?.decklist ?? decklistData;
+    const isViewingPreviousRevision = !(selectedRevision?.is_current ?? true);
 
     if (isJudge && !data) {
         return <p>No decklist found</p>
@@ -237,12 +238,14 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                     >
                         <BsArrowLeft className="me-1" /> Back
                     </button>
-                    <FlagCheckedButton 
-                        eventId={props.event.event_id} 
-                        userId={props.user_id!} 
-                        isChecked={data?.is_deck_checked || false} 
-                        refetch={handleDeckChecked} 
-                    />
+                    {!showRevisionsTable && (
+                        <FlagCheckedButton 
+                            eventId={props.event.event_id} 
+                            userId={props.user_id!} 
+                            isChecked={data?.is_deck_checked || false} 
+                            refetch={handleDeckChecked} 
+                        />
+                    )}
                 </div>
                 {data?.player_name && (
                     <div className='col-12 mb-3'>
@@ -272,15 +275,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             )}
                         </>
                     )}
-                    {showRevisionsTable && (
-                        <>
-                            <div className="alert alert-warning mb-3">You're viewing a previous version of this decklist.</div>
-                        </>
-                    )}
                         <div className="event-info mb-3 d-flex justify-content-between align-items-center">
                             <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
                             <div className="d-flex">
-                                {data && ( // Show revisions button if there's a deck
+                                {data && (
+                                    <>
                                     <button
                                         type="button"
                                         className="btn btn-sm btn-outline-secondary me-2"
@@ -294,16 +293,17 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                             <BsClockHistory />
                                         )}
                                     </button>
+                                    <Link 
+                                        to={`/e/${props.event.event_id}/deck/print${props.user_id ? `?id=${props.user_id}` : ''}`}
+                                        className="btn btn-sm btn-outline-secondary"
+                                        title="Print Decklist"
+                                        target="_blank" // Add this to open in a new window
+                                        rel="noopener noreferrer" // Add this for security best practices
+                                    >
+                                        <BsPrinter className="me-1" /> Print
+                                    </Link>
+                                    </>
                                 )}
-                                <Link 
-                                    to={`/e/${props.event.event_id}/deck/print${props.user_id ? `?id=${props.user_id}` : ''}`}
-                                    className="btn btn-sm btn-outline-secondary"
-                                    title="Print Decklist"
-                                    target="_blank" // Add this to open in a new window
-                                    rel="noopener noreferrer" // Add this for security best practices
-                                >
-                                    <BsPrinter className="me-1" /> Print
-                                </Link>
                             </div>
                         </div>
                         {showRevisionsTable && revisions && revisions.revisions.length > 0 && (
@@ -336,6 +336,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                 <p className="small text-muted mb-0">Only the last 20 revisions are shown.</p>
                             </div>
                         )}
+                        {showRevisionsTable && revisions && revisions.revisions.length === 0 && (
+                            <div className='col-12 mb-3'>
+                                <p className="text-muted">No revisions found for this decklist.</p>
+                            </div>
+                        )}
                     {!showRevisionsTable && (<>
                         <div className="form-group position-relative">
                             <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
@@ -351,7 +356,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     {...register("player_name", { value: data?.player_name ?? name })} 
                                     disabled={inputDisabled} // Disable for players if the event is closed
                                 />
-                                {data && !isJudge && (
+                                {data && !isJudge && isOpen && (
                                     <button 
                                         type="button" 
                                         className="btn btn-danger" 
@@ -524,6 +529,12 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             )}
                         </div>
                     </>)}
+
+                    {showRevisionsTable && isViewingPreviousRevision && (
+                        <>
+                            <div className="alert alert-warning mb-3">You're viewing a previous version of this decklist.</div>
+                        </>
+                    )}
 
                     {data?.deck_warnings && data.deck_warnings.length > 0 && (
                         <div className="mt-3">

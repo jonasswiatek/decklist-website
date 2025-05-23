@@ -650,6 +650,7 @@ export type DecklistRevision = {
     revision_type: RevisionType;
     created_at: string;
     is_current: boolean;
+    decklist: DecklistResponse;
 }
 
 export type DecklistRevisionsResponse = {
