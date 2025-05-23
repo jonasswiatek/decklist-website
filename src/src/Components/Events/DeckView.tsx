@@ -4,14 +4,15 @@ import { deleteDeckRequest, EventDetails, getDecklistRequest, submitDecklistRequ
 import { DecklistTable } from './DecklistTable';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsArrowLeft, BsPerson, BsTrash, BsCardText, BsPrinter } from 'react-icons/bs';
+import { BsArrowLeft, BsPerson, BsTrash, BsCardText, BsPrinter, BsClockHistory } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
 import { useEventListQuery } from '../../Hooks/useEventListQuery';
 import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
-import { useDecklistQuery } from '../../Hooks/useDecklistQuery';
+import { useDecklistQuery, useDecklistRevisionQuery } from '../../Hooks/useDecklistQuery';
 import { useAuth } from '../Login/useAuth';
+import { useDecklistRevisionsQuery } from '../../Hooks/useDecklistRevisionsQuery';
 
 export function DeckView() {
     const { event_id } = useParams();
@@ -53,12 +54,16 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     const [showToast, setShowToast] = useState(false);
     const [isEditing, setIsEditing] = useState(false); // New state to track if the judge is editing
+    const [showRevisionsTable, setShowRevisionsTable] = useState(false); // State for revisions table visibility
+    const [showRevisionId, setShowRevisionId] = useState<number | null>(null); // State for selected revision ID
 
     const navigate = useNavigate();
     const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const {refetch: refetchEvent} = useEventDetailsQuery(props.event.event_id, false);
-    const { data, error, isLoading, refetch } = useDecklistQuery(props.event.event_id, props.user_id);
+    const { data: decklistData, error: decklistError, isLoading: decklistLoading, refetch: refetchDecklist } = useDecklistQuery(props.event.event_id, props.user_id);
+    const { data: revisions, isLoading: revisionsLoading, refetch: refetchRevisions } = useDecklistRevisionsQuery(props.event.event_id, props.user_id, false);
+    const { data: currentRevisionData, isLoading: currentRevisionLoading } = useDecklistRevisionQuery(props.event.event_id, showRevisionId, props.user_id, true);  
     const { data: library, error: libraryError, isLoading: libraryLoading } = useLibraryDecksQuery(isPlayer);
     const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useEventListQuery(isPlayer);
     const { name } = useAuth();
@@ -74,7 +79,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
         try {
             await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, deck_name: data.deck_name, decklist_text: data.decklist_text });
-            refetch();
+            refetchDecklist();
 
             if (isPlayer) {
                 // Refetch the library decks to ensure the latest data is shown
@@ -107,7 +112,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const handleDeleteDeck = async () => {
         if (window.confirm("Are you sure you want to delete this deck? This action cannot be undone.")) {
             await deleteDeckRequest(props.event.event_id);
-            refetch();
+            refetchDecklist();
             if (isPlayer) {
                 // Refetch the library decks to ensure the latest data is shown
                 refetchMyEvents();
@@ -161,16 +166,35 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         navigate(`/e/${props.event.event_id}`);
     };
 
+    const handleShowRevisions = () => {
+        const newShowState = !showRevisionsTable;
+        if (newShowState) {
+            refetchRevisions();
+        }
+        else {
+            setShowRevisionId(null);
+        }
+        
+        setShowRevisionsTable(newShowState);
+    };
+
+    const handleSelectRevision = (revisionId: number) => {
+        console.log("Selected revision:", revisionId);
+        setShowRevisionId(revisionId);
+    };
+
     const handleDeckChecked = () => {
-        refetch();
+        refetchDecklist();
         refetchEvent();
     }
 
-    if (isLoading || libraryLoading || eventsLoading) {
+    const data = showRevisionId ? currentRevisionData : decklistData;
+
+    if (decklistLoading || libraryLoading || eventsLoading || currentRevisionLoading) {
         return <LoadingScreen />
     }
 
-    if (error || libraryError) {
+    if (decklistError || libraryError) {
         return <p>Error, try later</p>
     }
 
@@ -233,215 +257,273 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
         <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmitDecklist)(e); }} >
             <div className='row'>
-                <div className='col-lg-4 col-sm-12'>
-                    {!isOpen && !hasSubmission && (
-                        <div className="alert alert-info mb-3">This tournament is past it's decklist submission deadline.</div>
-                    )}
-                    {!isOpen && hasSubmission && (
-                        <div className="alert alert-info mb-3"><b>Your decklist is submitted</b>, but can no longer be modified because the submission deadline has passed.</div>
-                    )}
-                    {!isJudge && isOpen && hasSubmission && (
-                        <div className="alert alert-success mb-3"><b>Your decklist is submitted</b>, and can be modified until the submission deadline.</div>
-                    )}
 
-                    <div className="event-info mb-3 d-flex justify-content-between align-items-center">
-                        <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
-                        <Link 
-                            to={`/e/${props.event.event_id}/deck/print${props.user_id ? `?id=${props.user_id}` : ''}`}
-                            className="btn btn-sm btn-outline-secondary"
-                            title="Print Decklist"
-                            target="_blank" // Add this to open in a new window
-                            rel="noopener noreferrer" // Add this for security best practices
-                        >
-                            <BsPrinter className="me-1" /> Print Decklist
-                        </Link>
-                    </div>
-                    <div className="form-group position-relative">
-                        <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
-                            <span className="input-group-text" id="basic-addon1">
-                                <BsPerson />
-                            </span>
-                            <input 
-                                type='text' 
-                                id="player_name" 
-                                className='form-control' 
-                                placeholder='Player Name' 
-                                required 
-                                {...register("player_name", { value: data?.player_name ?? name })} 
-                                disabled={inputDisabled} // Disable for players if the event is closed
-                            />
-                            {data && !isJudge && (
-                                <button 
-                                    type="button" 
-                                    className="btn btn-danger" 
-                                    onClick={handleDeleteDeck}
+                <div className='col-lg-4 col-sm-12'>
+                    {!showRevisionsTable && (
+                        <>
+                            {!isOpen && !hasSubmission && (
+                                <div className="alert alert-info mb-3">This tournament is past it's decklist submission deadline.</div>
+                            )}
+                            {!isOpen && hasSubmission && (
+                                <div className="alert alert-info mb-3"><b>Your decklist is submitted</b>, but can no longer be modified because the submission deadline has passed.</div>
+                            )}
+                            {!isJudge && isOpen && hasSubmission && (
+                                <div className="alert alert-success mb-3"><b>Your decklist is submitted</b>, and can be modified until the submission deadline.</div>
+                            )}
+                        </>
+                    )}
+                    {showRevisionsTable && (
+                        <>
+                            <div className="alert alert-warning mb-3">You're viewing a previous version of this decklist.</div>
+                        </>
+                    )}
+                        <div className="event-info mb-3 d-flex justify-content-between align-items-center">
+                            <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
+                            <div className="d-flex">
+                                {data && ( // Show revisions button if there's a deck
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-secondary me-2"
+                                        title={showRevisionsTable ? "Hide Revisions" : "Show Revisions"}
+                                        onClick={handleShowRevisions}
+                                        disabled={revisionsLoading}
+                                    >
+                                        {revisionsLoading ? (
+                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        ) : (
+                                            <BsClockHistory />
+                                        )}
+                                    </button>
+                                )}
+                                <Link 
+                                    to={`/e/${props.event.event_id}/deck/print${props.user_id ? `?id=${props.user_id}` : ''}`}
+                                    className="btn btn-sm btn-outline-secondary"
+                                    title="Print Decklist"
+                                    target="_blank" // Add this to open in a new window
+                                    rel="noopener noreferrer" // Add this for security best practices
                                 >
-                                    <BsTrash />
-                                </button>
-                            )}
-                            {errors.player_name && (
-                                <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                    <span>{errors.player_name.message}</span>
-                                </div>
-                            )}
+                                    <BsPrinter className="me-1" /> Print
+                                </Link>
+                            </div>
                         </div>
-                    </div>
-                    <div className="form-group position-relative mt-2">
-                        <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
-                            <span className="input-group-text" id="basic-addon2">
-                                <BsCardText />
-                            </span>
-                            <input 
-                                type='text' 
-                                id="deck_name" 
-                                className='form-control' 
-                                placeholder='Deck Name (Optional)' 
-                                {...register("deck_name", { value: data?.deck_name })} 
-                                disabled={inputDisabled}
-                            />
-                            {errors.deck_name && (
-                                <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                    <span>{errors.deck_name.message}</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="form-group position-relative">
-                        {isJudge && !isEditing && (
-                            <button 
-                                type="button" 
-                                className="btn btn-primary edit-button-overlay" 
-                                onClick={() => {
-                                    setIsEditing(true);
-                                }}
-                            >
-                                Edit Decklist
-                            </button>
+                        {showRevisionsTable && revisions && revisions.revisions.length > 0 && (
+                            <div className='col-12 mb-3'>
+                                <table className="table table-sm table-hover" style={{ fontSize: '0.8rem' }}>
+                                    <thead>
+                                        <tr>
+                                            <th>Revision</th>
+                                            <th>By</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {revisions.revisions.map((revision) => (
+                                            <tr 
+                                                key={revision.revision_id} 
+                                                onClick={() => handleSelectRevision(revision.revision_id)} 
+                                                className={revision.revision_id === showRevisionId ? 'table-success' : ''}
+                                                style={{ 
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <td>{new Date(revision.created_at).toLocaleString()} {revision.is_current ? "- latest" : ""}</td>
+                                                <td>{revision.revised_by}</td>
+                                                <td>{revision.revision_type}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                <p className="small text-muted mb-0">Only the last 20 revisions are shown.</p>
+                            </div>
                         )}
-                        <div className={`textarea-container ${isJudge && !isEditing ? 'blurred' : ''}`}>
-                            <div className="form-group mb-1">
-                                {!isJudge && (
-                                    <div className="text-end">
-                                        <a href={`/help/decklist#${props.event.decklist_style.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
-                                            See formatting guide
-                                        </a>
+                    {!showRevisionsTable && (<>
+                        <div className="form-group position-relative">
+                            <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
+                                <span className="input-group-text" id="basic-addon1">
+                                    <BsPerson />
+                                </span>
+                                <input 
+                                    type='text' 
+                                    id="player_name" 
+                                    className='form-control' 
+                                    placeholder='Player Name' 
+                                    required 
+                                    {...register("player_name", { value: data?.player_name ?? name })} 
+                                    disabled={inputDisabled} // Disable for players if the event is closed
+                                />
+                                {data && !isJudge && (
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-danger" 
+                                        onClick={handleDeleteDeck}
+                                    >
+                                        <BsTrash />
+                                    </button>
+                                )}
+                                {errors.player_name && (
+                                    <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                                        <span>{errors.player_name.message}</span>
                                     </div>
                                 )}
                             </div>
-
-                            {!isJudge && (
-                                <div className="mb-1">
-                                    <select 
-                                        className="form-select" 
-                                        onChange={(e) => {
-                                            const selectedDeckId = e.target.value;
-                                            if (selectedDeckId) {
-                                                handleImportDeck(selectedDeckId);
-                                            }
-                                        }}
-                                        disabled={(availableSavedDecks.length === 0 && pastEvents.length === 0) || inputDisabled}
-                                    >
-                                        <option key="none" value="none">
-                                            {availableSavedDecks.length === 0 && pastEvents.length === 0
-                                                ? "No saved decks for this format" 
-                                                : "Import from..."}
-                                        </option>
-                                        {availableSavedDecks.length > 0 && (
-                                            <optgroup label="My Decks">
-                                                {availableSavedDecks.map(deck => (
-                                                    <option key={`saved-${deck.deck_id}`} value={`saved:${deck.deck_id}`}>
-                                                        {deck.deck_name}
-                                                    </option>
-                                                ))}
-                                            </optgroup>
-                                        )}
-                                        {pastEvents && pastEvents.length > 0 && (
-                                            <optgroup label="Other Events">
-                                                {pastEvents.map(event => (
-                                                    <option key={`event-${event.event_id}`} value={`event:${event.event_id}`}>
-                                                        {event.event_name}
-                                                    </option>
-                                                ))}
-                                            </optgroup>
-                                        )}
-                                    </select>
-                                </div>
-                            )}
-
-                            <textarea 
-                                id='decklist_text' 
-                                className="form-control" 
-                                placeholder={getDecklistPlaceholder(props.event.decklist_style)} 
-                                required 
-                                {...register("decklist_text", { value: data?.decklist_text })} 
-                                style={{ width: '100%', height: 400 }} 
-                                disabled={inputDisabled} // Disable for players if the event is closed
-                            />
-                            {errors.decklist_text && (
-                                <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                    <span>{errors.decklist_text.message}</span>
-                                </div>
-                            )}
-                            
                         </div>
-                    </div>
-                    <div 
-                        className="event-info mb-3 d-flex justify-content-between align-items-center position-relative" 
-                        style={{ padding: '10px', marginTop: '5px', minHeight: '60px' }}
-                    >
-                        {showToast ? (
-                            <div 
-                                style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    width: '100%',
-                                    height: '100%',
-                                    backgroundColor: 'green',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontWeight: 'bold',
-                                    borderRadius: '4px',
-                                    zIndex: 1
-                                }}
-                            >
-                                Your deck has been submitted
-                            </div>
-                        ) : (
-                            <>
-                            <div className="d-flex">
-                                {props.event.decklist_style.toLowerCase() === "commander" ? (
-                                    <span className="no-wrap-text">Deck: {mainboardCount}</span>
-                                ) : (
-                                    <>
-                                        <span style={{ marginRight: 10 }} className="no-wrap-text">Main: {mainboardCount}</span>
-                                        <span className="no-wrap-text">Side: {sideboardCount}</span>
-                                    </>
+                        <div className="form-group position-relative mt-2">
+                            <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
+                                <span className="input-group-text" id="basic-addon2">
+                                    <BsCardText />
+                                </span>
+                                <input 
+                                    type='text' 
+                                    id="deck_name" 
+                                    className='form-control' 
+                                    placeholder='Deck Name (Optional)' 
+                                    {...register("deck_name", { value: data?.deck_name })} 
+                                    disabled={inputDisabled}
+                                />
+                                {errors.deck_name && (
+                                    <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                                        <span>{errors.deck_name.message}</span>
+                                    </div>
                                 )}
                             </div>
-                            {isDirty && (
+                        </div>
+                        <div className="form-group position-relative">
+                            {isJudge && !isEditing && (
                                 <button 
-                                    type='submit' 
-                                    className='btn btn-primary no-wrap-text' 
-                                    id='submit-button'
-                                    disabled={isSubmitting} // Disable button while submitting
+                                    type="button" 
+                                    className="btn btn-primary edit-button-overlay" 
+                                    onClick={() => {
+                                        setIsEditing(true);
+                                    }}
                                 >
-                                    {isSubmitting ? (
-                                        <>
-                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                            Submitting
-                                        </>
-                                    ) : (
-                                        data ? 'Resubmit Decklist' : 'Submit Decklist'
-                                    )}
+                                    Edit Decklist
                                 </button>
                             )}
+                            <div className={`textarea-container ${isJudge && !isEditing ? 'blurred' : ''}`}>
+                                <div className="form-group mb-1">
+                                    {!isJudge && (
+                                        <div className="text-end">
+                                            <a href={`/help/decklist#${props.event.decklist_style.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
+                                                See formatting guide
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
 
-                            </>
-                        )}
-                    </div>
+                                {!isJudge && (
+                                    <div className="mb-1">
+                                        <select 
+                                            className="form-select" 
+                                            onChange={(e) => {
+                                                const selectedDeckId = e.target.value;
+                                                if (selectedDeckId) {
+                                                    handleImportDeck(selectedDeckId);
+                                                }
+                                            }}
+                                            disabled={(availableSavedDecks.length === 0 && pastEvents.length === 0) || inputDisabled}
+                                        >
+                                            <option key="none" value="none">
+                                                {availableSavedDecks.length === 0 && pastEvents.length === 0
+                                                    ? "No saved decks for this format" 
+                                                    : "Import from..."}
+                                            </option>
+                                            {availableSavedDecks.length > 0 && (
+                                                <optgroup label="My Decks">
+                                                    {availableSavedDecks.map(deck => (
+                                                        <option key={`saved-${deck.deck_id}`} value={`saved:${deck.deck_id}`}>
+                                                            {deck.deck_name}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
+                                            )}
+                                            {pastEvents && pastEvents.length > 0 && (
+                                                <optgroup label="Other Events">
+                                                    {pastEvents.map(event => (
+                                                        <option key={`event-${event.event_id}`} value={`event:${event.event_id}`}>
+                                                            {event.event_name}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
+                                            )}
+                                        </select>
+                                    </div>
+                                )}
+
+                                <textarea 
+                                    id='decklist_text' 
+                                    className="form-control" 
+                                    placeholder={getDecklistPlaceholder(props.event.decklist_style)} 
+                                    required 
+                                    {...register("decklist_text", { value: data?.decklist_text })} 
+                                    style={{ width: '100%', height: 400 }} 
+                                    disabled={inputDisabled} // Disable for players if the event is closed
+                                />
+                                {errors.decklist_text && (
+                                    <div className="alert alert-danger py-1 mt-1 mb-0 small">
+                                        <span>{errors.decklist_text.message}</span>
+                                    </div>
+                                )}
+                                
+                            </div>
+                        </div>
+                        <div 
+                            className="event-info mb-3 d-flex justify-content-between align-items-center position-relative" 
+                            style={{ padding: '10px', marginTop: '5px', minHeight: '60px' }}
+                        >
+                            {showToast ? (
+                                <div 
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        backgroundColor: 'green',
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: 'bold',
+                                        borderRadius: '4px',
+                                        zIndex: 1
+                                    }}
+                                >
+                                    Your deck has been submitted
+                                </div>
+                            ) : (
+                                <>
+                                <div className="d-flex">
+                                    {props.event.decklist_style.toLowerCase() === "commander" ? (
+                                        <span className="no-wrap-text">Deck: {mainboardCount}</span>
+                                    ) : (
+                                        <>
+                                            <span style={{ marginRight: 10 }} className="no-wrap-text">Main: {mainboardCount}</span>
+                                            <span className="no-wrap-text">Side: {sideboardCount}</span>
+                                        </>
+                                    )}
+                                </div>
+                                {isDirty && (
+                                    <button 
+                                        type='submit' 
+                                        className='btn btn-primary no-wrap-text' 
+                                        id='submit-button'
+                                        disabled={isSubmitting} // Disable button while submitting
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                Submitting
+                                            </>
+                                        ) : (
+                                            data ? 'Resubmit Decklist' : 'Submit Decklist'
+                                        )}
+                                    </button>
+                                )}
+
+                                </>
+                            )}
+                        </div>
+                    </>)}
 
                     {data?.deck_warnings && data.deck_warnings.length > 0 && (
                         <div className="mt-3">
@@ -456,6 +538,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                         </div>
                     )}
                 </div>
+                
                 
                 <div className='col-lg-8 col-sm-12 decklist-table-container' style={{ marginTop: '10px' }}>
                     {data && <DecklistTable cardGroups={data.groups} allowChecklist={isJudge} />}
