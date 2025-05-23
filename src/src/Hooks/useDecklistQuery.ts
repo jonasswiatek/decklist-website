@@ -13,7 +13,7 @@ export function useDecklistQuery(eventId: string, userId: string | null, enabled
 
 export function useDecklistRevisionQuery(eventId: string, revisionId?: number | null, userId?: string | null, enabled = true) {
     return useQuery<DecklistResponse | null>({
-        queryKey: ['decklist', 'revision', revisionId ?? 0, eventId, userId ?? ''],
+        queryKey: ['decklist', 'revision', revisionId ?? 'none', eventId, userId ?? ''],
         retry: false,
         staleTime: Infinity,
         refetchOnWindowFocus: false,
