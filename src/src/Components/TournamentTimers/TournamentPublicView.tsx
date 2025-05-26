@@ -118,8 +118,8 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
   if (count > 0) {
     if (isMobile || count <= 2) { // If mobile, or 1 or 2 items, always use a single column
       numColsInGrid = 1;
-    } else { // For count > 2 on non-mobile devices, create a squarish grid
-      numColsInGrid = Math.ceil(Math.sqrt(count));
+    } else { // For count > 2 on non-mobile devices, set to 2 columns
+      numColsInGrid = 2;
     }
 
     // Calculate numRows based on numColsInGrid and count
@@ -196,9 +196,9 @@ export function ClockComponent({ clock, className }: { clock: TournamentTimerClo
     conditionalClasses += ' shake-warning-border'; // Changed to use shaking animation
   }
 
-  return <div style={{ backgroundColor }} className={`p-3 mb-3 text-light d-flex flex-column justify-content-center align-items-center ${conditionalClasses}`}>
+  return <div style={{ backgroundColor }} className={`p-3 mb-3 text-light d-flex flex-column justify-content-center align-items-center clock-container-for-query ${conditionalClasses}`}>
     <h1 className={clockNameClass}>{clock.clock_name}</h1>
-    <div className={`timer-display-font`}> {/* Removed timerClass */}
+    <div className={`timer-display-font`}>
       <TimerDisplay msRemaining={clock.ms_remaining} />
     </div>
   </div>;

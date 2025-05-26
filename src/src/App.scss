@@ -144,7 +144,7 @@
   font-style: normal;
   font-variation-settings:
     "wdth" 100;
-  font-size: 3.5rem; /* Added to make font bigger */
+  font-size: 5rem; /* Added to make font bigger */
 }
 
 .timer-display-font-table {
@@ -182,21 +182,25 @@
   animation: shake-warning 3s infinite; /* Updated total duration for the periodic animation */
 }
 
+.clock-container-for-query {
+  container-type: inline-size; /* Establishes this element as a query container for its inline (width) dimension */
+}
+
 .clock-name-font {
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
-  font-weight: 700; /* Adjust weight as needed, e.g., 400 for regular, 700 for bold */
+  font-weight: 700;
   font-style: normal;
-  text-align: center; /* Center the text */
+  text-align: center;
   
-  /* Add properties for responsive font size and to prevent wrapping */
-  white-space: nowrap; /* Prevent text from wrapping to a new line */
-  overflow: hidden; /* Hide the part of the text that overflows */
-  text-overflow: ellipsis; /* Display an ellipsis (...) for overflowed text */
-  width: 100%; /* Ensure the element respects parent's width for overflow calculation */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
   
-  /* Adjust font size dynamically */
-  /* Values: clamp(MINIMUM_SIZE, PREFERRED_SIZE (viewport-based), MAXIMUM_SIZE) */
-  /* Increased preferred (5vw) and maximum (3rem) size */
-  font-size: clamp(1.25rem, 5vw, 3rem); 
+  /* Using cqw (container query width) units. 
+     12cqw means the font size will try to be 12% of the container's width.
+     Adjust 1.25rem (min), 12cqw (preferred), and 7rem (max) as needed.
+  */
+  font-size: clamp(1.25rem, 10cqw, 9rem); 
 }
