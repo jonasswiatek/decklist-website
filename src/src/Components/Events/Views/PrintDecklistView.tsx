@@ -49,23 +49,28 @@ export const PrintDecklistView: React.FC = () => {
     }
     
     return (
-        <div>
-            <p>
-                <div>Player: {data?.player_name}</div>
-                <div>Deck: {data?.deck_name}</div>
-                <div>Event: {eventDetailsData?.event_name} ({eventDetailsData?.event_date.toLocaleLowerCase()})</div>
-            </p>
-            <div className="print-decklist-container">
-                {data?.groups.map((group, index) => (
-                    <div key={index} className="print-decklist-group" style={{ marginBottom: '10px' }}>
-                        <h5>{group.group_name}</h5>
-                        {group.cards.map((card, cardIndex) => (
-                            <div key={cardIndex}>
-                                <span>{card.quantity} {card.card_name}</span>
+
+        <div className="container">
+            <div className='row'>
+                <div>
+                    <p>
+                        <div>Player: {data?.player_name}</div>
+                        <div>Deck: {data?.deck_name}</div>
+                        <div>Event: {eventDetailsData?.event_name} ({eventDetailsData?.event_date.toLocaleLowerCase()})</div>
+                    </p>
+                    <div className="print-decklist-container">
+                        {data?.groups.map((group, index) => (
+                            <div key={index} className="print-decklist-group" style={{ marginBottom: '10px' }}>
+                                <h5>{group.group_name}</h5>
+                                {group.cards.map((card, cardIndex) => (
+                                    <div key={cardIndex}>
+                                        <span>{card.quantity} {card.card_name}</span>
+                                    </div>
+                                ))}
                             </div>
                         ))}
                     </div>
-                ))}
+                </div>
             </div>
         </div>
     );
