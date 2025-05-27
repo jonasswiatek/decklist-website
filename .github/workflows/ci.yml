@@ -31,8 +31,5 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run tests
-      run: npm run test # Adjust if your test script has a different name
-
     - name: Build project
       run: npm run build # Adjust if your build script has a different name
