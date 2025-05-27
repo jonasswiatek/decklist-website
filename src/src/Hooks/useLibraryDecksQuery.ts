@@ -1,5 +1,5 @@
-import { useQuery } from 'react-query';
 import { LibraryDecksResponse, getLibraryDecksRequest } from '../model/api/apimodel';
+import { useQuery } from '@tanstack/react-query'
 
 export const useLibraryDecksQuery = (enabled = true) => {
   return useQuery<LibraryDecksResponse>({

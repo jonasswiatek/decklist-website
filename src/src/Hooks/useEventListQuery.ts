@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query'
 import { EventListItem, getAllEventsRequest } from '../model/api/apimodel';
 
 export function useEventListQuery(enabled: boolean = true) {

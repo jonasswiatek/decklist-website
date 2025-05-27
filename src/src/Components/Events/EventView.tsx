@@ -70,7 +70,7 @@ export function EventView() {
         )
     }
 
-    if(error === "error") {
+    if(error) {
         return (
             <>
                 <div className='row'>

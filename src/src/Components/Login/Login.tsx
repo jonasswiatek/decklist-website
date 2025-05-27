@@ -4,7 +4,7 @@ import { HandleValidation } from "../../Util/Validators";
 import { useState } from "react";
 import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function LoginScreen() {
   const { authState, logout, googleLogin } = useDecklistStore();

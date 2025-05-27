@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query'
 import { DecklistResponse, getDecklistRequest, getDecklistRevisionRequest } from '../model/api/apimodel';
 
 export function useDecklistQuery(eventId: string, userId: string | null, enabled = true) {

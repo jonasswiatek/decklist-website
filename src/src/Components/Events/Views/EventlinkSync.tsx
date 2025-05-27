@@ -42,7 +42,7 @@ export const EventlinkSync: React.FC = () => {
         )
     }
 
-    if(error === "error") {
+    if(error) {
         return (
             <>
                 <div className='row'>

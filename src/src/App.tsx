@@ -11,7 +11,7 @@ import {
   QueryClient,
   QueryClientProvider,
   useQueryClient
-} from 'react-query'
+} from '@tanstack/react-query'
 
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
