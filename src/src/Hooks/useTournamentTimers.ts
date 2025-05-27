@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from 'react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
     getUserTournaments,
     UserTournamentsResponse,
@@ -9,27 +9,23 @@ import {
 const TOURNAMENT_TIMERS_QUERY_KEY = 'tournamentTimers';
 
 export function useUserTournaments(enabled: boolean = true): UseQueryResult<UserTournamentsResponse, Error> {
-    return useQuery<UserTournamentsResponse, Error>(
-        [TOURNAMENT_TIMERS_QUERY_KEY, 'userTournaments'],
-        () => getUserTournaments(),
-        {
-            staleTime: Infinity,
-            retry: false,
-            refetchOnWindowFocus: false,
-            enabled: enabled,
-        }
-    );
+    return useQuery<UserTournamentsResponse, Error>({
+        queryKey: [TOURNAMENT_TIMERS_QUERY_KEY, 'userTournaments'],
+        queryFn: () => getUserTournaments(),
+        staleTime: Infinity,
+        retry: false,
+        refetchOnWindowFocus: false,
+        enabled: enabled,
+    });
 }
 
 export function useTournamentDetails(tournamentId: string, enabled : boolean = true): UseQueryResult<TournamentDetailsResponse, Error> {
-    return useQuery<TournamentDetailsResponse, Error>(
-        [TOURNAMENT_TIMERS_QUERY_KEY, 'tournamentDetails', tournamentId],
-        () => getTournamentDetails(tournamentId),
-        {
-            staleTime: Infinity,
-            retry: false,
-            refetchOnWindowFocus: false,
-            enabled: enabled,
-        }
-    );
+    return useQuery<TournamentDetailsResponse, Error>({
+        queryKey: [TOURNAMENT_TIMERS_QUERY_KEY, 'tournamentDetails', tournamentId],
+        queryFn: () => getTournamentDetails(tournamentId),
+        staleTime: Infinity,
+        retry: false,
+        refetchOnWindowFocus: false,
+        enabled: enabled,
+    });
 }
