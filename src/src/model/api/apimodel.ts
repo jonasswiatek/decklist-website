@@ -434,6 +434,28 @@ export async function getLibraryDecksRequest() : Promise<LibraryDecksResponse> {
     throw new Error("Http Exception");
 }
 
+export type CardResult = {
+    card_name: string;
+    mana_cost: string;
+}
+
+export async function searchCardsRequest(query?: string): Promise<CardResult[]> {
+    if (!query || query.length < 3) {
+        return [];
+    }
+    
+    const params = new URLSearchParams();
+    params.append('q', query);
+    const httpResponse = await fetch(`/api/cards/search?${params.toString()}`);
+
+    if (httpResponse.ok) {
+        const cards = await httpResponse.json() as CardResult[];
+        return cards;
+    }
+
+    throw new Error("Http Exception");
+}
+
 export async function deleteDeckRequest(eventId: string) {
     const httpResponse = await fetch(`/api/events/${eventId}/deck`, {
         method: "DELETE",

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import QRCode from 'qrcode.react';
 import { LoadingScreen } from '../../Login/LoadingScreen';
 import { useEventDetailsQuery } from '../../../Hooks/useEventDetailsQuery';
+import { QRCodeSVG } from 'qrcode.react';
 
 export const QRCodeView: React.FC = () => {
     const { eventId } = useParams<{ eventId: string }>();
@@ -14,7 +14,7 @@ export const QRCodeView: React.FC = () => {
         return <LoadingScreen />
     }
 
-    if(error === "error") {
+    if(error) {
         return (
             <>
                 <div className='row'>
@@ -140,12 +140,10 @@ export const QRCodeView: React.FC = () => {
                     maxWidth: '100%',
                     textAlign: 'center'
                 }}>
-                    <QRCode 
+                    <QRCodeSVG 
                         value={inviteLink} 
                         size={220}
                         level="H"
-                        renderAs="svg"
-                        includeMargin={true}
                         bgColor="#f5f5f5"
                         className="qr-code"
                     />

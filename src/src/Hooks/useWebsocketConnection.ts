@@ -1,36 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { TournamentTimerClock } from '../model/api/tournamentTimers';
 
 const WEBSOCKET_URL = 'wss://decklist.lol/ws';
-export const useDecklistWebSocketConnection = <T>(channelName: string) => {
-  return useWebSocket<T | undefined>(WEBSOCKET_URL, {
-    queryParams: { channel: channelName },
-    onOpen: () => console.log('WebSocket: opened connection'),
-    onClose: () => console.log('WebSocket: closed connection'),
-    onError: (event) => console.error('WebSocket: error:', event),
-    shouldReconnect: () => true,
-    heartbeat: {
-      message: "PING",
-      interval: 50000,
-      timeout: 60000,
-    }
-  });
-};
-
-type EventUpdatedMessage = {
-  updated_by_user_id: string;
-  updated_by_session_id: string;
-  refresh: boolean;
-}
-
 type ForbiddenMessage = {
   message: string;
   connectionId: string;
   requestId: string;
 }
 
-export const isForbiddenMessage = (data: unknown): data is ForbiddenMessage => {
+const isForbiddenMessage = (data: unknown): data is ForbiddenMessage => {
   return (
     typeof data === 'object' &&
     data !== null &&
@@ -40,8 +19,56 @@ export const isForbiddenMessage = (data: unknown): data is ForbiddenMessage => {
   );
 };
 
+const useDecklistWebSocketConnection = <T>(channelName: string) => {
+  const [lastJsonMessage, setLastJsonMessage] = useState<T | undefined>(undefined);
+  const { sendJsonMessage, readyState, lastJsonMessage: webSocketLastMessage } = useWebSocket<T | undefined>(WEBSOCKET_URL, {
+    queryParams: { channel: channelName },
+    onOpen: () => console.log('WebSocket: opened connection'),
+    onClose: () => console.log('WebSocket: closed connection'),
+    onError: (event) => console.error('WebSocket: error:', event),
+    shouldReconnect: () => true,
+    heartbeat: {
+      interval: 1200000,
+      timeout: 130000,
+    }
+  });
+
+  useEffect(() => {
+    if (webSocketLastMessage) {
+      if (isForbiddenMessage(webSocketLastMessage)) {
+        console.log("WebSocket: Ping/Pong");
+      } else {
+        setLastJsonMessage(webSocketLastMessage as T);
+      }
+    }
+  }, [webSocketLastMessage, setLastJsonMessage]);
+
+  //The ping feature of react-use-websocket is not reliable, so we implement our own ping mechanism
+  useEffect(() => {
+    if (readyState === WebSocket.OPEN) {
+      console.log("WebSocket: Starting ping interval");
+      const intervalId = setInterval(() => {
+        sendJsonMessage({ type: 'PING' });
+      }, 120000);
+
+      return () => {
+        console.log("WebSocket: Stopping ping interval");
+        clearInterval(intervalId);
+      };
+    }
+  }, [readyState, sendJsonMessage]);
+
+  return { readyState, lastJsonMessage };
+};
+
+type EventUpdatedMessage = {
+  updated_by_user_id: string;
+  updated_by_session_id: string;
+  refresh: boolean;
+}
+
 export const useEventUpdated = (effect: (message: EventUpdatedMessage) => void, eventId: string) => {
-  const { lastJsonMessage, readyState } = useDecklistWebSocketConnection<EventUpdatedMessage | ForbiddenMessage>(`decklist.lol:event:${eventId}`);
+  const { lastJsonMessage, readyState } = useDecklistWebSocketConnection<EventUpdatedMessage>(`decklist.lol:event:${eventId}`);
   
   const effectRef = useRef(effect);
   useEffect(() => {
@@ -49,11 +76,9 @@ export const useEventUpdated = (effect: (message: EventUpdatedMessage) => void, 
   }, [effect]);
 
   useEffect(() => {
-    if (lastJsonMessage && !isForbiddenMessage(lastJsonMessage)) {
+    if (lastJsonMessage) {
       console.log("WebSocket: EventUpdateEvent Received", lastJsonMessage);
-      effectRef.current(lastJsonMessage as EventUpdatedMessage);
-    } else if (lastJsonMessage && isForbiddenMessage(lastJsonMessage)) {
-      console.log("WebSocket: Ping/Pong");
+      effectRef.current(lastJsonMessage);
     }
   }, [lastJsonMessage]);
 
@@ -80,7 +105,7 @@ type TournamentTimersUpdatedMessage = {
 }
 
 export const useTournamentTimersUpdated = (effect: (message: TournamentTimersUpdatedMessage) => void, tournamentId: string) => {
-  const { lastJsonMessage, readyState } = useDecklistWebSocketConnection<TournamentTimersUpdatedMessage | ForbiddenMessage>(`decklist.lol:timers:tournament:${tournamentId}`);
+  const { lastJsonMessage, readyState } = useDecklistWebSocketConnection<TournamentTimersUpdatedMessage>(`decklist.lol:timers:tournament:${tournamentId}`);
   
   const effectRef = useRef(effect);
   useEffect(() => {
@@ -88,10 +113,8 @@ export const useTournamentTimersUpdated = (effect: (message: TournamentTimersUpd
   }, [effect]);
 
   useEffect(() => {
-    if (lastJsonMessage && !isForbiddenMessage(lastJsonMessage)) {
-      effectRef.current(lastJsonMessage as TournamentTimersUpdatedMessage);
-    } else if (lastJsonMessage && isForbiddenMessage(lastJsonMessage)) {
-      console.log("WebSocket: Ping/Pong");
+    if (lastJsonMessage) {
+      effectRef.current(lastJsonMessage);
     }
   }, [lastJsonMessage]);
   

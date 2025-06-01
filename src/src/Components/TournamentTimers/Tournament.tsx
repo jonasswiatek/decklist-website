@@ -62,8 +62,10 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
         return;
       }
 
-      if (message.updated_by_session_id == sessionId)
+      if (message.updated_by_session_id == sessionId) {
+        console.log("Ignoring update from own session");
         return; // Ignore updates from the same session
+      }
 
       switch (message.message_type) {
         case WebSocketTournamentTimersRefreshMessageType.CLOCK_ADDED:
