@@ -176,16 +176,16 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
 
 
 export function ClockComponent({ clock, className }: { clock: TournamentTimerClock, className?: string }): ReactElement { // Removed priority prop
-  const FIVE_MINUTES_MS = 5 * 60 * 1000;
-  const TEN_MINUTES_MS = 10 * 60 * 1000;
+  const RED_MS = 0 * 60 * 1000;
+  const YELLOW_MS = 5 * 60 * 1000;
 
   let backgroundColor: string;
   // Standardized text styling
   const clockNameClass = 'clock-name-font'; // Added clock-name-font for Inter font
 
-  if (clock.ms_remaining < FIVE_MINUTES_MS) {
+  if (clock.ms_remaining < RED_MS) {
     backgroundColor = '#C82E31'; // Dark, slightly reddish
-  } else if (clock.ms_remaining < TEN_MINUTES_MS) {
+  } else if (clock.ms_remaining < YELLOW_MS) {
     backgroundColor = '#9F6918'; // Dark, slightly yellowish
   } else {
     backgroundColor = '#3D802D'; // Dark, slightly greenish
