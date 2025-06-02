@@ -141,6 +141,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         
         if (confirmed) {
             await deleteEventUser(e.event.event_id, auth.userId!);
+            refetchMyEvents();
             navigate('/');
         }
     }
