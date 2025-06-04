@@ -39,7 +39,7 @@ export function EventList() : ReactElement {
         ))}
         {!isLoading && data?.length === 0 && (
           <tr>
-            <td colSpan={2} className="text-center py-4">No events found</td>
+            <td colSpan={2} className="text-center">No events found</td>
           </tr>
         )}
       </tbody>

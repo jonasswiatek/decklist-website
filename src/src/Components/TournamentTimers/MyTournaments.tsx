@@ -76,7 +76,7 @@ const MyTournaments: React.FC = () => {
                           {tournament.tournament_name}
                         </Link>
                       </td>
-                      <td>{tournament.role}</td>
+                      <td><span className="badge bg-primary">{tournament.role}</span></td>
                     </tr>
                   ))
                 ) : (
