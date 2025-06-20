@@ -10,6 +10,21 @@ import { useTournamentClocks } from './useTournamentClocks';
 import { useTournamentTimersUpdated, WebSocketTournamentTimersRefreshMessageType } from '../../Hooks/useWebsocketConnection';
 import { useAuth } from '../Login/useAuth';
 
+const getWebSocketStatusText = (readyState: number): string => {
+  switch (readyState) {
+    case WebSocket.CONNECTING:
+      return 'CONNECTING (0)';
+    case WebSocket.OPEN:
+      return 'OPEN (1)';
+    case WebSocket.CLOSING:
+      return 'CLOSING (2)';
+    case WebSocket.CLOSED:
+      return 'CLOSED (3)';
+    default:
+      return `UNKNOWN (${readyState})`;
+  }
+};
+
 interface AddManagerFormInputs {
   name: string;
   email: string;
@@ -182,6 +197,9 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       <Container fluid className="py-3 vh-100 d-flex flex-column justify-content-center align-items-center bg-dark">
         <Spinner animation="border" variant="light" className="mb-3" style={{ width: '3rem', height: '3rem' }} />
         <p className="text-light fs-5 text-center">Connecting to server...</p>
+        <p className="text-light fs-6 text-center text-muted">
+          WebSocket Status: {getWebSocketStatusText(readyState)}
+        </p>
       </Container>
     );
   }
