@@ -20,7 +20,8 @@ Temple Garden`;
 3 Monastery Swiftspear
 4 Young Pyromancer
 2 Fatal Push
-4 Consider
+4 Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
+2 Wear // Tear
 
 Sideboard
 2 Flusterstorm

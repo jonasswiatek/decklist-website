@@ -40,6 +40,28 @@ export function DecklistHelp() {
             <li>Lines with text like "mainboard" and "sideboard", or starting with // are ignored, but can be included for your own benefit</li>
           </ul>
 
+          <h4>Split and MDFC cards</h4>
+          <ul>
+            <li><strong>Split cards</strong> (e.g., Wear // Tear) and <strong>MDFC cards</strong> (Modal Double-Faced Cards, e.g., Fable of the Mirror-Breaker // Reflection of Kiki-Jiki) can be entered in two ways:</li>
+            <ul>
+              <li>With both sides: <code>Wear // Tear</code> or <code>Fable of the Mirror-Breaker // Reflection of Kiki-Jiki</code></li>
+              <li>With just the front side: <code>Wear</code> or <code>Fable of the Mirror-Breaker</code></li>
+            </ul>
+            <li>Both formats are accepted and will be recognized by the system.</li>
+          </ul>
+
+          <h5>Examples</h5>
+          <pre className="p-3 rounded">
+{`2 Wear // Tear
+3 Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
+1 Valki, God of Lies // Tibalt, Cosmic Impostor
+// Or simply:
+2 Wear
+3 Fable of the Mirror-Breaker
+1 Valki, God of Lies
+`}
+          </pre>
+
           <h4>Formatting Example</h4>
           <pre className=" p-3 rounded">
 {`4 Lightning Bolt
