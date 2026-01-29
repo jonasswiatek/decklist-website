@@ -68,7 +68,6 @@ export function LoginScreen() {
                     useOneTap
                     shape="rectangular"
                     text="signin_with"
-                    locale="en"
                   />
                 </div>
               </div>
