@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "@react-oauth/google": "^0.13.4",
+    "@react-oauth/google": "^0.12.2",
     "@tanstack/react-query": "^5.90.11",
     "bootstrap": "^5.3.8",
     "http-proxy-middleware": "^3.0.5",
@@ -40,7 +40,7 @@
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
-    "sass": "^1.97.3",
+    "sass": "1.94.2",
     "typescript": "^5.9.3",
     "vite": "^7.2.4"
   }
