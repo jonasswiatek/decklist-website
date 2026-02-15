@@ -1,223 +1,147 @@
-import { ThrowIfValidationErrors } from "./apimodel";
+import { fetchClient, ValidationError } from "./apimodel";
+import type { components } from "./decklist-api-schema";
 
-export interface CreateTournamentRequest {
-    tournament_name: string;
-}
+// --- Re-exported schema types for consumers ---
 
-export interface CreateTournamentResponse {
-    tournament_id: string;
-    tournament_name: string;
-}
+export type TournamentTimerClock = components["schemas"]["TournamentTimerClock"];
+export type UserTournamentsResponseItem = components["schemas"]["UserTournamentsResponseItem"];
 
-export interface UserTournamentsResponseItem {
-    tournament_id: string;
-    tournament_name: string;
-    role: string;
-}
+// --- Functions ---
 
-export interface UserTournamentsResponse {
-    tournaments: UserTournamentsResponseItem[];
-}
-
-export interface TournamentManager {
-    user_id: string;
-    user_name: string;
-    role: string;
-}
-
-export interface TournamentTimerClock {
-    clock_id: string;
-    clock_name: string;
-    is_running: boolean;
-    duration_seconds: number;
-    ms_remaining: number;
-}
-
-export interface TournamentDetailsResponse {
-    tournament_id: string;
-    tournament_name: string;
-    role: string | null;
-    managers: TournamentManager[];
-    clocks: TournamentTimerClock[];
-}
-
-export interface CreateClockRequest {
-    clock_name: string;
-    duration_seconds: number;
-}
-
-export interface UpdateClockRequest {
-    is_running: boolean;
-}
-
-export interface AdjustClockRequest {
-    ms_adjustment: number;
-}
-
-export interface AddManagerRequest {
-    user_email: string;
-    user_name: string;
-}
-
-const API_BASE_URL = '/api/timers';
-
-export async function createTournament(request: CreateTournamentRequest): Promise<CreateTournamentResponse> {
-    const response = await fetch(API_BASE_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+export async function createTournament(request: { tournament_name: string }) {
+    const { data, error } = await fetchClient.POST("/api/timers", {
+        body: {
+            tournament_name: request.tournament_name,
         },
-        body: JSON.stringify(request),
     });
 
-    await ThrowIfValidationErrors(response);
+    if (error) throw new ValidationError(error);
+    if (data) return data;
 
-    if (!response.ok) {
-        throw new Error(`Error creating tournament: ${response.statusText}`);
-    }
-    return response.json();
-}
-
-export async function getUserTournaments(): Promise<UserTournamentsResponse> {
-    const response = await fetch(API_BASE_URL, {
-        method: 'GET',
-    });
-    if (!response.ok) {
-        throw new Error(`Error fetching user tournaments: ${response.statusText}`);
-    }
-    return response.json();
-}
-
-export async function getTournamentDetails(tournamentId: string): Promise<TournamentDetailsResponse> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}`, {
-        method: 'GET',
-    });
-    if (!response.ok) {
-        throw new Error(`Error fetching tournament details: ${response.statusText}`);
-    }
-    return response.json();
+    throw new Error("Http Exception");
 }
 
 export async function deleteTournament(tournamentId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}`, {
-        method: 'DELETE',
+    const { response } = await fetchClient.DELETE("/api/timers/{tournamentId}", {
+        params: {
+            path: { tournamentId },
+        },
     });
-    if (!response.ok) {
-        throw new Error(`Error deleting tournament: ${response.statusText}`);
-    }
+
+    if (response.ok) return;
+
+    throw new Error("Http Exception");
 }
 
-export async function createClock(tournamentId: string, request: CreateClockRequest): Promise<TournamentTimerClock> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+export async function createClock(tournamentId: string, request: { clock_name: string; duration_seconds: number }) {
+    const { data, error } = await fetchClient.POST("/api/timers/{tournamentId}/clocks", {
+        params: {
+            path: { tournamentId },
         },
-        body: JSON.stringify(request),
+        body: {
+            clock_name: request.clock_name,
+            duration_seconds: request.duration_seconds,
+        },
     });
 
-    await ThrowIfValidationErrors(response);
+    if (error) throw new ValidationError(error);
+    if (data) return data;
 
-    if (!response.ok) {
-        throw new Error(`Error creating clock: ${response.statusText}`);
-    }
-    return response.json();
+    throw new Error("Http Exception");
 }
 
 export async function deleteClock(tournamentId: string, clockId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}`, {
-        method: 'DELETE',
-    });
-    if (!response.ok) {
-        throw new Error(`Error deleting clock: ${response.statusText}`);
-    }
-}
-
-export async function updateClock(tournamentId: string, clockId: string, request: UpdateClockRequest): Promise<TournamentTimerClock> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-    });
-
-    await ThrowIfValidationErrors(response);
-
-    if (!response.ok) {
-        throw new Error(`Error updating clock: ${response.statusText}`);
-    }
-
-    return response.json();
-}
-
-export async function resetClock(tournamentId: string, clockId: string): Promise<TournamentTimerClock> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}/reset`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+    const { response } = await fetchClient.DELETE("/api/timers/{tournamentId}/clocks/{clockId}", {
+        params: {
+            path: { tournamentId, clockId },
         },
     });
 
-    if (!response.ok) {
-        throw new Error(`Error resetting clock: ${response.statusText}`);
-    }
+    if (response.ok) return;
 
-    return response.json();
+    throw new Error("Http Exception");
 }
 
-export async function adjustClock(tournamentId: string, clockId: string, request: AdjustClockRequest): Promise<TournamentTimerClock> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}/clocks/${clockId}/adjust`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+export async function updateClock(tournamentId: string, clockId: string, request: { is_running: boolean }) {
+    const { data, error } = await fetchClient.POST("/api/timers/{tournamentId}/clocks/{clockId}", {
+        params: {
+            path: { tournamentId, clockId },
         },
-        body: JSON.stringify(request),
+        body: {
+            is_running: request.is_running,
+        },
     });
 
-    await ThrowIfValidationErrors(response);
+    if (error) throw new ValidationError(error);
+    if (data) return data;
 
-    if (!response.ok) {
-        throw new Error(`Error adjusting clock: ${response.statusText}`);
-    }
-
-    return response.json();
+    throw new Error("Http Exception");
 }
 
-export async function addManager(tournamentId: string, request: AddManagerRequest): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}/managers`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+export async function resetClock(tournamentId: string, clockId: string) {
+    const { data } = await fetchClient.POST("/api/timers/{tournamentId}/clocks/{clockId}/reset", {
+        params: {
+            path: { tournamentId, clockId },
         },
-        body: JSON.stringify(request),
     });
 
-    await ThrowIfValidationErrors(response);
+    if (data) return data;
 
-    if (!response.ok) {
-        throw new Error(`Error adding manager: ${response.statusText}`);
-    }
+    throw new Error("Http Exception");
+}
+
+export async function adjustClock(tournamentId: string, clockId: string, request: { ms_adjustment: number }) {
+    const { data } = await fetchClient.POST("/api/timers/{tournamentId}/clocks/{clockId}/adjust", {
+        params: {
+            path: { tournamentId, clockId },
+        },
+        body: {
+            ms_adjustment: request.ms_adjustment,
+        },
+    });
+
+    if (data) return data;
+
+    throw new Error("Http Exception");
+}
+
+export async function addManager(tournamentId: string, request: { user_email: string; user_name: string }): Promise<void> {
+    const { response, error } = await fetchClient.POST("/api/timers/{tournamentId}/managers", {
+        params: {
+            path: { tournamentId },
+        },
+        body: {
+            user_email: request.user_email,
+            user_name: request.user_name,
+        },
+    });
+
+    if (error) throw new ValidationError(error);
+    if (response.ok) return;
+
+    throw new Error("Http Exception");
 }
 
 export async function deleteManager(tournamentId: string, userId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}/managers/${userId}`, {
-        method: 'DELETE',
-    });
-    if (!response.ok) {
-        throw new Error(`Error deleting manager: ${response.statusText}`);
-    }
-}
-
-export async function forceUpdate(tournamentId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/${tournamentId}/force-update`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+    const { response } = await fetchClient.DELETE("/api/timers/{tournamentId}/managers/{userId}", {
+        params: {
+            path: { tournamentId, userId },
         },
     });
 
-    if (!response.ok) {
-        throw new Error(`Error forcing update: ${response.statusText}`);
-    }
+    if (response.ok) return;
+
+    throw new Error("Http Exception");
+}
+
+export async function forceUpdate(tournamentId: string): Promise<void> {
+    const { response } = await fetchClient.POST("/api/timers/{tournamentId}/force-update", {
+        params: {
+            path: { tournamentId },
+        },
+    });
+
+    if (response.ok) return;
+
+    throw new Error("Http Exception");
 }

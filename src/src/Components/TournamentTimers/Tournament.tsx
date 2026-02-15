@@ -208,7 +208,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     return (
       <Container className="py-3">
         <Alert variant="danger">
-          Error loading tournament details: {error?.message}
+          Error loading tournament details: {error}
         </Alert>
       </Container>
     );

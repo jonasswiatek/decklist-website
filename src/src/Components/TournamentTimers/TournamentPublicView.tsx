@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Spinner, Alert, Button } from 'react-bootstrap';
+import { Container, Spinner, Alert } from 'react-bootstrap';
 import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
 import { useTournamentTimersUpdated, WebSocketTournamentTimersRefreshMessageType } from '../../Hooks/useWebsocketConnection';
 import {  TimerDisplay } from './TimerDisplay';
@@ -100,9 +100,7 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
     return (
         <Alert variant="danger" className="w-75 text-center shadow-sm">
           <Alert.Heading as="h4">Error Loading Tournament Timers</Alert.Heading>
-          <p>{error?.message || "Tournament details could not be loaded."}</p>
-          <hr />
-          <Button onClick={() => refetch()} variant="danger">Try Again</Button>
+          <p>{error || "Tournament details could not be loaded."}</p>
         </Alert>
     );
   }

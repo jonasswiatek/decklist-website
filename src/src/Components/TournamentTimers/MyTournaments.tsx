@@ -22,7 +22,7 @@ const MyTournaments: React.FC = () => {
     return (
       <Container className="mt-4">
         <Alert variant="danger">
-          Error fetching tournaments: {error?.message || 'Unknown error'}
+          Error fetching tournaments: {error || 'Unknown error'}
         </Alert>
       </Container>
     );

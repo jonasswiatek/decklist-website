@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
-import { DecklistGroup, deleteLibraryDeckRequest, Format, NotFoundError, saveLibraryDeckRequest } from '../../model/api/apimodel';
+import { DecklistGroup, deleteLibraryDeckRequest, Format, saveLibraryDeckRequest } from '../../model/api/apimodel';
 import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
@@ -17,7 +17,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
   const location = useLocation();
   const importedDeck = location.state?.importedDeck;
 
-  const { data, error, isLoading, refetch } = useLibraryDeckQuery(deck_id);
+  const { data, error, isLoading, refetch, isError } = useLibraryDeckQuery(deck_id);
   const { refetch: refetchDeckLibrary } = useLibraryDecksQuery();
   const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
 
@@ -25,7 +25,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
       return <LoadingScreen />
   }
   
-  if(error instanceof NotFoundError) {
+  if(isError) {
     return (
     <div className="alert alert-warning" role="alert">
       <h4 className="alert-heading">Deck not found</h4>

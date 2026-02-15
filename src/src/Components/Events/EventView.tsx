@@ -8,7 +8,7 @@ import { BsArrowLeft } from 'react-icons/bs';
 import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
 
 // New EventHeader component
-const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string }> = ({ eventName, eventId, role }) => {
+const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string | undefined }> = ({ eventName, eventId, role }) => {
     const showEventId = role === "owner" || role === "judge";
     const navigate = useNavigate();
 
@@ -106,10 +106,10 @@ export function EventView() {
     
     return (
       <>
-        <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
+        <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role ?? undefined} />
         {(data.player_count >= data.max_players) ? 
             <EventFullMessage /> : 
-            (authorized ? <DeckEditor event={data} user_id={null} /> : <UnauthedView event={data} />)
+            (authorized ? <DeckEditor event={data} /> : <UnauthedView event={data} />)
         }
       </>
     )

@@ -66,7 +66,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LoginStartResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
                 };
             };
         };
@@ -103,7 +114,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LoginContinueResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
                 };
             };
         };
@@ -140,7 +162,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["LoginContinueResponse"];
+                    };
                 };
             };
         };
@@ -204,7 +228,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["MeResponse"];
+                    };
                 };
             };
         };
@@ -262,7 +288,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CreateEventResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
                 };
             };
         };
@@ -292,6 +329,24 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EventDetails"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": string;
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -328,7 +383,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["FormatsResponse"];
+                    };
                 };
             };
         };
@@ -363,6 +420,15 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["EventDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -385,6 +451,13 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -448,6 +521,22 @@ export interface paths {
                     };
                     content?: never;
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         delete: {
@@ -467,6 +556,22 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -508,7 +613,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["AddPlayerResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
                 };
             };
         };
@@ -543,6 +659,15 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["DecklistResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -570,6 +695,22 @@ export interface paths {
                     };
                     content?: never;
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         delete: {
@@ -585,6 +726,22 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -622,6 +779,15 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["DecklistRevisionsResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -649,7 +815,7 @@ export interface paths {
                 header?: never;
                 path: {
                     event_id: string;
-                    revision_id: number | string;
+                    revision_id: number;
                 };
                 cookie?: never;
             };
@@ -657,6 +823,15 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DecklistResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -690,8 +865,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -738,6 +913,22 @@ export interface paths {
                     };
                     content?: never;
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         delete?: never;
@@ -769,7 +960,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CardResult"][];
+                    };
                 };
             };
         };
@@ -802,7 +995,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["DeckLibraryResponse"];
+                    };
                 };
             };
         };
@@ -824,6 +1019,24 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SaveLibraryDeckResppnse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -860,6 +1073,15 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["LibraryDecklistResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -885,6 +1107,24 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
+                    content: {
+                        "application/json": components["schemas"]["SaveLibraryDeckResppnse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
                     content?: never;
                 };
             };
@@ -902,6 +1142,13 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -935,7 +1182,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["UserTournamentsResponse"];
+                    };
                 };
             };
         };
@@ -958,7 +1207,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["CreateTournamentResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
                 };
             };
         };
@@ -988,6 +1248,15 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TournamentDetailsResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1086,7 +1355,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TournamentTimerClock"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
                 };
             };
         };
@@ -1126,7 +1406,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TournamentTimerClock"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
                 };
             };
         };
@@ -1182,7 +1473,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TournamentTimerClock"];
+                    };
                 };
             };
         };
@@ -1219,6 +1512,15 @@ export interface paths {
             responses: {
                 /** @description OK */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TournamentTimerClock"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1262,6 +1564,15 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
                 };
             };
         };
@@ -1316,17 +1627,28 @@ export interface components {
             user_name: string;
         };
         AddPlayerRequest: {
-            email?: null | string;
+            email?: string | null;
             player_name: string;
+        };
+        AddPlayerResponse: {
+            user_id: string;
         };
         AdjustClockRequest: {
             /** Format: int64 */
-            ms_adjustment: number | string;
+            ms_adjustment: number;
+        };
+        CardGroup: {
+            group_name: string;
+            cards: components["schemas"]["DecklistCard"][];
+        };
+        CardResult: {
+            card_name: string;
+            mana_cost: string;
         };
         CreateClockRequest: {
             clock_name: string;
             /** Format: int32 */
-            duration_seconds: number | string;
+            duration_seconds: number;
         };
         CreateEventRequest: {
             event_name: string;
@@ -1334,11 +1656,62 @@ export interface components {
             /** Format: date */
             event_date: string;
         };
+        CreateEventResponse: {
+            success: boolean;
+            event_id?: string | null;
+        };
         CreateTournamentRequest: {
+            tournament_name: string;
+        };
+        CreateTournamentResponse: {
+            tournament_id: string;
             tournament_name: string;
         };
         /** @enum {unknown} */
         CredentialType: "cookie" | "bearer_token";
+        DeckLibraryEntry: {
+            deck_id: string;
+            deck_name: string;
+            format: string;
+            format_name: string;
+            has_warnings: boolean;
+        };
+        DeckLibraryResponse: {
+            decks: components["schemas"]["DeckLibraryEntry"][];
+        };
+        DecklistCard: {
+            card_name: string;
+            /** Format: int32 */
+            quantity: number;
+            mana_cost: string;
+            /** Format: int32 */
+            mana_value: number;
+            type: string;
+            warnings: string[];
+        };
+        DecklistResponse: {
+            player_name: string | null;
+            deck_name: string | null;
+            groups: components["schemas"]["CardGroup"][];
+            deck_warnings: string[];
+            is_deck_checked: boolean;
+            decklist_text: string;
+        };
+        DecklistRevision: {
+            /** Format: int64 */
+            revision_id: number;
+            revised_by: string;
+            revision_type: components["schemas"]["RevisionType"];
+            /** Format: date-time */
+            created_at: string;
+            is_current: boolean;
+            decklist: components["schemas"]["DecklistResponse"];
+        };
+        DecklistRevisionsResponse: {
+            event_id: string;
+            player_email_hash: string;
+            revisions: components["schemas"]["DecklistRevision"][];
+        };
         DeleteUserRequest: {
             user_id: string;
         };
@@ -1350,37 +1723,135 @@ export interface components {
             /** Format: date */
             event_date: string;
         };
+        EventDetails: {
+            event_id: string;
+            event_name: string;
+            format: string;
+            format_name: string;
+            status: string;
+            /** Format: date */
+            event_date: string;
+            decklist_style: string;
+            /** Format: int32 */
+            player_count: number;
+            /** Format: int32 */
+            max_players: number;
+            role?: string | null;
+            participants: components["schemas"]["EventParticipant"][];
+        };
+        EventParticipant: {
+            player_name: string;
+            role: string;
+            user_id: string;
+            has_deck_warning: boolean;
+            is_deck_checked: boolean;
+        };
         /** @enum {unknown} */
         EventStatus: "open" | "closed" | null;
+        FormatListItem: {
+            name: string;
+            format: string;
+            decklist_style: string;
+        };
+        FormatsResponse: {
+            formats: components["schemas"]["FormatListItem"][];
+        };
         GoogleSignInRequest: {
             token: string;
         };
+        HttpValidationProblemDetails: {
+            type?: string | null;
+            title?: string | null;
+            /** Format: int32 */
+            status?: number | null;
+            detail?: string | null;
+            instance?: string | null;
+            errors?: {
+                [key: string]: string[];
+            };
+        };
+        LibraryDecklistResponse: {
+            deck_id: string;
+            deck_name: string;
+            format: string;
+            format_name: string;
+            groups: components["schemas"]["CardGroup"][];
+            deck_warnings: string[];
+            decklist_text: string;
+        };
+        LoginContinueErrorType: number;
         LoginContinueRequest: {
             email: string;
             code: string;
             credential_type?: components["schemas"]["CredentialType"];
         };
+        LoginContinueResponse: {
+            success: boolean;
+            session_id: string;
+            error_type?: unknown | components["schemas"]["LoginContinueErrorType"];
+            bearer_token?: string | null;
+            email?: string | null;
+            user_id?: string | null;
+            name?: string | null;
+        };
         LoginStartRequest: {
             email: string;
+        };
+        LoginStartResponse: {
+            success: boolean;
+            notification: string;
+        };
+        MeResponse: {
+            authorized: boolean;
+            email: string;
+            user_id: string;
+            name: string | null;
+            session_id: string;
+        };
+        /** @enum {unknown} */
+        RevisionType: "submitted" | "deleted";
+        SaveLibraryDeckResppnse: {
+            deck_id: string;
         };
         SetDeckCheckedRequest: {
             user_id: string;
             is_checked: boolean;
         };
+        TournamentDetailsResponse: {
+            tournament_id: string;
+            tournament_name: string;
+            role: string | null;
+            managers: components["schemas"]["TournamentManager"][];
+            clocks: components["schemas"]["TournamentTimerClock"][];
+        };
+        TournamentManager: {
+            user_id: string;
+            user_name: string;
+            role: string;
+        };
+        TournamentTimerClock: {
+            clock_id: string;
+            clock_name: string;
+            is_running: boolean;
+            /** Format: int32 */
+            duration_seconds: number;
+            /** Format: int64 */
+            ms_remaining: number;
+        };
         UpdateClockRequest: {
             is_running: boolean;
         };
         UpdateDeckRequest: {
-            user_id?: null | string;
+            user_id?: string | null;
             player_name: string;
-            deck_name?: null | string;
+            deck_name?: string | null;
             decklist_text: string;
         };
         UpdateEventRequest: {
-            event_status?: null | components["schemas"]["EventStatus"];
+            event_status?: unknown | components["schemas"]["EventStatus"];
         };
         UpdateLibraryDeckRequest: {
-            deck_id?: null | string;
+            deck_id?: string | null;
             deck_name: string;
             format: string;
             decklist_text: string;
@@ -1388,10 +1859,18 @@ export interface components {
         UpdateUsersRequest: {
             email: string;
             player_name: string;
-            role: null | components["schemas"]["UserRole"];
+            role: unknown | components["schemas"]["UserRole"];
         };
         /** @enum {unknown} */
         UserRole: "judge" | null;
+        UserTournamentsResponse: {
+            tournaments: components["schemas"]["UserTournamentsResponseItem"][];
+        };
+        UserTournamentsResponseItem: {
+            tournament_id: string;
+            tournament_name: string;
+            role: string;
+        };
     };
     responses: never;
     parameters: never;

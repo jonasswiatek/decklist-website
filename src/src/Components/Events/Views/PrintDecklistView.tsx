@@ -11,7 +11,7 @@ export const PrintDecklistView: React.FC = () => {
 
     const { data: eventDetailsData, error: eventError, isLoading: eventLoading } = useEventDetailsQuery(event_id!);
     
-    const { data, error, isLoading } = useDecklistQuery(event_id!, userId);
+    const { data, error, isLoading } = useDecklistQuery(event_id!, userId ?? undefined);
 
     // Apply proper class to body for print styling
     useEffect(() => {
