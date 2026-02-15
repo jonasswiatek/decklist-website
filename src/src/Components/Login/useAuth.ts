@@ -2,9 +2,9 @@ import { createContext, useContext } from 'react';
 
 export type AuthContextType = {
     authorized?: boolean,
-    email?: string,
-    userId?: string,
-    name?: string,
+    email?: string | null,
+    userId?: string | null,
+    name?: string | null,
     sessionId?: string,
     login: () => void
 }

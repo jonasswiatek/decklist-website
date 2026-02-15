@@ -8,7 +8,7 @@ const fetchClient = createFetchClient<paths>({
 
 const $api = createClient(fetchClient);
 
-export function useDecklistQuery(eventId: string, userId?: string, enabled = true) {
+export function useDecklistQuery(eventId: string, userId?: string | null, enabled = true) {
     return $api.useQuery(
         "get",
         "/api/events/{event_id}/deck",
@@ -18,7 +18,7 @@ export function useDecklistQuery(eventId: string, userId?: string, enabled = tru
                     event_id: eventId,
                 },
                 query: {
-                    user_id: userId,
+                    user_id: userId ?? undefined,
                 },
             },
             queryKey: ['decklist', eventId, userId],

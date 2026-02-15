@@ -236,7 +236,7 @@ export async function getEvent(eventId: string) {
 
 // --- Decklists ---
 
-export async function getDecklistRequest(eventId: string, userId: string | null) {
+export async function getDecklistRequest(eventId: string, userId?: string | null) {
     const { data, response } = await fetchClient.GET("/api/events/{event_id}/deck", {
         params: {
             path: {

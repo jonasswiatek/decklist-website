@@ -8,7 +8,7 @@ const fetchClient = createFetchClient<paths>({
 
 const $api = createClient(fetchClient);
 
-export function useDecklistRevisionsQuery(eventId: string, userId?: string, enabled = true) {
+export function useDecklistRevisionsQuery(eventId: string, userId?: string | null, enabled = true) {
     return $api.useQuery(
         "get",
         "/api/events/{event_id}/deck/revisions",

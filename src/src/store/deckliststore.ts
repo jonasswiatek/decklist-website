@@ -9,10 +9,10 @@ export enum AuthState {
 
 type DecklistStore = {
     authState: AuthState,
-    email?: string,
-    userId?: string,
+    email?: string | null,
+    userId?: string | null,
     sessionId?: string,
-    name?: string,
+    name?: string | null,
 }
 
 type Actions = {
@@ -39,7 +39,7 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
                     email: me.email,
                     userId: me.user_id,
                     sessionId: me.session_id,
-                    name: me.name ?? undefined
+                    name: me.name
                 })
             }
             else {
@@ -59,25 +59,25 @@ export const useDecklistStore = create<DecklistStore & Actions>()(
             if (res.success) {
                 set({
                     authState: AuthState.Authorized,
-                    email: res.email ?? undefined,
-                    userId: res.user_id ?? undefined,
+                    email: res.email,
+                    userId: res.user_id,
                     sessionId: res.session_id,
-                    name: res.name ?? undefined
+                    name: res.name
                 })
             }
 
             return res;
         },
-        googleLogin: async (token) => 
+        googleLogin: async (token) =>
         {
             const res = await googleLoginRequest({token});
             if (res.success) {
                 set({
                     authState: AuthState.Authorized,
-                    email: res.email ?? undefined,
-                    userId: res.user_id ?? undefined,
+                    email: res.email,
+                    userId: res.user_id,
                     sessionId: res.session_id,
-                    name: res.name ?? undefined
+                    name: res.name
                 })
             }
 

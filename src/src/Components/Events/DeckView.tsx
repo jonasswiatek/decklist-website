@@ -16,7 +16,7 @@ import { useDecklistRevisionsQuery } from '../../Hooks/useDecklistRevisionsQuery
 export function DeckView() {
     const { event_id } = useParams();
     const [ searchParams ] = useSearchParams();
-    const id = searchParams.get('id') ?? undefined;
+    const id = searchParams.get('id');
 
     const { data, error, isLoading } = useEventDetailsQuery(event_id!);
     
@@ -43,7 +43,7 @@ export function DeckView() {
 
 type DeckEditorProps = {
     event: EventDetails,
-    user_id?: string,
+    user_id?: string | null,
 }
 
 export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
@@ -145,7 +145,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
             case 'event': {
                 const decklist = await getDecklistRequest(id, null);
-                setValue("deck_name", decklist!.deck_name ?? undefined, { 
+                setValue("deck_name", decklist!.deck_name ?? '', {
                     shouldDirty: true,
                     shouldValidate: true
                 });
@@ -351,7 +351,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     className='form-control' 
                                     placeholder='Your Name' 
                                     required 
-                                    {...register("player_name", { value: data?.player_name ?? undefined })} 
+                                    {...register("player_name", { value: data?.player_name ?? '' })}
                                     disabled={inputDisabled} // Disable for players if the event is closed
                                 />
                                 {data && !isJudge && isOpen && (
@@ -380,7 +380,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     id="deck_name" 
                                     className='form-control' 
                                     placeholder='Deck Name (Optional)' 
-                                    {...register("deck_name", { value: data?.deck_name ?? undefined })} 
+                                    {...register("deck_name", { value: data?.deck_name ?? '' })}
                                     disabled={inputDisabled}
                                 />
                                 {errors.deck_name && (

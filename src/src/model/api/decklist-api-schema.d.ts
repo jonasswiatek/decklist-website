@@ -1519,13 +1519,6 @@ export interface paths {
                         "application/json": components["schemas"]["TournamentTimerClock"];
                     };
                 };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
             };
         };
         delete?: never;
@@ -1627,7 +1620,7 @@ export interface components {
             user_name: string;
         };
         AddPlayerRequest: {
-            email?: string | null;
+            email?: null | string;
             player_name: string;
         };
         AddPlayerResponse: {
@@ -1658,7 +1651,7 @@ export interface components {
         };
         CreateEventResponse: {
             success: boolean;
-            event_id?: string | null;
+            event_id?: null | string;
         };
         CreateTournamentRequest: {
             tournament_name: string;
@@ -1690,8 +1683,8 @@ export interface components {
             warnings: string[];
         };
         DecklistResponse: {
-            player_name: string | null;
-            deck_name: string | null;
+            player_name: null | string;
+            deck_name: null | string;
             groups: components["schemas"]["CardGroup"][];
             deck_warnings: string[];
             is_deck_checked: boolean;
@@ -1736,7 +1729,7 @@ export interface components {
             player_count: number;
             /** Format: int32 */
             max_players: number;
-            role?: string | null;
+            role?: null | string;
             participants: components["schemas"]["EventParticipant"][];
         };
         EventParticipant: {
@@ -1760,12 +1753,12 @@ export interface components {
             token: string;
         };
         HttpValidationProblemDetails: {
-            type?: string | null;
-            title?: string | null;
+            type?: null | string;
+            title?: null | string;
             /** Format: int32 */
-            status?: number | null;
-            detail?: string | null;
-            instance?: string | null;
+            status?: null | number;
+            detail?: null | string;
+            instance?: null | string;
             errors?: {
                 [key: string]: string[];
             };
@@ -1788,11 +1781,11 @@ export interface components {
         LoginContinueResponse: {
             success: boolean;
             session_id: string;
-            error_type?: unknown | components["schemas"]["LoginContinueErrorType"];
-            bearer_token?: string | null;
-            email?: string | null;
-            user_id?: string | null;
-            name?: string | null;
+            error_type?: null | components["schemas"]["LoginContinueErrorType"];
+            bearer_token?: null | string;
+            email?: null | string;
+            user_id?: null | string;
+            name?: null | string;
         };
         LoginStartRequest: {
             email: string;
@@ -1805,7 +1798,7 @@ export interface components {
             authorized: boolean;
             email: string;
             user_id: string;
-            name: string | null;
+            name: null | string;
             session_id: string;
         };
         /** @enum {unknown} */
@@ -1820,7 +1813,7 @@ export interface components {
         TournamentDetailsResponse: {
             tournament_id: string;
             tournament_name: string;
-            role: string | null;
+            role: null | string;
             managers: components["schemas"]["TournamentManager"][];
             clocks: components["schemas"]["TournamentTimerClock"][];
         };
@@ -1842,16 +1835,16 @@ export interface components {
             is_running: boolean;
         };
         UpdateDeckRequest: {
-            user_id?: string | null;
+            user_id?: null | string;
             player_name: string;
-            deck_name?: string | null;
+            deck_name?: null | string;
             decklist_text: string;
         };
         UpdateEventRequest: {
-            event_status?: unknown | components["schemas"]["EventStatus"];
+            event_status?: null | components["schemas"]["EventStatus"];
         };
         UpdateLibraryDeckRequest: {
-            deck_id?: string | null;
+            deck_id?: null | string;
             deck_name: string;
             format: string;
             decklist_text: string;
@@ -1859,7 +1852,7 @@ export interface components {
         UpdateUsersRequest: {
             email: string;
             player_name: string;
-            role: unknown | components["schemas"]["UserRole"];
+            role: null | components["schemas"]["UserRole"];
         };
         /** @enum {unknown} */
         UserRole: "judge" | null;
