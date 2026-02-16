@@ -10,11 +10,12 @@ export function useEventDetailsQuery(event_id: string, enabled: boolean = true) 
                     eventId: event_id,
                 },
             },
-            queryKey: ['event', event_id],
+        },
+        {
             staleTime: Infinity,
             retry: false,
             refetchOnWindowFocus: false,
-            enabled: enabled,
+            enabled,
         }
     );
 }

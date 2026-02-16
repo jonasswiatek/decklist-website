@@ -13,7 +13,8 @@ export function useSearchCardsQuery(searchQuery?: string) {
                     q: value ?? '',
                 },
             },
-            queryKey: ['search-cards', value],
+        },
+        {
             enabled: !!value && value.length > 3,
             staleTime: Infinity,
             refetchOnWindowFocus: false,

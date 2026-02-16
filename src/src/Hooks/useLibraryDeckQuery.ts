@@ -10,7 +10,8 @@ export const useLibraryDeckQuery = (deck_id?: string, enabled = true) => {
                     deckId: deck_id!,
                 },
             },
-            queryKey: ['library-deck', deck_id],
+        },
+        {
             staleTime: Infinity,
             retry: false,
             refetchOnWindowFocus: false,

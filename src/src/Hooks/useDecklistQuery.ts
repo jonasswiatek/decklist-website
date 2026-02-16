@@ -13,7 +13,8 @@ export function useDecklistQuery(eventId: string, userId?: string | null, enable
                     user_id: userId ?? undefined,
                 },
             },
-            queryKey: ['decklist', eventId, userId],
+        },
+        {
             retry: false,
             refetchOnWindowFocus: false,
             enabled,
@@ -35,7 +36,8 @@ export function useDecklistRevisionQuery(eventId: string, revisionId?: number | 
                     user_id: userId ?? undefined,
                 },
             },
-            queryKey: ['decklist', 'revision', revisionId ?? 'none', eventId, userId ?? ''],
+        },
+        {
             retry: false,
             staleTime: Infinity,
             refetchOnWindowFocus: false,

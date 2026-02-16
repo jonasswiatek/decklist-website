@@ -13,7 +13,8 @@ export function useDecklistRevisionsQuery(eventId: string, userId?: string | nul
                     user_id: userId ?? undefined,
                 },
             },
-            queryKey: ['decklist', 'revisions', eventId, userId],
+        },
+        {
             retry: false,
             staleTime: Infinity,
             refetchOnWindowFocus: false,
