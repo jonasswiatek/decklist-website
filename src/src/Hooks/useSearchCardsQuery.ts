@@ -1,13 +1,5 @@
 import { useDebounce } from 'use-debounce';
-import createFetchClient from "openapi-fetch";
-import createClient from "openapi-react-query";
-import type { paths } from "../model/api/decklist-api-schema";
-
-const fetchClient = createFetchClient<paths>({
-    baseUrl: "/",
-});
-
-const $api = createClient(fetchClient);
+import { $api } from "../model/api/client";
 
 export function useSearchCardsQuery(searchQuery?: string) {
     const [value] = useDebounce(searchQuery, 1000);

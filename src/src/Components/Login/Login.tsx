@@ -1,6 +1,6 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { AuthState, useDecklistStore } from '../../store/deckliststore';
-import { HandleValidation } from "../../Util/Validators";
+import { withValidation } from "../../Util/Validators";
 import { useState } from "react";
 import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
@@ -108,21 +108,16 @@ const LoginForm: React.FC = () => {
     code?: string;
   };
   
-  const onSubmit: SubmitHandler<Inputs> = async data => {
-    try {
-      if (!isVerifying) {
-        await startLogin(data.email);
-        setEmail(data.email);
-        setIsVerifying(true);
-      } else {
-        queryClient.clear();
-        await continueLogin(email, data.code!);
-      }
+  const onSubmit = withValidation(setError, async (data: Inputs) => {
+    if (!isVerifying) {
+      await startLogin(data.email);
+      setEmail(data.email);
+      setIsVerifying(true);
+    } else {
+      queryClient.clear();
+      await continueLogin(email, data.code!);
     }
-    catch(e) {
-      HandleValidation(setError, e);
-    }
-  }
+  });
 
   return (
     <>

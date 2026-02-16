@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
-import { DecklistGroup, deleteLibraryDeckRequest, Format, saveLibraryDeckRequest } from '../../model/api/apimodel';
+import { DecklistGroup, Format, saveLibraryDeckRequest } from '../../model/api/apimodel';
 import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTable } from '../Events/DecklistTable';
 import { LoadingScreen } from '../Login/LoadingScreen';
-import { HandleValidation } from '../../Util/Validators';
+import { withValidation } from '../../Util/Validators';
 import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
 import { useLibraryDeckQuery } from '../../Hooks/useLibraryDeckQuery';
 import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
+import { useDeleteLibraryDeckMutation } from '../../Hooks/useDeckMutations';
 
 export const LibraryDeckEditorPage: React.FC = () => {
   const { deck_id } = useParams();
@@ -21,16 +22,23 @@ export const LibraryDeckEditorPage: React.FC = () => {
   const { refetch: refetchDeckLibrary } = useLibraryDecksQuery();
   const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
 
+  const deleteDeckMutation = useDeleteLibraryDeckMutation({
+    onSuccess: () => {
+      refetchDeckLibrary();
+      navigate('/library');
+    },
+  });
+
   if (isLoading || formatsLoading) {
       return <LoadingScreen />
   }
-  
+
   if(isError) {
     return (
     <div className="alert alert-warning" role="alert">
       <h4 className="alert-heading">Deck not found</h4>
       <hr />
-      <p className="mb-0">No deck found.</p> 
+      <p className="mb-0">No deck found.</p>
     </div>
     );
   }
@@ -40,7 +48,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
           <div className="alert alert-danger" role="alert">
               <h4 className="alert-heading">Error loading deck</h4>
               <hr />
-              <p className="mb-0">Please try again later.</p> 
+              <p className="mb-0">Please try again later.</p>
           </div>
       );
   }
@@ -62,11 +70,10 @@ export const LibraryDeckEditorPage: React.FC = () => {
     }
   };
 
-  const handleDeleteDeck = async () => {
-    // Implement deck deletion logic here
-    await deleteLibraryDeckRequest(deck_id!);
-    refetchDeckLibrary();
-    navigate('/library');
+  const handleDeleteDeck = () => {
+    deleteDeckMutation.mutate({
+      params: { path: { deckId: deck_id! } },
+    });
   };
 
   return (
@@ -142,15 +149,10 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
     }
   }, [props.format, props.formats]);
 
-  const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
-    try {
-      await props.onDeckUpdate(data.deck_name, data.format, data.decklist_text);
-      reset(data);  
-    }
-    catch (e) {
-      HandleValidation(setError, e);
-    }
-  }
+  const onSubmitDecklist = withValidation(setError, async (data: Inputs) => {
+    await props.onDeckUpdate(data.deck_name, data.format, data.decklist_text);
+    reset(data);
+  });
 
   const handleDeleteDeck = async () => {
     if (window.confirm("Are you sure you want to delete this deck? This action cannot be undone.")) {

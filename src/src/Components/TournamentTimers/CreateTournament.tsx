@@ -1,10 +1,10 @@
 import { ReactElement } from 'react';
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Button, Card, Form, Spinner, Alert } from 'react-bootstrap';
 import { BsArrowLeft } from 'react-icons/bs';
-import { createTournament } from '../../model/api/tournamentTimers'; 
-import { HandleValidation } from '../../Util/Validators'; 
+import { HandleValidation } from '../../Util/Validators';
+import { useCreateTournamentMutation } from '../../Hooks/useTournamentMutations';
 
 // Define the expected input type for the form
 type Inputs = {
@@ -12,17 +12,23 @@ type Inputs = {
 };
 
 export function CreateTournament(): ReactElement {
-  const { register, handleSubmit, setError, clearErrors, formState: { errors, isSubmitting } } = useForm<Inputs>();
+  const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm<Inputs>();
   const navigate = useNavigate();
 
-  const onSubmit: SubmitHandler<Inputs> = async data => {
-    clearErrors(); // Clear previous errors
-    try {
-      const createdTournament = await createTournament({ tournament_name: data.tournament_name });
-      navigate('/timers/' + createdTournament.tournament_id); 
-    } catch (e) {
-      HandleValidation(setError, e); 
-    } 
+  const mutation = useCreateTournamentMutation({
+    onSuccess: (data) => {
+      navigate('/timers/' + data.tournament_id);
+    },
+    onError: (e) => HandleValidation(setError, e),
+  });
+
+  const onSubmit = (data: Inputs) => {
+    clearErrors();
+    mutation.mutate({
+      body: {
+        tournament_name: data.tournament_name,
+      },
+    });
   };
 
   return (
@@ -44,7 +50,7 @@ export function CreateTournament(): ReactElement {
               Create New Tournament Timer
             </Card.Header>
             <Card.Body>
-              <Form onSubmit={handleSubmit(onSubmit)}> 
+              <Form onSubmit={handleSubmit(onSubmit)}>
                 {errors.root?.serverError && (
                   <Alert variant="danger">
                     {errors.root.serverError.message}
@@ -67,9 +73,9 @@ export function CreateTournament(): ReactElement {
                   <Button
                     variant="primary"
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={mutation.isPending}
                   >
-                    {isSubmitting ? (
+                    {mutation.isPending ? (
                       <>
                         <Spinner
                           as="span"

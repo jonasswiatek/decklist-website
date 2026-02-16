@@ -1,38 +1,46 @@
 import '../../App.scss'
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { HandleValidation } from '../../Util/Validators';
-import { createEventRequest } from '../../model/api/apimodel';
 import { useNavigate } from "react-router-dom";
 import { ReactElement } from 'react';
 import { BsArrowLeft } from 'react-icons/bs';
 import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
 import { useEventListQuery } from '../../Hooks/useEventListQuery';
+import { useCreateEventMutation } from '../../Hooks/useEventMutations';
 
 
 export function CreateEvent() : ReactElement {
-    const { register, handleSubmit, setError, clearErrors, formState: { errors, isSubmitting } } = useForm<Inputs>();
+    const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm<Inputs>();
     const navigate = useNavigate();
     const { refetch: refetchMyEvents } = useEventListQuery(false);
 
     const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
-    
-    const onSubmit: SubmitHandler<Inputs> = async data => {
-      try {
-        const createdEvent = await createEventRequest({ event_name: data.event_name, format: data.format, event_date: data.event_date });
-        refetchMyEvents();
-        navigate('/e/' + createdEvent.event_id);
-      }
-      catch(e) {
-        HandleValidation(setError, e);
-      }
-    }
-  
+
+    const mutation = useCreateEventMutation({
+        onSuccess: (data) => {
+            refetchMyEvents();
+            navigate('/e/' + data.event_id);
+        },
+        onError: (e) => HandleValidation(setError, e),
+    });
+
+    const onSubmit = (data: Inputs) => {
+      clearErrors();
+      mutation.mutate({
+        body: {
+          event_name: data.event_name.trim(),
+          format: data.format,
+          event_date: data.event_date.toString(),
+        },
+      });
+    };
+
     type Inputs = {
       event_name: string,
       format: string
       event_date: Date;
     };
-    
+
     const today = new Date();
     const minDate = new Date(today);
     minDate.setDate(today.getDate() - 1);
@@ -45,15 +53,15 @@ export function CreateEvent() : ReactElement {
     return (
       <div className="container py-1">
         <div className="mb-3">
-          <button 
-            type="button" 
-            className="btn btn-link text-decoration-none ps-0" 
+          <button
+            type="button"
+            className="btn btn-link text-decoration-none ps-0"
             onClick={() => navigate('/')}
           >
             <BsArrowLeft className="me-1" /> Back to Events
           </button>
         </div>
-            
+
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             <div className="card mb-4">
@@ -61,27 +69,27 @@ export function CreateEvent() : ReactElement {
                 <h5 className="mb-0">Create New Tournament</h5>
               </div>
               <div className="card-body">
-                <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmit)(e); }} > 
+                <form onSubmit={handleSubmit(onSubmit)} >
                   <div className="mb-3">
                     <label htmlFor="event_name" className="form-label">Tournament Name</label>
-                    <input 
-                      id='event_name' 
-                      type="text" 
-                      className={`form-control ${errors.event_name ? 'is-invalid' : ''}`} 
-                      placeholder="Modern RCQ" 
-                      required 
-                      {...register("event_name")} 
+                    <input
+                      id='event_name'
+                      type="text"
+                      className={`form-control ${errors.event_name ? 'is-invalid' : ''}`}
+                      placeholder="Modern RCQ"
+                      required
+                      {...register("event_name")}
                     />
                     {errors.event_name && <div className="invalid-feedback">{errors.event_name?.message}</div>}
                   </div>
-                                
+
                   <div className="mb-3">
                     <label htmlFor="event_date" className="form-label">Tournament Date</label>
-                    <input 
+                    <input
                       id="event_date"
-                      type='date' 
-                      className={`form-control ${errors.event_date ? 'is-invalid' : ''}`} 
-                      required 
+                      type='date'
+                      className={`form-control ${errors.event_date ? 'is-invalid' : ''}`}
+                      required
                       {...register("event_date")}
                       min={minDateString}
                       max={maxDateString}
@@ -91,7 +99,7 @@ export function CreateEvent() : ReactElement {
                       Date can't be more than 30 days in the future.
                     </small>
                   </div>
-                                
+
                   <div className="mb-3">
                     <label htmlFor="format" className="form-label">Format</label>
                     {formatsLoading ? (
@@ -103,9 +111,9 @@ export function CreateEvent() : ReactElement {
                         <small>Error loading formats. Please refresh the page.</small>
                       </div>
                     ) : (
-                      <select 
+                      <select
                         id="format"
-                        className={`form-select ${errors.format ? 'is-invalid' : ''}`} 
+                        className={`form-select ${errors.format ? 'is-invalid' : ''}`}
                         {...register("format")}
                       >
                         {formats?.formats.map(format => (
@@ -115,14 +123,14 @@ export function CreateEvent() : ReactElement {
                     )}
                     {errors.format && <div className="invalid-feedback">{errors.format?.message}</div>}
                   </div>
-                                
+
                   <div className="d-grid mt-4">
-                    <button 
-                      type='submit' 
+                    <button
+                      type='submit'
                       className='btn btn-primary'
-                      disabled={isSubmitting || formatsLoading || !!formatsError}
+                      disabled={mutation.isPending || formatsLoading || !!formatsError}
                     >
-                      {isSubmitting ? (
+                      {mutation.isPending ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                           Creating...

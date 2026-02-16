@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp, BsDownload, BsTrash, BsExclamationTriangleFill, BsCheckCircleFill } from 'react-icons/bs'; 
-import { updateEventUsers, deleteEventUser, updateEvent, deleteEvent, addUserToEvent } from '../../../model/api/apimodel';
+import { useForm } from 'react-hook-form';
+import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp, BsDownload, BsTrash, BsExclamationTriangleFill, BsCheckCircleFill } from 'react-icons/bs';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
 import { useAuth } from '../../Login/useAuth';
 import { useEventListQuery } from '../../../Hooks/useEventListQuery';
 import { useEventUpdated } from '../../../Hooks/useWebsocketConnection';
+import { useUpdateEventMutation, useDeleteEventMutation, useDeleteEventUserMutation, useAddJudgeMutation, useAddPlayerMutation } from '../../../Hooks/useEventMutations';
 
 export const JudgeView: React.FC<EventViewProps> = (e) => {
     const players = e.event.participants.filter(a => a.role === "player");
@@ -47,9 +47,24 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const toggleEventState = async () => {
+    const updateEventMutation = useUpdateEventMutation({
+        onSuccess: () => e.refetch?.(),
+    });
+
+    const deleteEventMutation = useDeleteEventMutation({
+        onSuccess: () => {
+            refetchMyEvents();
+            navigate('/');
+        },
+    });
+
+    const deleteEventUserMutation = useDeleteEventUserMutation({
+        onSuccess: () => e.refetch!(),
+    });
+
+    const toggleEventState = () => {
         const isOpen = e.event.status === "open";
-        
+
         // Judges can only close events, not reopen them
         if (e.event.role === "judge" && isOpen) {
             const confirmed = window.confirm(
@@ -60,28 +75,22 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
 
             if (!confirmed) return;
         }
-        
+
         // Only proceed if owner (who can do both) or judge closing the event
         if (e.event.role === "owner" || isOpen) {
-            await updateEvent(e.event.event_id, { 
-                event_status: isOpen ? "closed" : "open"
+            updateEventMutation.mutate({
+                params: { path: { eventId: e.event.event_id } },
+                body: { event_status: isOpen ? "closed" : "open" },
             });
-
-            if (e.refetch) {
-                e.refetch();
-            }
         }
     };
 
-    const handleDeleteEvent = async () => {
+    const handleDeleteEvent = () => {
         const confirmed = window.confirm("Are you sure you want to delete this tournament? This action cannot be undone.");
         if (confirmed) {
-            await deleteEvent({ event_id: e.event.event_id });
-
-            refetchMyEvents();
-
-            // Navigate back to the events list using React Router
-            navigate('/');
+            deleteEventMutation.mutate({
+                params: { path: { eventId: e.event.event_id } },
+            });
         }
     };
 
@@ -90,61 +99,76 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         window.open(`/api/events/${e.event.event_id}/decks/all`, '_blank');
     };
 
-    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors, isSubmitting: isJudgeSubmitting } } = useForm<{player_name: string, email: string}>();
-    const onAddJudge: SubmitHandler<{player_name: string, email: string}> = async data => {
-        try {
-            await updateEventUsers({ event_id: e.event.event_id, email: data.email, player_name: data.player_name, role: 'judge' });
+    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<{player_name: string, email: string}>();
+    const addJudgeMutation = useAddJudgeMutation({
+        onSuccess: () => {
             e.refetch!();
             reset();
-        }
-        catch(e) {
-            HandleValidation(setError, e);
-        }
-    }
+        },
+        onError: (err) => HandleValidation(setError, err),
+    });
+    const onAddJudge = (data: {player_name: string, email: string}) => {
+        addJudgeMutation.mutate({
+            params: { path: { eventId: e.event.event_id } },
+            body: {
+                email: data.email.trim(),
+                player_name: data.player_name.trim(),
+                role: "judge",
+            },
+        });
+    };
 
     // Handler for adding a player
-    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors, isSubmitting: isPlayerSubmitting } } = useForm<{player_name: string, email: string}>();
-    const onAddPlayer: SubmitHandler<{player_name: string, email: string}> = async data => {
-        try {
-            const response = await addUserToEvent({ 
-                eventId: e.event.event_id, 
-                email: data.email || undefined, 
-                playerName: data.player_name, 
-            });
-            
+    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors } } = useForm<{player_name: string, email: string}>();
+    const addPlayerMutation = useAddPlayerMutation({
+        onSuccess: (response) => {
             resetPlayer();
-            
             if (response && response.user_id) {
-                // Navigate to the player's deck page
                 navigate(`/e/${e.event.event_id}/deck?id=${response.user_id}`);
             } else {
                 e.refetch?.();
             }
-        } catch(err) {
-            console.log(err);
-            HandleValidation(setPlayerError, err);
-        }
-    }
+        },
+        onError: (err) => HandleValidation(setPlayerError, err),
+    });
+    const onAddPlayer = (data: {player_name: string, email: string}) => {
+        addPlayerMutation.mutate({
+            params: { path: { eventId: e.event.event_id } },
+            body: {
+                email: data.email?.trim() || undefined,
+                player_name: data.player_name.trim(),
+            },
+        });
+    };
 
-    const onRemovePlayer = async (userId: string, playerName: string) => {
-        const displayName = playerName;
-        const confirmed = window.confirm(`Are you sure you want to remove ${displayName} from the tournament?`);
-        
-        if (confirmed) {
-            await deleteEventUser(e.event.event_id, userId);
-            e.refetch!();
-        }
-    }
+    const onRemovePlayer = (userId: string, playerName: string) => {
+        const confirmed = window.confirm(`Are you sure you want to remove ${playerName} from the tournament?`);
 
-    const onDisassociateSelf = async () => {
-        const confirmed = window.confirm(`Are you sure you want to leave this event?`);
-        
         if (confirmed) {
-            await deleteEventUser(e.event.event_id, auth.userId!);
+            deleteEventUserMutation.mutate({
+                params: { path: { eventId: e.event.event_id } },
+                body: { user_id: userId },
+            });
+        }
+    };
+
+    const disassociateSelfMutation = useDeleteEventUserMutation({
+        onSuccess: () => {
             refetchMyEvents();
             navigate('/');
+        },
+    });
+
+    const onDisassociateSelf = () => {
+        const confirmed = window.confirm(`Are you sure you want to leave this event?`);
+
+        if (confirmed) {
+            disassociateSelfMutation.mutate({
+                params: { path: { eventId: e.event.event_id } },
+                body: { user_id: auth.userId! },
+            });
         }
-    }
+    };
 
     return (
         <>
@@ -192,9 +216,9 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                         <button 
                                             type="submit" 
                                             className="btn btn-success" 
-                                            disabled={isPlayerSubmitting}
+                                            disabled={addPlayerMutation.isPending}
                                         >
-                                            {isPlayerSubmitting ? (
+                                            {addPlayerMutation.isPending ? (
                                                 <>
                                                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                                     Adding...
@@ -529,9 +553,9 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                             <button 
                                                 type='submit' 
                                                 className='btn btn-success'
-                                                disabled={isJudgeSubmitting}
+                                                disabled={addJudgeMutation.isPending}
                                             >
-                                                {isJudgeSubmitting ? (
+                                                {addJudgeMutation.isPending ? (
                                                     <>
                                                         <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                                         Adding...

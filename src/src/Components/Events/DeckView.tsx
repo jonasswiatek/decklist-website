@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { deleteDeckRequest, EventDetails, getDecklistRequest, submitDecklistRequest, setDeckChecked, getLibraryDeckRequest } from '../../model/api/apimodel';
+import { EventDetails, getDecklistRequest, getLibraryDeckRequest } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
 import { BsArrowLeft, BsPerson, BsTrash, BsCardText, BsPrinter, BsClockHistory } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
@@ -12,6 +12,7 @@ import { useEventListQuery } from '../../Hooks/useEventListQuery';
 import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
 import { useDecklistQuery } from '../../Hooks/useDecklistQuery';
 import { useDecklistRevisionsQuery } from '../../Hooks/useDecklistRevisionsQuery';
+import { useSubmitDeckMutation, useDeleteDeckMutation, useSetDeckCheckedMutation } from '../../Hooks/useDeckMutations';
 
 export function DeckView() {
     const { event_id } = useParams();
@@ -72,50 +73,65 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         decklist_text: string
     };
  
-    const { register, setError, handleSubmit, clearErrors, reset, setValue, formState: { errors, isDirty, isSubmitting } } = useForm<Inputs>();
-    const onSubmitDecklist: SubmitHandler<Inputs> = async data => {
-        try {
-            await submitDecklistRequest({ event_id: props.event.event_id, user_id: props.user_id, player_name: data.player_name, deck_name: data.deck_name, decklist_text: data.decklist_text });
+    const { register, setError, handleSubmit, clearErrors, reset, setValue, formState: { errors, isDirty } } = useForm<Inputs>();
+    const submitMutation = useSubmitDeckMutation({
+        onSuccess: () => {
             refetchDecklist();
 
             if (isPlayer) {
-                // Refetch the library decks to ensure the latest data is shown
                 refetchMyEvents();
             }
             else {
                 refetchEvent();
             }
 
-            reset(data);
-            
+            reset(lastSubmittedData.current ?? undefined);
+
             // Show toast notification
             setShowToast(true);
-            
+
             // Clear any existing timeout
             if (toastTimeoutRef.current) {
                 clearTimeout(toastTimeoutRef.current);
             }
-            
+
             // Hide toast after 5 seconds
             toastTimeoutRef.current = setTimeout(() => {
                 setShowToast(false);
             }, 3000);
-        }
-        catch(e) {
-            HandleValidation(setError, e);
-        }
-    }
+        },
+        onError: (e) => HandleValidation(setError, e),
+    });
+    const lastSubmittedData = useRef<Inputs | null>(null);
+    const onSubmitDecklist = (data: Inputs) => {
+        clearErrors();
+        lastSubmittedData.current = data;
+        submitMutation.mutate({
+            params: { path: { event_id: props.event.event_id } },
+            body: {
+                user_id: props.user_id,
+                player_name: data.player_name.trim(),
+                deck_name: data.deck_name?.trim(),
+                decklist_text: data.decklist_text,
+            },
+        });
+    };
 
-    const handleDeleteDeck = async () => {
-        if (window.confirm("Are you sure you want to delete this deck? This action cannot be undone.")) {
-            await deleteDeckRequest(props.event.event_id);
+    const deleteDeckMutation = useDeleteDeckMutation({
+        onSuccess: () => {
             refetchDecklist();
             if (isPlayer) {
-                // Refetch the library decks to ensure the latest data is shown
                 refetchMyEvents();
             }
-            
             reset({ player_name: '', deck_name: '', decklist_text: '' });
+        },
+    });
+
+    const handleDeleteDeck = () => {
+        if (window.confirm("Are you sure you want to delete this deck? This action cannot be undone.")) {
+            deleteDeckMutation.mutate({
+                params: { path: { event_id: props.event.event_id } },
+            });
         }
     };
 
@@ -510,9 +526,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                         type='submit' 
                                         className='btn btn-primary no-wrap-text' 
                                         id='submit-button'
-                                        disabled={isSubmitting} // Disable button while submitting
+                                        disabled={submitMutation.isPending} // Disable button while submitting
                                     >
-                                        {isSubmitting ? (
+                                        {submitMutation.isPending ? (
                                             <>
                                                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                                 Submitting
@@ -560,29 +576,29 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 }
 
 const FlagCheckedButton: React.FC<{ eventId: string, userId: string, isChecked: boolean, refetch: () => void }> = ({ eventId, userId, isChecked, refetch }) => {
-    const { handleSubmit, formState: { isSubmitting } } = useForm();
     const [localCheckedState, setLocalCheckedState] = useState(isChecked);
 
-    const onSubmit = async () => {
+    const setCheckedMutation = useSetDeckCheckedMutation({
+        onSuccess: () => refetch(),
+    });
+
+    const onSubmit = () => {
         const newCheckedState = !localCheckedState;
         setLocalCheckedState(newCheckedState);
-        await setDeckChecked({
-            event_id: eventId,
-            user_id: userId,
-            is_checked: newCheckedState
+        setCheckedMutation.mutate({
+            params: { path: { event_id: eventId } },
+            body: { user_id: userId, is_checked: newCheckedState },
         });
-        refetch();
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <button 
-                type="submit" 
-                className={`btn ${isSubmitting ? 'btn-secondary' : (localCheckedState ? 'btn-warning' : 'btn-success')}`} 
-                disabled={isSubmitting}
-            >
-                {localCheckedState ? 'Mark as Unchecked' : 'Mark as Checked'}
-            </button>
-        </form>
+        <button
+            type="button"
+            onClick={onSubmit}
+            className={`btn ${setCheckedMutation.isPending ? 'btn-secondary' : (localCheckedState ? 'btn-warning' : 'btn-success')}`}
+            disabled={setCheckedMutation.isPending}
+        >
+            {localCheckedState ? 'Mark as Unchecked' : 'Mark as Checked'}
+        </button>
     );
 };

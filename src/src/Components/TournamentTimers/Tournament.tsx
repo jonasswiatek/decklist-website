@@ -1,14 +1,16 @@
 import { ReactElement, useState, Fragment, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsSliders, BsArrowLeft } from 'react-icons/bs';
 import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournamentTimers';
-import { addManager, createClock, deleteClock, deleteManager, TournamentTimerClock, updateClock, deleteTournament, resetClock, adjustClock, forceUpdate } from '../../model/api/tournamentTimers';
+import { TournamentTimerClock } from '../../model/api/tournamentTimers';
+import { HandleValidation } from '../../Util/Validators';
 import { TimerDisplay } from './TimerDisplay';
 import { useTournamentClocks } from './useTournamentClocks';
 import { useTournamentTimersUpdated, WebSocketTournamentTimersRefreshMessageType } from '../../Hooks/useWebsocketConnection';
 import { useAuth } from '../Login/useAuth';
+import { useAddManagerMutation, useDeleteManagerMutation, useCreateClockMutation, useUpdateClockMutation, useResetClockMutation, useAdjustClockMutation, useDeleteClockMutation, useDeleteTournamentMutation, useForceSyncMutation } from '../../Hooks/useTournamentMutations';
 
 const getWebSocketStatusText = (readyState: number): string => {
   switch (readyState) {
@@ -47,8 +49,8 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const { sessionId } = useAuth();
   const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
   const { refetch: refetchUserTournaments } = useUserTournaments();
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<AddManagerFormInputs>();
-  const { register: registerClock, handleSubmit: handleSubmitClock, reset: resetClockForm, formState: { errors: clockErrors, isSubmitting: isSubmittingClock } } = useForm<AddClockFormInputs>({
+  const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<AddManagerFormInputs>();
+  const { register: registerClock, handleSubmit: handleSubmitClock, reset: resetClockForm, formState: { errors: clockErrors } } = useForm<AddClockFormInputs>({
     defaultValues: {
       duration_minutes: 50
     }
@@ -58,8 +60,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const [copied, setCopied] = useState(false);
   const [expandedClockId, setExpandedClockId] = useState<string | null>(null);
   const [syncStatusMessage, setSyncStatusMessage] = useState<string>("");
-  const [isSyncing, setIsSyncing] = useState(false);
-  
+
   const {clocks: timers, addClock, removeClock, initClocks} = useTournamentClocks();
 
   useEffect(() => {
@@ -117,79 +118,134 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       setTimeout(() => setCopied(false), 2000);
   };
 
-  const onAddManager: SubmitHandler<AddManagerFormInputs> = async (data) => {
-    await addManager(tournament_id, {
-      user_email: data.email,
-      user_name: data.name,
+  // --- Mutations ---
+
+  const addManagerMutation = useAddManagerMutation({
+    onSuccess: () => {
+      refetch();
+      reset();
+    },
+    onError: (e) => HandleValidation(setError, e),
+  });
+
+  const deleteManagerMutation = useDeleteManagerMutation({
+    onSuccess: () => refetch(),
+  });
+
+  const createClockMutation = useCreateClockMutation({
+    onSuccess: (data) => {
+      addClock(data);
+      resetClockForm({ clock_name: '', duration_minutes: 50 });
+    },
+  });
+
+  const updateClockMutation = useUpdateClockMutation({
+    onSuccess: (data) => addClock(data),
+  });
+
+  const resetClockMutation = useResetClockMutation({
+    onSuccess: (data) => addClock(data),
+  });
+
+  const adjustClockMutation = useAdjustClockMutation({
+    onSuccess: (data) => addClock(data),
+  });
+
+  const deleteClockMutation = useDeleteClockMutation({
+    onSuccess: (_data, { params }) => removeClock(params.path.clockId),
+  });
+
+  const deleteTournamentMutation = useDeleteTournamentMutation({
+    onSuccess: () => {
+      refetchUserTournaments();
+      navigate('/timers');
+    },
+  });
+
+  const forceSyncMutation = useForceSyncMutation({
+    onSuccess: () => {
+      setSyncStatusMessage("Sync requested");
+      setTimeout(() => setSyncStatusMessage(""), 3000);
+    },
+  });
+
+  // --- Handlers ---
+
+  const onAddManager = (data: AddManagerFormInputs) => {
+    addManagerMutation.mutate({
+      params: { path: { tournamentId: tournament_id } },
+      body: {
+        user_email: data.email,
+        user_name: data.name,
+      },
     });
-    refetch();
-    reset();
   };
 
-  const onRemoveManager = async (managerId: string) => {
+  const onRemoveManager = (managerId: string) => {
     if (window.confirm("Are you sure you want to remove this manager?")) {
-      await deleteManager(tournament_id, managerId);
-      refetch();
+      deleteManagerMutation.mutate({
+        params: { path: { tournamentId: tournament_id, userId: managerId } },
+      });
     }
   };
 
-  const onAddClock: SubmitHandler<AddClockFormInputs> = async (data) => {
-    const clock = await createClock(tournament_id, {
-      clock_name: data.clock_name,
-      duration_seconds: data.duration_minutes * 60,
+  const onAddClock = (data: AddClockFormInputs) => {
+    createClockMutation.mutate({
+      params: { path: { tournamentId: tournament_id } },
+      body: {
+        clock_name: data.clock_name,
+        duration_seconds: data.duration_minutes * 60,
+      },
     });
-
-    addClock(clock);
-    resetClockForm({ clock_name: '', duration_minutes: 50 });
   };
 
-  const onToggleClock = async (clockId: string, currentState: boolean) => {
-    const clock = await updateClock(tournament_id, clockId, { is_running: !currentState });
-    addClock(clock);
+  const onToggleClock = (clockId: string, currentState: boolean) => {
+    updateClockMutation.mutate({
+      params: { path: { tournamentId: tournament_id, clockId } },
+      body: { is_running: !currentState },
+    });
   };
 
   const handleToggleAdjustPanel = (clockId: string) => {
     setExpandedClockId(prevId => (prevId === clockId ? null : clockId));
   };
 
-  const onResetClock = async (clockId: string, durationSeconds: number) => {
+  const onResetClock = (clockId: string, durationSeconds: number) => {
     const durationMinutes = Math.floor(durationSeconds / 60);
     if (window.confirm(`Are you sure you want to reset this clock to ${durationMinutes} minutes?`)) {
-      const clock = await resetClock(tournament_id, clockId);
-      addClock(clock);
+      resetClockMutation.mutate({
+        params: { path: { tournamentId: tournament_id, clockId } },
+      });
     }
   };
 
-  const onAdjustClockTime = async (clockId: string, msAdjustment: number) => {
-    console.log(`Adjusting clock ${clockId} by ${msAdjustment} ms`);
-    const clock = await adjustClock(tournament_id, clockId, { ms_adjustment: msAdjustment });
-    addClock(clock);
+  const onAdjustClockTime = (clockId: string, msAdjustment: number) => {
+    adjustClockMutation.mutate({
+      params: { path: { tournamentId: tournament_id, clockId } },
+      body: { ms_adjustment: msAdjustment },
+    });
   };
 
-  const onDeleteClock = async (clockId: string) => {
+  const onDeleteClock = (clockId: string) => {
     if (window.confirm("Are you sure you want to delete this clock?")) {
-      console.log(`Deleting clock ${clockId}`);
-      await deleteClock(tournament_id, clockId);
-      removeClock(clockId);
+      deleteClockMutation.mutate({
+        params: { path: { tournamentId: tournament_id, clockId } },
+      });
     }
   };
 
-  const onDeleteTournament = async () => {
+  const onDeleteTournament = () => {
     if (window.confirm("Are you sure you want to permanently delete this tournament and all its clocks? This action cannot be undone.")) {
-      await deleteTournament(tournament_id);
-      refetchUserTournaments();
-      navigate('/timers');
+      deleteTournamentMutation.mutate({
+        params: { path: { tournamentId: tournament_id } },
+      });
     }
   };
 
-  const onForceSync = async () => {
-    setIsSyncing(true);
-    await forceUpdate(tournament_id);
-    setSyncStatusMessage("Sync requested");
-    setTimeout(() => {
-      setSyncStatusMessage("");
-      setIsSyncing(false); // Re-enable button after 3 seconds
-    }, 3000);
+  const onForceSync = () => {
+    forceSyncMutation.mutate({
+      params: { path: { tournamentId: tournament_id } },
+    });
   };
 
   if(!tournamentDetails || readyState !== WebSocket.OPEN || isLoading) {
@@ -229,9 +285,9 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       <Row className="mb-3">
         <Col>
           <div className="mb-3">
-              <button 
-                  type="button" 
-                  className="btn btn-link text-decoration-none p-0" 
+              <button
+                  type="button"
+                  className="btn btn-link text-decoration-none p-0"
                   onClick={() => navigate('/timers')}
               >
                   <BsArrowLeft className="me-1" /> Back
@@ -286,8 +342,8 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                   </Col>
                 </Row>
 
-                <Button variant="success" type="submit" disabled={isSubmittingClock}>
-                  {isSubmittingClock ? (
+                <Button variant="success" type="submit" disabled={createClockMutation.isPending}>
+                  {createClockMutation.isPending ? (
                     <>
                       <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
                       Adding Clock...
@@ -309,9 +365,9 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                 {timers.map((clock: TournamentTimerClock) => (
                   <Fragment key={clock.clock_id}>
                     <tr>
-                      <td 
+                      <td
                         className="align-middle"
-                        style={{ 
+                        style={{
                           maxWidth: '150px', // Adjust as needed
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -321,12 +377,12 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                       >
                         {clock.clock_name}
                       </td>
-                      <td 
-                        className="align-middle text-end timer-display-font-table" 
+                      <td
+                        className="align-middle text-end timer-display-font-table"
                       >
                         <TimerDisplay msRemaining={clock.ms_remaining} />
                       </td>
-                      <td 
+                      <td
                         className="text-end align-middle"
                         style={{ whiteSpace: 'nowrap', width: '1%' }}
                       >
@@ -412,16 +468,16 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                   <strong>Public Link:</strong> {publicLink}
               </div>
               <div className="d-flex align-items-center">
-                  <button 
-                      onClick={copyToClipboard} 
+                  <button
+                      onClick={copyToClipboard}
                       className="btn btn-primary d-flex align-items-center me-2"
                       title="Copy to clipboard"
                   >
-                    {copied ? <BsCheck /> : <BsClipboard />}    
+                    {copied ? <BsCheck /> : <BsClipboard />}
                   </button>
-                  
-                  <Link 
-                      to={publicLink} 
+
+                  <Link
+                      to={publicLink}
                       className="btn btn-primary d-flex align-items-center"
                       title="Open public view"
                       target="_blank" // Add this to open in a new window
@@ -431,7 +487,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                   </Link>
               </div>
           </div>
-        
+
           {tournamentDetails.role === "owner" && (
             <>
               <Card className="mb-3">
@@ -480,8 +536,8 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
                       </Col>
                     </Row>
 
-                    <Button variant="success" type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? (
+                    <Button variant="success" type="submit" disabled={addManagerMutation.isPending}>
+                      {addManagerMutation.isPending ? (
                         <>
                           <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
                           Adding...
@@ -537,17 +593,17 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
             </Card.Header>
             <Card.Body>
               <p>
-                Use this button in case one or more presentation screens have desynchronized, 
-                which can happen in case of intermittent connectivity issues. 
+                Use this button in case one or more presentation screens have desynchronized,
+                which can happen in case of intermittent connectivity issues.
                 While they should automatically recover given time, you can attempt to force a sync here.
               </p>
               <Button
                 variant="primary"
                 onClick={onForceSync}
                 className="w-100"
-                disabled={isSyncing} // Disable button when syncing
+                disabled={forceSyncMutation.isPending}
               >
-                {isSyncing ? (
+                {forceSyncMutation.isPending ? (
                   <>
                     <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
                     Syncing...

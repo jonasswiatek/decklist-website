@@ -1,12 +1,4 @@
-import createFetchClient from "openapi-fetch";
-import createClient from "openapi-react-query";
-import type { paths } from "../model/api/decklist-api-schema";
-
-const fetchClient = createFetchClient<paths>({
-    baseUrl: "/",
-});
-
-const $api = createClient(fetchClient);
+import { $api } from "../model/api/client";
 
 const TOURNAMENT_TIMERS_QUERY_KEY = 'tournamentTimers';
 
