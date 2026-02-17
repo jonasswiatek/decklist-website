@@ -108,7 +108,7 @@ export const LibraryOverview: React.FC = () => {
               </thead>
               <tbody>
                 {library.decks.map((deck) => (
-                  <tr key={deck.deck_name}>
+                  <tr key={deck.deck_id}>
                     <td 
                         className="align-middle" 
                         onClick={() => navigate(`/library/deck/${deck.deck_id}`)}
