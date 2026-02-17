@@ -5,20 +5,23 @@ import { useNavigate } from "react-router";
 import { BsArrowLeft } from "react-icons/bs";
 import { useEventListQuery } from "../../Hooks/useEventListQuery";
 import { useLibraryDecksQuery } from "../../Hooks/useLibraryDecksQuery";
+import { useToast } from "../../Util/ToastContext";
 
 export const LibraryOverview: React.FC = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const { data: library, error: decksError, isLoading: isLibraryLoading } = useLibraryDecksQuery();
   const { data: events, error: eventsError, isLoading: isEventsLoading } = useEventListQuery();
 
   const onImportDeck = async (eventId: string) => {
-    if (eventId) {
+    if (!eventId) return;
+    try {
       const importedEvent = await getEvent(eventId);
       const importedDeck = await getDecklistRequest(eventId, null);
       if (importedEvent && importedDeck) {
         navigate('/library/deck', {
-          state: { 
+          state: {
             importedDeck: {
               format: importedEvent.format,
               decklist_text: importedDeck.decklist_text,
@@ -26,6 +29,9 @@ export const LibraryOverview: React.FC = () => {
           }
         });
       }
+    } catch (e) {
+      console.error("Failed to import deck", e);
+      showToast("Failed to import deck", "danger");
     }
   };
 

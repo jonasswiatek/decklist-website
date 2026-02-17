@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useToast } from '../../Util/ToastContext';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { EventDetails, getDecklistRequest, getLibraryDeckRequest } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
@@ -52,13 +53,12 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isPlayer = !isJudge;
     const isOpen = props.event.status === "open" || isJudge;
 
-    const [showToast, setShowToast] = useState(false);
     const [isEditing, setIsEditing] = useState(false); // New state to track if the judge is editing
     const [showRevisionsTable, setShowRevisionsTable] = useState(false); // State for revisions table visibility
     const [showRevisionId, setShowRevisionId] = useState<number | null>(null); // State for selected revision ID
 
     const navigate = useNavigate();
-    const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const { showToast } = useToast();
 
     const { refetch: refetchEvent } = useEventDetailsQuery(props.event.event_id, false);
     const { data: decklistData, error: decklistError, isLoading: decklistLoading, refetch: refetchDecklist } = useDecklistQuery(props.event.event_id, props.user_id);
@@ -87,18 +87,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
             reset(lastSubmittedData.current ?? undefined);
 
-            // Show toast notification
-            setShowToast(true);
-
-            // Clear any existing timeout
-            if (toastTimeoutRef.current) {
-                clearTimeout(toastTimeoutRef.current);
-            }
-
-            // Hide toast after 5 seconds
-            toastTimeoutRef.current = setTimeout(() => {
-                setShowToast(false);
-            }, 3000);
+            showToast("Your deck has been submitted", "success");
         },
         onError: (e) => HandleValidation(setError, e),
     });
@@ -137,42 +126,47 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     const handleImportDeck = async (selectedDeck: string) => {
         if (selectedDeck === 'none') {
-            setValue("decklist_text", '', { 
+            setValue("decklist_text", '', {
                 shouldDirty: true,
                 shouldValidate: true
             });
             return;
         }
-        const [source, id] = selectedDeck.split(':');
-        switch (source) {
-            case 'saved': {
-                const savedDeck = await getLibraryDeckRequest({ deck_id: id });
-                setValue("deck_name", savedDeck.deck_name, { 
-                    shouldDirty: true,
-                    shouldValidate: true
-                });
+        try {
+            const [source, id] = selectedDeck.split(':');
+            switch (source) {
+                case 'saved': {
+                    const savedDeck = await getLibraryDeckRequest({ deck_id: id });
+                    setValue("deck_name", savedDeck.deck_name, {
+                        shouldDirty: true,
+                        shouldValidate: true
+                    });
 
-                setValue("decklist_text", savedDeck.decklist_text, { 
-                    shouldDirty: true,
-                    shouldValidate: true
-                });
-                break;
+                    setValue("decklist_text", savedDeck.decklist_text, {
+                        shouldDirty: true,
+                        shouldValidate: true
+                    });
+                    break;
+                }
+
+                case 'event': {
+                    const decklist = await getDecklistRequest(id);
+                    if (!decklist) break;
+                    setValue("deck_name", decklist.deck_name ?? '', {
+                        shouldDirty: true,
+                        shouldValidate: true
+                    });
+
+                    setValue("decklist_text", decklist.decklist_text, {
+                        shouldDirty: true,
+                        shouldValidate: true
+                    });
+                    break;
+                }
             }
-
-            case 'event': {
-                const decklist = await getDecklistRequest(id);
-                if (!decklist) break;
-                setValue("deck_name", decklist.deck_name ?? '', {
-                    shouldDirty: true,
-                    shouldValidate: true
-                });
-
-                setValue("decklist_text", decklist.decklist_text, {
-                    shouldDirty: true,
-                    shouldValidate: true
-                });
-                break;
-            }
+        } catch (e) {
+            console.error("Failed to import deck", e);
+            showToast("Failed to import deck", "danger");
         }
     };
 
@@ -486,32 +480,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                 
                             </div>
                         </div>
-                        <div 
-                            className="event-info mb-3 d-flex justify-content-between align-items-center position-relative" 
+                        <div
+                            className="event-info mb-3 d-flex justify-content-between align-items-center"
                             style={{ padding: '10px', marginTop: '5px', minHeight: '60px' }}
                         >
-                            {showToast ? (
-                                <div 
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        height: '100%',
-                                        backgroundColor: 'green',
-                                        color: 'white',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontWeight: 'bold',
-                                        borderRadius: '4px',
-                                        zIndex: 1
-                                    }}
-                                >
-                                    Your deck has been submitted
-                                </div>
-                            ) : (
-                                <>
                                 <div className="d-flex">
                                     {props.event.decklist_style.toLowerCase() === "commander" ? (
                                         <span className="no-wrap-text">Deck: {mainboardCount}</span>
@@ -523,11 +495,11 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     )}
                                 </div>
                                 {isDirty && (
-                                    <button 
-                                        type='submit' 
-                                        className='btn btn-primary no-wrap-text' 
+                                    <button
+                                        type='submit'
+                                        className='btn btn-primary no-wrap-text'
                                         id='submit-button'
-                                        disabled={submitMutation.isPending} // Disable button while submitting
+                                        disabled={submitMutation.isPending}
                                     >
                                         {submitMutation.isPending ? (
                                             <>
@@ -539,9 +511,6 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                         )}
                                     </button>
                                 )}
-
-                                </>
-                            )}
                         </div>
                     </>)}
 
