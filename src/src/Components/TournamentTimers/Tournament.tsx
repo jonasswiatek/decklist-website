@@ -262,7 +262,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
 
   if (error) {
     return (
-      <Container className="py-3">
+      <Container className="mt-4">
         <Alert variant="danger">
           Error loading tournament details: {error}
         </Alert>
@@ -272,7 +272,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
 
   if (tournamentDetails.role !== "owner" && tournamentDetails.role !== "manager") {
     return (
-      <Container className="py-3">
+      <Container className="mt-4">
         <Alert variant="warning">
           You do not have permission to view this tournament.
         </Alert>
@@ -281,7 +281,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   }
 
   return (
-    <Container className="py-3">
+    <Container className="mt-4">
       <Row className="mb-3">
         <Col>
           <div className="mb-3">

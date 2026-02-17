@@ -33,7 +33,7 @@ export function LandingPage() {
     };
 
     return (
-        <div className="container">
+        <div className="container mt-4">
             <div className="row mb-4">
                 <div className="col">
                     <h1 className="display-5">Register your decklist</h1>

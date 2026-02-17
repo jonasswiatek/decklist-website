@@ -51,11 +51,11 @@ export function CreateEvent() : ReactElement {
     const maxDateString = maxDate.toISOString().split('T')[0];
 
     return (
-      <div className="container py-1">
+      <div className="container mt-4">
         <div className="mb-3">
           <button
             type="button"
-            className="btn btn-link text-decoration-none ps-0"
+            className="btn btn-link text-decoration-none p-0"
             onClick={() => navigate('/')}
           >
             <BsArrowLeft className="me-1" /> Back to Events

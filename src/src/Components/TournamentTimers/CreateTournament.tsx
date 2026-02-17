@@ -32,11 +32,11 @@ export function CreateTournament(): ReactElement {
   };
 
   return (
-    <Container className="py-1">
+    <Container className="mt-4">
       <div className="mb-3">
         <Button
           variant="link"
-          className="text-decoration-none ps-0"
+          className="text-decoration-none p-0"
           onClick={() => navigate('/timers')}
         >
           <BsArrowLeft className="me-1" /> Back to Tournament Timers

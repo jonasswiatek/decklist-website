@@ -78,7 +78,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
 
   return (
     <>
-      <div className="container">
+      <div className="container mt-4">
         <div className="mb-3">
           <button 
             type="button" 

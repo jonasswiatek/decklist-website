@@ -13,7 +13,7 @@ const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string 
     const navigate = useNavigate();
 
     return (
-        <div className="container">
+        <div className="container mt-4">
             <div className='row'>
                 <div className='col'>
                     <div className="mb-3">

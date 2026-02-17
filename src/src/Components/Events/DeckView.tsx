@@ -236,7 +236,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     return (
         <>
-        <div className="container">
+        <div className="container mt-4">
         {isJudge && (
             <div className='row'>
                 <div className='col-12 mb-3 d-flex justify-content-between align-items-center'>
