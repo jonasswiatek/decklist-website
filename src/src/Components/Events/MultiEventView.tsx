@@ -42,7 +42,7 @@ export function MutliEventView() {
                 </tr>
               </thead>
               <tbody>
-                {data?.sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()).map((event) => (
+                {data?.toSorted((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()).map((event) => (
                     <tr key={event.event_id}>
                       <td>
                         <div className="d-flex justify-content-between align-items-center">
