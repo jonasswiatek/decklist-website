@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Rules
+
+- **Never run `git push`**. The user will push manually.
+
 ## Build & Development
 
 All commands run from `src/`:
@@ -26,18 +30,23 @@ React 19 + TypeScript app. Vite build. Bootstrap 5 dark theme. Source lives in `
 
 - **Client**: `model/api/client.ts` — singleton `fetchClient` (openapi-fetch) and `$api` (openapi-react-query)
 - **Generated types**: `model/api/decklist-api-schema.d.ts` — regenerate with `npm run generate-api-client` after backend changes
-- **Manual API functions**: `model/api/apimodel.ts` — auth flows, a few GET requests, and `saveLibraryDeckRequest` (conditional endpoint routing). These exist because they're called from Zustand (outside React) or have special logic
+- **Manual API functions**: `model/api/apimodel.ts` — a few GET requests and `saveLibraryDeckRequest` (conditional endpoint routing)
 
 ### Query & Mutation Hooks (`Hooks/`)
 
 Components never import `$api` directly. They import from `Hooks/`:
 
 - **Query hooks** wrap `$api.useQuery()` with method+path baked in, plus options like `retry: false`, `refetchOnWindowFocus: false`, `staleTime: Infinity`
-- **Mutation hooks** (`useEventMutations.ts`, `useDeckMutations.ts`, `useTournamentMutations.ts`) wrap `$api.useMutation()` using a custom `MutationOptions<Method, Path>` utility type — see existing hooks for the pattern
+- **Mutation hooks** (`useEventMutations.ts`, `useDeckMutations.ts`, `useTournamentMutations.ts`, `useAuthMutations.ts`) wrap `$api.useMutation()` using a custom `MutationOptions<Method, Path>` utility type — see existing hooks for the pattern
 
 ### Auth
 
-Zustand store (`store/deckliststore.ts`) manages auth state. Cannot use React Query hooks for auth because it runs outside React component lifecycle. Auth context provided via `Components/Login/AuthContext.tsx`, consumed via `useAuth()` hook. Protected routes use `<LoggedIn>` wrapper.
+React Query manages auth state like all other server state:
+
+- **`Hooks/useAuthQuery.ts`** — `useAuthQuery()` wraps `$api.useQuery("get", "/api/me")`. Returns `authorized`, `email`, `userId`, `sessionId`, `name` alongside standard query fields.
+- **`Hooks/useAuthMutations.ts`** — `useStartLoginMutation()`, `useContinueLoginMutation()`, `useGoogleLoginMutation()`, `useLogoutMutation()` wrap `$api.useMutation()`.
+- **Login flow**: `/login` route renders `LoginScreen`. After successful login, redirects to the `return` search param. Login/logout mutations call `queryClient.resetQueries()` on success to clear stale data and refetch.
+- **Protected routes**: `ProtectedLayout` (in `Components/Login/LoggedIn.tsx`) is a layout route using `<Navigate>` and `<Outlet>`. All protected routes are grouped as children in the router config.
 
 ### Validation
 
