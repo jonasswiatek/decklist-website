@@ -232,7 +232,7 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
                 
                 {decklistStyle && (<>
                   <div className="form-group position-relative">
-                    <div className={`textarea-container}`}>
+                    <div className={`textarea-container`}>
                       <div className="form-group mb-1">
                         <div className="text-end">
                             <a href={`/help/decklist#${decklistStyle.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
@@ -279,7 +279,7 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
                           {isSubmitting ? (
                               <>
                                   <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                  Savings
+                                  Saving
                               </>
                           ) : (
                               'Save Decklist'

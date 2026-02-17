@@ -232,7 +232,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const pastEvents = events?.filter(
         event => event.role === "player" &&
         event.format === props.event.format &&
-        event.event_id != props.event.event_id) ?? [];
+        event.event_id !== props.event.event_id) ?? [];
 
     return (
         <>
