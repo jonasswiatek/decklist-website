@@ -6,10 +6,10 @@ import Card from 'react-bootstrap/Card';
 import { useState } from "react";
 import { getEvent } from '../../model/api/apimodel';
 import { EventList } from "../Events/EventList";
-import { useAuth } from "../Login/useAuth";
+import { useAuthQuery } from "../../Hooks/useAuthQuery";
 
 export function LandingPage() {
-    const { login, authorized } = useAuth();
+    const { authorized } = useAuthQuery();
 
     const [joinCode, setJoinCode] = useState<string>('');
     const [showError, setShowError] = useState<boolean>(false);
@@ -40,7 +40,7 @@ export function LandingPage() {
                     <h2 className="lead text-muted">Decklists for your Magic: the Gathering tournaments - for free</h2>
                 </div>
             </div>
-            
+
             <div className="row mb-4">
                 <div className="col">
                     <Card>
@@ -50,9 +50,9 @@ export function LandingPage() {
                                 Enter event code, or scan QR code provided by the tournament to upload your decklist.
                             </Card.Text>
                             <InputGroup style={{ maxWidth: '450px' }}>
-                                <Form.Control 
+                                <Form.Control
                                     placeholder="Enter event code"
-                                    value={joinCode} 
+                                    value={joinCode}
                                     onChange={(e) => setJoinCode(e.target.value)}
                                     aria-label="Event code"
                                 />
@@ -69,7 +69,7 @@ export function LandingPage() {
                     </Card>
                 </div>
             </div>
-            
+
             <div className="row">
                 <div className="col">
                     {authorized ? (
@@ -78,7 +78,7 @@ export function LandingPage() {
                         <Card style={{marginBottom: '15px'}}>
                             <Card.Body>
                                 <Card.Text>
-                                    <a href="#" onClick={(e) => { e.preventDefault(); login(); }}>Log in</a> to see your tournaments.
+                                    <a href="/login">Log in</a> to see your tournaments.
                                 </Card.Text>
                             </Card.Body>
                         </Card>

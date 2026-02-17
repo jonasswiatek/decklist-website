@@ -1,18 +1,16 @@
-import { ReactNode, useEffect } from 'react';
-import { useAuth } from './useAuth';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuthQuery } from '../../Hooks/useAuthQuery';
 import { LoadingScreen } from './LoadingScreen';
 
-export const LoggedIn = (props: {children: ReactNode}) => {
-    const { login, authorized } = useAuth();
+export const ProtectedLayout = () => {
+    const { authorized, isLoading } = useAuthQuery();
+    const location = useLocation();
 
-    useEffect(() => {
-        if (!authorized)
-            login();
-        
-    }, [login, authorized]);
-
-    if (authorized)
-        return props.children;
-    else if (authorized === null)
+    if (isLoading)
         return <LoadingScreen />;
+
+    if (!authorized)
+        return <Navigate to={`/login?return=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+
+    return <Outlet />;
 };

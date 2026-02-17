@@ -9,7 +9,7 @@ import { HandleValidation } from '../../Util/Validators';
 import { TimerDisplay } from './TimerDisplay';
 import { useTournamentClocks } from './useTournamentClocks';
 import { useTournamentTimersUpdated, WebSocketTournamentTimersRefreshMessageType } from '../../Hooks/useWebsocketConnection';
-import { useAuth } from '../Login/useAuth';
+import { useAuthQuery } from '../../Hooks/useAuthQuery';
 import { useAddManagerMutation, useDeleteManagerMutation, useCreateClockMutation, useUpdateClockMutation, useResetClockMutation, useAdjustClockMutation, useDeleteClockMutation, useDeleteTournamentMutation, useForceSyncMutation } from '../../Hooks/useTournamentMutations';
 
 const getWebSocketStatusText = (readyState: number): string => {
@@ -46,7 +46,7 @@ export function TournamentWrapper(): ReactElement {
 }
 
 export function Tournament({ tournament_id }: {tournament_id: string}): ReactElement {
-  const { sessionId } = useAuth();
+  const { sessionId } = useAuthQuery();
   const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
   const { refetch: refetchUserTournaments } = useUserTournaments();
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<AddManagerFormInputs>();

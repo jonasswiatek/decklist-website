@@ -2,10 +2,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { JudgeView } from './Views/JudgeView';
 import { DeckEditor } from './DeckView';
 import { EventViewProps } from './EventTypes';
-import { useAuth } from '../Login/useAuth';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { BsArrowLeft } from 'react-icons/bs';
 import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
+import { useAuthQuery } from '../../Hooks/useAuthQuery';
 
 // New EventHeader component
 const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string | null }> = ({ eventName, eventId, role }) => {
@@ -17,9 +17,9 @@ const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string 
             <div className='row'>
                 <div className='col'>
                     <div className="mb-3">
-                        <button 
-                            type="button" 
-                            className="btn btn-link text-decoration-none p-0" 
+                        <button
+                            type="button"
+                            className="btn btn-link text-decoration-none p-0"
                             onClick={() => navigate('/')}
                         >
                             <BsArrowLeft className="me-1" /> Events
@@ -60,10 +60,10 @@ const EventFullMessage: React.FC = () => {
 
 export function EventView() {
     const { event_id } = useParams();
-    const { authorized } = useAuth();
+    const { authorized } = useAuthQuery();
 
     const { data, error, isLoading, refetch } = useEventDetailsQuery(event_id!);
-    
+
     if (isLoading) {
         return (
             <LoadingScreen />
@@ -103,12 +103,12 @@ export function EventView() {
             </>
         )
     }
-    
+
     return (
       <>
         <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
-        {(data.player_count >= data.max_players) ? 
-            <EventFullMessage /> : 
+        {(data.player_count >= data.max_players) ?
+            <EventFullMessage /> :
             (authorized ? <DeckEditor event={data} /> : <UnauthedView event={data} />)
         }
       </>
@@ -117,7 +117,7 @@ export function EventView() {
 
 
 const UnauthedView: React.FC<EventViewProps> = (props) => {
-    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const isEventOpen = props.event.status === 'open';
 
@@ -141,10 +141,10 @@ const UnauthedView: React.FC<EventViewProps> = (props) => {
                                 <p className="card-text mb-4">
                                     Log in submit your decklist for this event.
                                 </p>
-                                <button 
-                                    type="button" 
-                                    className="btn btn-outline-light" 
-                                    onClick={login}
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-light"
+                                    onClick={() => navigate(`/login?return=${encodeURIComponent(window.location.pathname)}`)}
                                 >
                                     Log in to Continue
                                 </button>

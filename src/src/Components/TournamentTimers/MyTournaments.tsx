@@ -5,10 +5,10 @@ import { UserTournamentsResponseItem } from '../../model/api/tournamentTimers';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { useNavigate, Link } from 'react-router-dom';
 import { BsArrowLeft } from 'react-icons/bs';
-import { useAuth } from '../Login/useAuth';
+import { useAuthQuery } from '../../Hooks/useAuthQuery';
 
 const MyTournaments: React.FC = () => {
-  const { login, authorized } = useAuth();
+  const { authorized } = useAuthQuery();
   const { data, isLoading, isError, error } = useUserTournaments(authorized || false);
   const navigate = useNavigate();
 
@@ -30,13 +30,13 @@ const MyTournaments: React.FC = () => {
 
   return (
     <Container className="mt-4">
-      
+
       <Row className="mb-4">
         <Col>
           <div className="mb-3">
-              <button 
-                  type="button" 
-                  className="btn btn-link text-decoration-none p-0" 
+              <button
+                  type="button"
+                  className="btn btn-link text-decoration-none p-0"
                   onClick={() => navigate('/tools')}
               >
                   <BsArrowLeft className="me-1" /> Tools
@@ -52,7 +52,7 @@ const MyTournaments: React.FC = () => {
           {!authorized ? (
             <Alert variant="info" className="text-center">
               <p>Please log in to view your tournaments.</p>
-              <Button variant="primary" onClick={login}>
+              <Button variant="primary" onClick={() => navigate('/login?return=/timers')}>
                 Log In
               </Button>
             </Alert>
@@ -69,7 +69,7 @@ const MyTournaments: React.FC = () => {
                   data.tournaments.map((tournament: UserTournamentsResponseItem) => (
                     <tr key={tournament.tournament_id}>
                       <td>
-                        <Link 
+                        <Link
                           to={`/timers/${tournament.tournament_id}`}
                           className="fw-semibold text-decoration-none"
                         >

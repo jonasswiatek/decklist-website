@@ -9,9 +9,6 @@ export type DecklistGroup = components["schemas"]["CardGroup"];
 export type DecklistCard = components["schemas"]["DecklistCard"];
 export type Format = components["schemas"]["FormatListItem"];
 export type LibraryDeckResponse = components["schemas"]["LibraryDecklistResponse"];
-export type LoginContinueResponse = components["schemas"]["LoginContinueResponse"];
-export type MeResponse = components["schemas"]["MeResponse"];
-
 // --- Error handling ---
 
 export type ValidationErrorResponse = components["schemas"]["HttpValidationProblemDetails"];
@@ -31,65 +28,6 @@ export class NotAuthenticatedError extends Error {
 
 export class NotFoundError extends Error {
 
-}
-
-// --- Auth ---
-
-export async function meRequest() : Promise<MeResponse> {
-    const { data, response } = await fetchClient.GET("/api/me");
-    if (response.status === 401)
-        return { authorized: false } as MeResponse;
-
-    if (data) return data;
-
-    throw new Error("Http Exception");
-}
-
-export async function startLoginRequest(data: { email: string }) {
-    const { data: responseData, error } = await fetchClient.POST("/api/login/start", {
-        body: {
-            email: data.email.trim(),
-        },
-    });
-
-    if (error) throw new ValidationError(error);
-    if (responseData) return responseData;
-
-    throw new Error("Http Exception");
-}
-
-export async function continueLoginRequest(data: { email: string; code: string }) {
-    const { data: responseData, error } = await fetchClient.POST("/api/login/continue", {
-        body: {
-            email: data.email.trim(),
-            code: data.code.trim(),
-        },
-    });
-
-    if (error) throw new ValidationError(error);
-    if (responseData) return responseData;
-
-    throw new Error("Http Exception");
-}
-
-export async function googleLoginRequest(data: { token: string }) {
-    const { data: responseData } = await fetchClient.POST("/api/login/google", {
-        body: {
-            token: data.token,
-        },
-    });
-
-    if (responseData) return responseData;
-
-    throw new Error("Http Exception");
-}
-
-export async function logoutRequest() {
-    const { response } = await fetchClient.POST("/api/logout");
-
-    if (response.ok) return;
-
-    throw new Error("Http Exception");
 }
 
 // --- Events ---

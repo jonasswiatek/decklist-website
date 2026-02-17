@@ -1,22 +1,20 @@
 import './App.scss'
-import { useDecklistStore } from './store/deckliststore';
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
 import { EventView } from './Components/Events/EventView.tsx'
-import { LoggedIn } from './Components/Login/LoggedIn.tsx';
+import { ProtectedLayout } from './Components/Login/LoggedIn.tsx';
 import { LandingPage } from './Components/LandingPage/LandingPage.tsx';
 import {
   QueryClient,
   QueryClientProvider,
-  useQueryClient
+  useQueryClient,
 } from '@tanstack/react-query'
 
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import { AuthProvider } from './Components/Login/AuthContext.tsx';
 import { CreateEvent } from './Components/Events/CreateEvent.tsx';
 import { DeckView } from './Components/Events/DeckView.tsx';
 import { QRCodeView } from './Components/Events/Views/QRCodeView';
@@ -24,7 +22,6 @@ import { DecklistHelp } from './Components/Help/DecklistHelp';
 import { PrivacyHelp } from './Components/Help/PrivacyPolicy';
 import { TermsAndServicesHelp } from './Components/Help/TermsAndServices';
 import { MutliEventView } from './Components/Events/MultiEventView.tsx';
-import { useAuth } from './Components/Login/useAuth.ts';
 import { ContributeHelp } from './Components/Help/Contribute.tsx';
 import { About } from './Components/Help/About.tsx';
 import { EventlinkSync } from './Components/Events/Views/EventlinkSync.tsx';
@@ -37,15 +34,26 @@ import { CreateTournament } from './Components/TournamentTimers/CreateTournament
 import { TournamentWrapper } from './Components/TournamentTimers/Tournament.tsx';
 import { TournamentPublicViewWrapper } from './Components/TournamentTimers/TournamentPublicView.tsx';
 import { Tools } from './Components/LandingPage/Tools.tsx';
+import { LoginScreen } from './Components/Login/Login.tsx';
+import { useAuthQuery } from './Hooks/useAuthQuery.ts';
+import { useLogoutMutation } from './Hooks/useAuthMutations.ts';
 
 const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
+  // --- Public routes ---
   {
     path: "/",
-    element: 
+    element:
       <ScrollToTop>
         <LandingPage />
+      </ScrollToTop>,
+  },
+  {
+    path: "/login",
+    element:
+      <ScrollToTop>
+        <LoginScreen />
       </ScrollToTop>,
   },
   {
@@ -56,15 +64,6 @@ const router = createBrowserRouter([
       </ScrollToTop>,
   },
   {
-    path: "/e/new",
-    element:
-      <LoggedIn>
-        <ScrollToTop>
-          <CreateEvent />
-        </ScrollToTop>
-      </LoggedIn>,
-  },
-  {
     path: "/e/:event_id",
     element:
       <ScrollToTop>
@@ -72,56 +71,11 @@ const router = createBrowserRouter([
       </ScrollToTop>
   },
   {
-    path: "/e/:event_id/deck",
-    element:
-    <LoggedIn>
-      <ScrollToTop>
-        <DeckView />
-      </ScrollToTop>
-    </LoggedIn>,
-  },
-  {
-    path: "/e/:event_id/deck/print",
-    element:
-    <LoggedIn>
-      <ScrollToTop>
-        <PrintDecklistView />
-      </ScrollToTop>
-    </LoggedIn>,
-  },
-  {
-    path: "/e/:event_id/sync/eventlink",
-    element:
-    <LoggedIn>
-      <ScrollToTop>
-        <EventlinkSync />
-      </ScrollToTop>
-    </LoggedIn>,
-  },
-  {
     path: "/e/:eventId/qr",
-    element: 
+    element:
       <ScrollToTop>
         <QRCodeView />
       </ScrollToTop>,
-  },
-  {
-    path: "/library",
-    element:
-      <LoggedIn>
-        <ScrollToTop>
-          <LibraryOverview />
-        </ScrollToTop>
-      </LoggedIn>,
-  },
-  {
-    path: "/library/deck/:deck_id?",
-    element: 
-      <LoggedIn>
-        <ScrollToTop>
-          <LibraryDeckEditorPage />
-        </ScrollToTop>
-      </LoggedIn>,
   },
   {
     path: "/tools",
@@ -138,34 +92,15 @@ const router = createBrowserRouter([
       </ScrollToTop>,
   },
   {
-    path: "/timers/new",
+    path: "/timers/:tournament_id/view",
     element:
-      <LoggedIn>
-        <ScrollToTop>
-          <CreateTournament />
-        </ScrollToTop>
-      </LoggedIn>,
-  },
-  {
-    path: "/timers/:tournament_id",
-    element:
-      <LoggedIn>
-        <ScrollToTop>
-          <TournamentWrapper />
-        </ScrollToTop>
-      </LoggedIn>,
-  },
-  { // New route for public timer view
-  path: "/timers/:tournament_id/view",
-  element:
-    // No LoggedIn wrapper for public view
-    <ScrollToTop>
-      <TournamentPublicViewWrapper />
-    </ScrollToTop>,
+      <ScrollToTop>
+        <TournamentPublicViewWrapper />
+      </ScrollToTop>,
   },
   {
     path: "/help/decklist",
-    element: 
+    element:
       <ScrollToTop>
         <DecklistHelp />
       </ScrollToTop>
@@ -198,23 +133,84 @@ const router = createBrowserRouter([
         <About />
       </ScrollToTop>
   },
+
+  // --- Protected routes ---
+  {
+    element: <ProtectedLayout />,
+    children: [
+      {
+        path: "/e/new",
+        element:
+          <ScrollToTop>
+            <CreateEvent />
+          </ScrollToTop>,
+      },
+      {
+        path: "/e/:event_id/deck",
+        element:
+          <ScrollToTop>
+            <DeckView />
+          </ScrollToTop>,
+      },
+      {
+        path: "/e/:event_id/deck/print",
+        element:
+          <ScrollToTop>
+            <PrintDecklistView />
+          </ScrollToTop>,
+      },
+      {
+        path: "/e/:event_id/sync/eventlink",
+        element:
+          <ScrollToTop>
+            <EventlinkSync />
+          </ScrollToTop>,
+      },
+      {
+        path: "/library",
+        element:
+          <ScrollToTop>
+            <LibraryOverview />
+          </ScrollToTop>,
+      },
+      {
+        path: "/library/deck/:deck_id?",
+        element:
+          <ScrollToTop>
+            <LibraryDeckEditorPage />
+          </ScrollToTop>,
+      },
+      {
+        path: "/timers/new",
+        element:
+          <ScrollToTop>
+            <CreateTournament />
+          </ScrollToTop>,
+      },
+      {
+        path: "/timers/:tournament_id",
+        element:
+          <ScrollToTop>
+            <TournamentWrapper />
+          </ScrollToTop>,
+      },
+    ],
+  },
 ]);
 
 function App() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          {/* This div acts as the main flex container for the page */}
-          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <NavBar />
-            {/* This main element will grow to fill available space, pushing the footer down */}
-            <main style={{ flex: '1 0 auto' }}>
-              <RouterProvider router={router} />
-            </main>
-            <Footer />
-          </div>
-        </AuthProvider>
+        {/* This div acts as the main flex container for the page */}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <NavBar />
+          {/* This main element will grow to fill available space, pushing the footer down */}
+          <main style={{ flex: '1 0 auto' }}>
+            <RouterProvider router={router} />
+          </main>
+          <Footer />
+        </div>
       </QueryClientProvider>
     </>
   );
@@ -222,9 +218,13 @@ function App() {
 
 function NavBar()
 {
-  const { login, authorized } = useAuth();
-  const { logout } = useDecklistStore();
+  const { authorized } = useAuthQuery();
   const queryClient = useQueryClient();
+  const logoutMutation = useLogoutMutation({
+    onSuccess: () => {
+      queryClient.resetQueries();
+    },
+  });
 
   const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
   const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
@@ -241,9 +241,8 @@ function NavBar()
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
-  const handleLogout = async() => {
-    queryClient.clear();
-    logout();
+  const handleLogout = () => {
+    logoutMutation.mutate({});
   }
 
   return <>
@@ -263,7 +262,7 @@ function NavBar()
               ) :
               (
                 <>
-                  <Nav.Link onClick={() => login()}>Log in</Nav.Link>
+                  <Nav.Link onClick={handleNavigate(`/login?return=${encodeURIComponent(window.location.pathname + window.location.search)}`)} href="/login">Log in</Nav.Link>
                 </>
               )}
           </Nav>
@@ -279,7 +278,7 @@ function Footer() {
   const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
   const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
   const isTournamentPublicViewRoute = window.location.pathname.match(/\/timers\/.*\/view$/i) !== null;
-  
+
   if (isQRCodeRoute || isPrintDecklistRoute || isTournamentPublicViewRoute) {
     return null;
   }

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp, BsDownload, BsTrash, BsExclamationTriangleFill, BsCheckCircleFill } from 'react-icons/bs';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
-import { useAuth } from '../../Login/useAuth';
+import { useAuthQuery } from '../../../Hooks/useAuthQuery';
 import { useEventListQuery } from '../../../Hooks/useEventListQuery';
 import { useEventUpdated } from '../../../Hooks/useWebsocketConnection';
 import { useUpdateEventMutation, useDeleteEventMutation, useDeleteEventUserMutation, useAddJudgeMutation, useAddPlayerMutation } from '../../../Hooks/useEventMutations';
@@ -18,7 +18,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const [showAddJudgeForm, setShowAddJudgeForm] = useState(false);
     const inviteLink = `${window.location.origin}/e/${e.event.event_id}`;
     const navigate = useNavigate();
-    const auth = useAuth();
+    const auth = useAuthQuery();
     const [filterByDeckStatus, setFilterByDeckStatus] = useState<'all' | 'checked' | 'unchecked' | 'warnings'>('all');
     const { refetch: refetchMyEvents } = useEventListQuery(false);
     const { refetch: refetchEvent } = e;
