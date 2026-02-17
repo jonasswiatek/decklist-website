@@ -160,13 +160,14 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
             }
 
             case 'event': {
-                const decklist = await getDecklistRequest(id, null);
-                setValue("deck_name", decklist!.deck_name ?? '', {
+                const decklist = await getDecklistRequest(id);
+                if (!decklist) break;
+                setValue("deck_name", decklist.deck_name ?? '', {
                     shouldDirty: true,
                     shouldValidate: true
                 });
 
-                setValue("decklist_text", decklist!.decklist_text, { 
+                setValue("decklist_text", decklist.decklist_text, {
                     shouldDirty: true,
                     shouldValidate: true
                 });
