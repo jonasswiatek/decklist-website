@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { EventDetails, getDecklistRequest, getLibraryDeckRequest } from '../../model/api/apimodel';
 import { DecklistTable } from './DecklistTable';
@@ -578,6 +578,10 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
 const FlagCheckedButton: React.FC<{ eventId: string, userId: string, isChecked: boolean, refetch: () => void }> = ({ eventId, userId, isChecked, refetch }) => {
     const [localCheckedState, setLocalCheckedState] = useState(isChecked);
+
+    useEffect(() => {
+        setLocalCheckedState(isChecked);
+    }, [isChecked]);
 
     const setCheckedMutation = useSetDeckCheckedMutation({
         onSuccess: () => refetch(),
