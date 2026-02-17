@@ -1,7 +1,9 @@
 import './App.scss'
 import {
   createBrowserRouter,
+  Outlet,
   RouterProvider,
+  ScrollRestoration,
 } from "react-router-dom";
 import { EventView } from './Components/Events/EventView.tsx'
 import { ProtectedLayout } from './Components/Login/LoggedIn.tsx';
@@ -25,7 +27,6 @@ import { MutliEventView } from './Components/Events/MultiEventView.tsx';
 import { ContributeHelp } from './Components/Help/Contribute.tsx';
 import { About } from './Components/Help/About.tsx';
 import { EventlinkSync } from './Components/Events/Views/EventlinkSync.tsx';
-import { ScrollToTop } from './Util/ScrollToTop.tsx';
 import { LibraryDeckEditorPage } from './Components/DeckLibrary/LibraryDeckEditorPage.tsx';
 import { LibraryOverview } from './Components/DeckLibrary/LibraryOverview.tsx';
 import { PrintDecklistView } from './Components/Events/Views/PrintDecklistView.tsx';
@@ -41,158 +42,37 @@ import { useLogoutMutation } from './Hooks/useAuthMutations.ts';
 const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
-  // --- Public routes ---
   {
-    path: "/",
-    element:
-      <ScrollToTop>
-        <LandingPage />
-      </ScrollToTop>,
-  },
-  {
-    path: "/login",
-    element:
-      <ScrollToTop>
-        <LoginScreen />
-      </ScrollToTop>,
-  },
-  {
-    path: "/multi/:hub_name",
-    element:
-      <ScrollToTop>
-        <MutliEventView/>
-      </ScrollToTop>,
-  },
-  {
-    path: "/e/:event_id",
-    element:
-      <ScrollToTop>
-        <EventView />
-      </ScrollToTop>
-  },
-  {
-    path: "/e/:eventId/qr",
-    element:
-      <ScrollToTop>
-        <QRCodeView />
-      </ScrollToTop>,
-  },
-  {
-    path: "/tools",
-    element:
-      <ScrollToTop>
-        <Tools />
-      </ScrollToTop>,
-  },
-  {
-    path: "/timers",
-    element:
-      <ScrollToTop>
-        <MyTournaments />
-      </ScrollToTop>,
-  },
-  {
-    path: "/timers/:tournament_id/view",
-    element:
-      <ScrollToTop>
-        <TournamentPublicViewWrapper />
-      </ScrollToTop>,
-  },
-  {
-    path: "/help/decklist",
-    element:
-      <ScrollToTop>
-        <DecklistHelp />
-      </ScrollToTop>
-  },
-  {
-    path: "/help/privacy",
-    element:
-      <ScrollToTop>
-        <PrivacyHelp />
-      </ScrollToTop>
-  },
-  {
-    path: "/help/terms-and-services",
-    element:
-      <ScrollToTop>
-        <TermsAndServicesHelp />
-      </ScrollToTop>
-  },
-  {
-    path: "/help/contribute",
-    element:
-      <ScrollToTop>
-        <ContributeHelp />
-      </ScrollToTop>
-  },
-  {
-    path: "/help/about",
-    element:
-      <ScrollToTop>
-        <About />
-      </ScrollToTop>
-  },
-
-  // --- Protected routes ---
-  {
-    element: <ProtectedLayout />,
+    element: <><ScrollRestoration /><Outlet /></>,
     children: [
+      // --- Public routes ---
+      { path: "/", element: <LandingPage /> },
+      { path: "/login", element: <LoginScreen /> },
+      { path: "/multi/:hub_name", element: <MutliEventView /> },
+      { path: "/e/:event_id", element: <EventView /> },
+      { path: "/e/:eventId/qr", element: <QRCodeView /> },
+      { path: "/tools", element: <Tools /> },
+      { path: "/timers", element: <MyTournaments /> },
+      { path: "/timers/:tournament_id/view", element: <TournamentPublicViewWrapper /> },
+      { path: "/help/decklist", element: <DecklistHelp /> },
+      { path: "/help/privacy", element: <PrivacyHelp /> },
+      { path: "/help/terms-and-services", element: <TermsAndServicesHelp /> },
+      { path: "/help/contribute", element: <ContributeHelp /> },
+      { path: "/help/about", element: <About /> },
+
+      // --- Protected routes ---
       {
-        path: "/e/new",
-        element:
-          <ScrollToTop>
-            <CreateEvent />
-          </ScrollToTop>,
-      },
-      {
-        path: "/e/:event_id/deck",
-        element:
-          <ScrollToTop>
-            <DeckView />
-          </ScrollToTop>,
-      },
-      {
-        path: "/e/:event_id/deck/print",
-        element:
-          <ScrollToTop>
-            <PrintDecklistView />
-          </ScrollToTop>,
-      },
-      {
-        path: "/e/:event_id/sync/eventlink",
-        element:
-          <ScrollToTop>
-            <EventlinkSync />
-          </ScrollToTop>,
-      },
-      {
-        path: "/library",
-        element:
-          <ScrollToTop>
-            <LibraryOverview />
-          </ScrollToTop>,
-      },
-      {
-        path: "/library/deck/:deck_id?",
-        element:
-          <ScrollToTop>
-            <LibraryDeckEditorPage />
-          </ScrollToTop>,
-      },
-      {
-        path: "/timers/new",
-        element:
-          <ScrollToTop>
-            <CreateTournament />
-          </ScrollToTop>,
-      },
-      {
-        path: "/timers/:tournament_id",
-        element:
-          <ScrollToTop>
-            <TournamentWrapper />
-          </ScrollToTop>,
+        element: <ProtectedLayout />,
+        children: [
+          { path: "/e/new", element: <CreateEvent /> },
+          { path: "/e/:event_id/deck", element: <DeckView /> },
+          { path: "/e/:event_id/deck/print", element: <PrintDecklistView /> },
+          { path: "/e/:event_id/sync/eventlink", element: <EventlinkSync /> },
+          { path: "/library", element: <LibraryOverview /> },
+          { path: "/library/deck/:deck_id?", element: <LibraryDeckEditorPage /> },
+          { path: "/timers/new", element: <CreateTournament /> },
+          { path: "/timers/:tournament_id", element: <TournamentWrapper /> },
+        ],
       },
     ],
   },
