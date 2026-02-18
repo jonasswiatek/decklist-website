@@ -6,6 +6,7 @@ export function useUserTournaments(enabled: boolean = true) {
     return $api.useQuery(
         "get",
         "/api/timers",
+        {},
         {
             queryKey: [TOURNAMENT_TIMERS_QUERY_KEY, 'userTournaments'],
             staleTime: Infinity,
@@ -26,6 +27,8 @@ export function useTournamentDetails(tournamentId: string, enabled: boolean = tr
                     tournamentId: tournamentId,
                 },
             },
+        },
+        {
             queryKey: [TOURNAMENT_TIMERS_QUERY_KEY, 'tournamentDetails', tournamentId],
             staleTime: Infinity,
             retry: false,

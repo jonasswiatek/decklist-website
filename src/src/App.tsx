@@ -51,7 +51,7 @@ const router = createBrowserRouter([
       { path: "/login", element: <LoginScreen /> },
       { path: "/multi/:hub_name", element: <MutliEventView /> },
       { path: "/e/:event_id", element: <EventView /> },
-      { path: "/e/:eventId/qr", element: <QRCodeView /> },
+      { path: "/e/:event_id/qr", element: <QRCodeView /> },
       { path: "/tools", element: <Tools /> },
       { path: "/timers", element: <MyTournaments /> },
       { path: "/timers/:tournament_id/view", element: <TournamentPublicViewWrapper /> },
@@ -177,7 +177,7 @@ function Footer() {
           <Nav.Link href="/help/privacy" className="text-reset text-decoration-none">Privacy Policy</Nav.Link>
           <Nav.Link href="/help/terms-and-services" className="text-reset text-decoration-none">Terms of Service</Nav.Link>
           <Nav.Link href="/help/contribute" className="text-reset text-decoration-none">Contribute</Nav.Link>
-          <Nav.Link href="/help/About" className="text-reset text-decoration-none">About</Nav.Link>
+          <Nav.Link href="/help/about" className="text-reset text-decoration-none">About</Nav.Link>
         </Nav>
       </Container>
     </footer>

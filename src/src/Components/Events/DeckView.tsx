@@ -274,7 +274,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                     {!showRevisionsTable && (
                         <>
                             {!isOpen && !hasSubmission && (
-                                <div className="alert alert-info mb-3">This tournament is past it's decklist submission deadline.</div>
+                                <div className="alert alert-info mb-3">This tournament is past its decklist submission deadline.</div>
                             )}
                             {!isOpen && hasSubmission && (
                                 <div className="alert alert-info mb-3"><b>Your decklist is submitted</b>, but can no longer be modified because the submission deadline has passed.</div>
@@ -370,8 +370,13 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                         type="button"
                                         className="btn btn-danger"
                                         onClick={handleDeleteDeck}
+                                        disabled={deleteDeckMutation.isPending}
                                     >
-                                        <BsTrash />
+                                        {deleteDeckMutation.isPending ? (
+                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        ) : (
+                                            <BsTrash />
+                                        )}
                                     </button>
                                 )}
                                 {errors.player_name && (

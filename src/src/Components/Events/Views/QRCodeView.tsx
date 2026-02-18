@@ -5,10 +5,10 @@ import { useEventDetailsQuery } from '../../../Hooks/useEventDetailsQuery';
 import { QRCodeSVG } from 'qrcode.react';
 
 export const QRCodeView: React.FC = () => {
-    const { eventId } = useParams<{ eventId: string }>();
-    const inviteLink = `${window.location.origin}/e/${eventId}`;
+    const { event_id } = useParams<{ event_id: string }>();
+    const inviteLink = `${window.location.origin}/e/${event_id}`;
 
-    const { data, error, isLoading } = useEventDetailsQuery(eventId!);
+    const { data, error, isLoading } = useEventDetailsQuery(event_id!);
 
     if (isLoading) {
         return <LoadingScreen />
