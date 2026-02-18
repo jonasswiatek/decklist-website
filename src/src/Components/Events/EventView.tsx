@@ -33,7 +33,6 @@ const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string 
                             </small>
                         )}
                     </h1>
-                    <br></br>
                 </div>
             </div>
         </div>
@@ -72,25 +71,17 @@ export function EventView() {
 
     if(error) {
         return (
-            <>
-                <div className='row'>
-                    <div className='col'>
-                        <p>Error. Try again later.</p>
-                    </div>
-                </div>
-            </>
+            <div className="container mt-4">
+                <p>Error. Try again later.</p>
+            </div>
         )
     }
 
     if(!data) {
         return (
-            <>
-                <div className='row'>
-                    <div className='col'>
-                        <p>Can't find this event. Check that the code you entered is correct.</p>
-                    </div>
-                </div>
-            </>
+            <div className="container mt-4">
+                <p>Can't find this event. Check that the code you entered is correct.</p>
+            </div>
         )
     }
 
@@ -135,7 +126,7 @@ const UnauthedView: React.FC<EventViewProps> = (props) => {
                             </p>
                         </div>
                     ) : (
-                        <div className="card shadow-sm bg-dark text-light">
+                        <div className="card shadow-sm">
                             <div className="card-body text-center py-4">
                                 <i className="bi bi-person-badge fs-1 text-info mb-3"></i>
                                 <p className="card-text mb-4">

@@ -65,7 +65,7 @@ export function CreateEvent() : ReactElement {
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             <div className="card mb-4">
-              <div className="card-header bg-dark text-white">
+              <div className="card-header">
                 <h5 className="mb-0">Create New Tournament</h5>
               </div>
               <div className="card-body">

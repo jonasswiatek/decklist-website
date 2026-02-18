@@ -194,23 +194,23 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                             <div className="card-body">
                                 <form onSubmit={(e) => { clearPlayerErrors(); handleSubmitPlayer(onAddPlayer)(e); }}>
                                     <div className="mb-3">
-                                        <input 
-                                            type="text" 
-                                            className="form-control" 
-                                            placeholder="Player Name" 
+                                        <input
+                                            type="text"
+                                            className={`form-control ${playerErrors.player_name ? 'is-invalid' : ''}`}
+                                            placeholder="Player Name"
                                             required
-                                            {...registerPlayer("player_name")} 
+                                            {...registerPlayer("player_name")}
                                         />
-                                        {playerErrors.player_name && <div className="text-danger mt-1">{playerErrors.player_name.message}</div>}
+                                        {playerErrors.player_name && <div className="invalid-feedback">{playerErrors.player_name.message}</div>}
                                     </div>
                                     <div className="mb-3">
-                                        <input 
-                                            type="email" 
-                                            className="form-control" 
-                                            placeholder="Email (optional)" 
-                                            {...registerPlayer("email")} 
+                                        <input
+                                            type="email"
+                                            className={`form-control ${playerErrors.email ? 'is-invalid' : ''}`}
+                                            placeholder="Email (optional)"
+                                            {...registerPlayer("email")}
                                         />
-                                        {playerErrors.email && <div className="text-danger mt-1">{playerErrors.email.message}</div>}
+                                        {playerErrors.email && <div className="invalid-feedback">{playerErrors.email.message}</div>}
                                     </div>
                                     <div>
                                         <button 
@@ -543,12 +543,12 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                     <div className="card-body">
                                         <form onSubmit={(e) => { clearErrors(); handleSubmit(onAddJudge)(e); }} >
                                             <div className="mb-3">
-                                                <input id='player_name' type="text" className="form-control" placeholder="Judge Name" required {...register("player_name")} />
-                                                {errors.player_name && <p className="text-danger mt-2">{errors.player_name?.message}</p>}
+                                                <input id='player_name' type="text" className={`form-control ${errors.player_name ? 'is-invalid' : ''}`} placeholder="Judge Name" required {...register("player_name")} />
+                                                {errors.player_name && <div className="invalid-feedback">{errors.player_name.message}</div>}
                                             </div>
                                             <div className="mb-3">
-                                                <input id='email' type="text" className="form-control" placeholder="Email Address" required {...register("email")} />
-                                                {errors.email && <p className="text-danger mt-2">{errors.email?.message}</p>}
+                                                <input id='email' type="text" className={`form-control ${errors.email ? 'is-invalid' : ''}`} placeholder="Email Address" required {...register("email")} />
+                                                {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
                                             </div>
                                             <button 
                                                 type='submit' 

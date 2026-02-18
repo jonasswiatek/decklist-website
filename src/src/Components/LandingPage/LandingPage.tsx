@@ -37,7 +37,7 @@ export function LandingPage() {
             <div className="row mb-4">
                 <div className="col">
                     <h1 className="display-5">Register your decklist</h1>
-                    <h2 className="lead text-muted">Decklists for your Magic: the Gathering tournaments - for free</h2>
+                    <p className="lead text-muted">Decklists for your Magic: the Gathering tournaments - for free</p>
                 </div>
             </div>
 
@@ -75,7 +75,7 @@ export function LandingPage() {
                     {authorized ? (
                         <EventList />
                     ) : (
-                        <Card style={{marginBottom: '15px'}}>
+                        <Card className="mb-3">
                             <Card.Body>
                                 <Card.Text>
                                     <a href="/login">Log in</a> to see your tournaments.

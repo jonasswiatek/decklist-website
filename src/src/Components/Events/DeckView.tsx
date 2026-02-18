@@ -351,57 +351,53 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                             </div>
                         )}
                     {!showRevisionsTable && (<>
-                        <div className="form-group position-relative">
+                        <div className="position-relative">
                             <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
                                 <span className="input-group-text" id="basic-addon1">
                                     <BsPerson />
                                 </span>
-                                <input 
-                                    type='text' 
-                                    id="player_name" 
-                                    className='form-control' 
-                                    placeholder='Your Name' 
-                                    required 
+                                <input
+                                    type='text'
+                                    id="player_name"
+                                    className={`form-control ${errors.player_name ? 'is-invalid' : ''}`}
+                                    placeholder='Your Name'
+                                    required
                                     {...register("player_name", { value: data?.player_name ?? '' })}
-                                    disabled={inputDisabled} // Disable for players if the event is closed
+                                    disabled={inputDisabled}
                                 />
                                 {data && !isJudge && isOpen && (
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-danger" 
+                                    <button
+                                        type="button"
+                                        className="btn btn-danger"
                                         onClick={handleDeleteDeck}
                                     >
                                         <BsTrash />
                                     </button>
                                 )}
                                 {errors.player_name && (
-                                    <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                        <span>{errors.player_name.message}</span>
-                                    </div>
+                                    <div className="invalid-feedback">{errors.player_name.message}</div>
                                 )}
                             </div>
                         </div>
-                        <div className="form-group position-relative mt-2">
+                        <div className="position-relative mt-2">
                             <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
                                 <span className="input-group-text" id="basic-addon2">
                                     <BsCardText />
                                 </span>
-                                <input 
-                                    type='text' 
-                                    id="deck_name" 
-                                    className='form-control' 
-                                    placeholder='Deck Name (Optional)' 
+                                <input
+                                    type='text'
+                                    id="deck_name"
+                                    className={`form-control ${errors.deck_name ? 'is-invalid' : ''}`}
+                                    placeholder='Deck Name (Optional)'
                                     {...register("deck_name", { value: data?.deck_name ?? '' })}
                                     disabled={inputDisabled}
                                 />
                                 {errors.deck_name && (
-                                    <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                        <span>{errors.deck_name.message}</span>
-                                    </div>
+                                    <div className="invalid-feedback">{errors.deck_name.message}</div>
                                 )}
                             </div>
                         </div>
-                        <div className="form-group position-relative">
+                        <div className="position-relative">
                             {isJudge && !isEditing && (
                                 <button 
                                     type="button" 
@@ -414,7 +410,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                 </button>
                             )}
                             <div className={`textarea-container ${isJudge && !isEditing ? 'blurred' : ''}`}>
-                                <div className="form-group mb-1">
+                                <div className="mb-1">
                                     {!isJudge && (
                                         <div className="text-end">
                                             <a href={`/help/decklist#${props.event.decklist_style.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
@@ -463,33 +459,28 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     </div>
                                 )}
 
-                                <textarea 
-                                    id='decklist_text' 
-                                    className="form-control" 
-                                    placeholder={getDecklistPlaceholder(props.event.decklist_style)} 
-                                    required 
-                                    {...register("decklist_text", { value: data?.decklist_text })} 
-                                    style={{ width: '100%', height: 400 }} 
-                                    disabled={inputDisabled} // Disable for players if the event is closed
+                                <textarea
+                                    id='decklist_text'
+                                    className={`form-control ${errors.decklist_text ? 'is-invalid' : ''}`}
+                                    placeholder={getDecklistPlaceholder(props.event.decklist_style)}
+                                    required
+                                    {...register("decklist_text", { value: data?.decklist_text })}
+                                    style={{ height: 400 }}
+                                    disabled={inputDisabled}
                                 />
                                 {errors.decklist_text && (
-                                    <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                                        <span>{errors.decklist_text.message}</span>
-                                    </div>
+                                    <div className="invalid-feedback">{errors.decklist_text.message}</div>
                                 )}
                                 
                             </div>
                         </div>
-                        <div
-                            className="event-info mb-3 d-flex justify-content-between align-items-center"
-                            style={{ padding: '10px', marginTop: '5px', minHeight: '60px' }}
-                        >
+                        <div className="event-info mb-3 mt-1 p-2 d-flex justify-content-between align-items-center">
                                 <div className="d-flex">
                                     {props.event.decklist_style.toLowerCase() === "commander" ? (
                                         <span className="no-wrap-text">Deck: {mainboardCount}</span>
                                     ) : (
                                         <>
-                                            <span style={{ marginRight: 10 }} className="no-wrap-text">Main: {mainboardCount}</span>
+                                            <span className="me-2 no-wrap-text">Main: {mainboardCount}</span>
                                             <span className="no-wrap-text">Side: {sideboardCount}</span>
                                         </>
                                     )}
