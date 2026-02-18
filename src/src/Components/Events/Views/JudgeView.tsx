@@ -15,7 +15,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const [copied, setCopied] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [showAddDeckForm, setShowAddDeckForm] = useState(false);
-    const [showAddJudgeForm, setShowAddJudgeForm] = useState(false);
+
     const inviteLink = `${window.location.origin}/e/${e.event.event_id}`;
     const navigate = useNavigate();
     const auth = useAuthQuery();
@@ -535,50 +535,29 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                         <>
                             <h2 className="mb-3">Judges</h2>
 
-                            <div className="card mb-3">
-                                <div 
-                                    className="card-header d-flex align-items-center justify-content-between"
-                                    onClick={() => setShowAddJudgeForm(!showAddJudgeForm)}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <strong>Add Judge</strong>
-                                    {showAddJudgeForm ? <BsChevronUp /> : <BsChevronDown />}
-                                </div>
-                                {showAddJudgeForm && (
-                                    <div className="card-body">
-                                        <form onSubmit={(e) => { clearErrors(); handleSubmit(onAddJudge)(e); }} >
-                                            <div className="mb-3">
-                                                <input id='player_name' type="text" className={`form-control ${errors.player_name ? 'is-invalid' : ''}`} placeholder="Judge Name" required {...register("player_name")} />
-                                                {errors.player_name && <div className="invalid-feedback">{errors.player_name.message}</div>}
-                                            </div>
-                                            <div className="mb-3">
-                                                <input id='email' type="text" className={`form-control ${errors.email ? 'is-invalid' : ''}`} placeholder="Email Address" required {...register("email")} />
-                                                {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
-                                            </div>
-                                            <button 
-                                                type='submit' 
-                                                className='btn btn-success'
-                                                disabled={addJudgeMutation.isPending}
-                                            >
-                                                {addJudgeMutation.isPending ? (
-                                                    <>
-                                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                        Adding...
-                                                    </>
-                                                ) : 'Add Judge'}
-                                            </button>
-                                        </form>
+                            <form onSubmit={(e) => { clearErrors(); handleSubmit(onAddJudge)(e); }} className="mb-3">
+                                <div className="d-flex gap-2 align-items-start">
+                                    <div className="flex-fill">
+                                        <input id='player_name' type="text" className={`form-control ${errors.player_name ? 'is-invalid' : ''}`} placeholder="Judge Name" required {...register("player_name")} />
+                                        {errors.player_name && <div className="invalid-feedback">{errors.player_name.message}</div>}
                                     </div>
-                                )}
-                            </div>
+                                    <div className="flex-fill">
+                                        <input id='email' type="text" className={`form-control ${errors.email ? 'is-invalid' : ''}`} placeholder="Email Address" required {...register("email")} />
+                                        {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
+                                    </div>
+                                    <button
+                                        type='submit'
+                                        className='btn btn-success'
+                                        disabled={addJudgeMutation.isPending}
+                                    >
+                                        {addJudgeMutation.isPending ? (
+                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        ) : 'Add'}
+                                    </button>
+                                </div>
+                            </form>
                             <table className="table table-striped table-hover">
-                                <thead className="table-dark">
-                                    <tr>
-                                        <th>Name</th>          
-                                        <th className="text-end">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+<tbody>
                                 {judges.map((p) => {
                                     return (
                                         <tr key={p.user_id}>
