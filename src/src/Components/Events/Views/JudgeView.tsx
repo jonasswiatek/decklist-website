@@ -325,13 +325,18 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                         >
                                             <BsSearch />
                                         </Link>
-                                        <button 
-                                            type="button" 
-                                            className="btn btn-sm btn-danger" 
-                                            onClick={async () => onRemovePlayer(p.user_id, p.player_name)}
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => onRemovePlayer(p.user_id, p.player_name)}
                                             title="Remove Player"
+                                            disabled={deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === p.user_id}
                                         >
-                                            <BsTrash />
+                                            {deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === p.user_id ? (
+                                                <span className="spinner-border" style={{ width: '1em', height: '1em' }} role="status" aria-hidden="true"></span>
+                                            ) : (
+                                                <BsTrash />
+                                            )}
                                         </button>
                                     </div>
                                 </td>
@@ -580,13 +585,18 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                             <td>{p.player_name}</td>
                                             <td className="text-end">
                                                 <div className="d-flex justify-content-end align-items-center">
-                                                    <button 
-                                                        type="button" 
-                                                        className="btn btn-sm btn-danger" 
-                                                        onClick={async () => onRemovePlayer(p.user_id, p.player_name)}
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-danger"
+                                                        onClick={() => onRemovePlayer(p.user_id, p.player_name)}
                                                         title="Remove Judge"
+                                                        disabled={deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === p.user_id}
                                                     >
-                                                        <BsTrash />
+                                                        {deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === p.user_id ? (
+                                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                        ) : (
+                                                            <BsTrash />
+                                                        )}
                                                     </button>
                                                 </div>
                                             </td>
