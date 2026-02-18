@@ -5,20 +5,17 @@ import { useNavigate } from "react-router-dom";
 import { ReactElement } from 'react';
 import { BsArrowLeft } from 'react-icons/bs';
 import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
-import { useEventListQuery } from '../../Hooks/useEventListQuery';
 import { useCreateEventMutation } from '../../Hooks/useEventMutations';
 
 
 export function CreateEvent() : ReactElement {
     const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm<Inputs>();
     const navigate = useNavigate();
-    const { refetch: refetchMyEvents } = useEventListQuery(false);
 
     const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
 
     const mutation = useCreateEventMutation({
         onSuccess: (data) => {
-            refetchMyEvents();
             navigate('/e/' + data.event_id);
         },
         onError: (e) => HandleValidation(setError, e),

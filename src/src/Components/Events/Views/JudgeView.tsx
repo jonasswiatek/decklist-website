@@ -5,9 +5,8 @@ import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsP
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
 import { useAuthQuery } from '../../../Hooks/useAuthQuery';
-import { useEventListQuery } from '../../../Hooks/useEventListQuery';
 import { useEventUpdated } from '../../../Hooks/useWebsocketConnection';
-import { useUpdateEventMutation, useDeleteEventMutation, useDeleteEventUserMutation, useAddJudgeMutation, useAddPlayerMutation } from '../../../Hooks/useEventMutations';
+import { useUpdateEventMutation, useDeleteEventMutation, useDeleteEventUserMutation, useLeaveEventMutation, useAddJudgeMutation, useAddPlayerMutation } from '../../../Hooks/useEventMutations';
 
 export const JudgeView: React.FC<EventViewProps> = (e) => {
     const players = e.event.participants.filter(a => a.role === "player");
@@ -20,7 +19,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const navigate = useNavigate();
     const auth = useAuthQuery();
     const [filterByDeckStatus, setFilterByDeckStatus] = useState<'all' | 'checked' | 'unchecked' | 'warnings'>('all');
-    const { refetch: refetchMyEvents } = useEventListQuery(false);
     const { refetch: refetchEvent } = e;
 
     useEventUpdated((message) => {
@@ -52,10 +50,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     });
 
     const deleteEventMutation = useDeleteEventMutation({
-        onSuccess: () => {
-            refetchMyEvents();
-            navigate('/');
-        },
+        onSuccess: () => navigate('/'),
     });
 
     const deleteEventUserMutation = useDeleteEventUserMutation({
@@ -152,11 +147,8 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         }
     };
 
-    const disassociateSelfMutation = useDeleteEventUserMutation({
-        onSuccess: () => {
-            refetchMyEvents();
-            navigate('/');
-        },
+    const disassociateSelfMutation = useLeaveEventMutation({
+        onSuccess: () => navigate('/'),
     });
 
     const onDisassociateSelf = () => {

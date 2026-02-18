@@ -1,8 +1,9 @@
-import { UseMutationOptions } from "@tanstack/react-query";
+import { UseMutationOptions, useQueryClient } from "@tanstack/react-query";
 import { FetchResponse, MaybeOptionalInit } from "openapi-fetch";
 import { HttpMethod, MediaType, PathsWithMethod } from "openapi-typescript-helpers";
 import { $api } from "../model/api/client";
 import type { paths } from "../model/api/decklist-api-schema";
+import { libraryDecksQueryKey } from "./useLibraryDecksQuery";
 
 type MutationOptions<
     Method extends HttpMethod,
@@ -32,5 +33,12 @@ export function useSetDeckCheckedMutation(options?: MutationOptions<"post", "/ap
 }
 
 export function useDeleteLibraryDeckMutation(options?: MutationOptions<"delete", "/api/decks/library/{deckId}">) {
-    return $api.useMutation("delete", "/api/decks/library/{deckId}", options);
+    const queryClient = useQueryClient();
+    return $api.useMutation("delete", "/api/decks/library/{deckId}", {
+        ...options,
+        onSuccess: (...args) => {
+            queryClient.invalidateQueries({ queryKey: libraryDecksQueryKey });
+            options?.onSuccess?.(...args);
+        },
+    });
 }

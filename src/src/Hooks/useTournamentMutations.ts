@@ -1,8 +1,9 @@
-import { UseMutationOptions } from "@tanstack/react-query";
+import { UseMutationOptions, useQueryClient } from "@tanstack/react-query";
 import { FetchResponse, MaybeOptionalInit } from "openapi-fetch";
 import { HttpMethod, MediaType, PathsWithMethod } from "openapi-typescript-helpers";
 import { $api } from "../model/api/client";
 import type { paths } from "../model/api/decklist-api-schema";
+import { userTournamentsQueryKey } from "./useTournamentTimers";
 
 type MutationOptions<
     Method extends HttpMethod,
@@ -20,7 +21,14 @@ type MutationOptions<
 >;
 
 export function useCreateTournamentMutation(options?: MutationOptions<"post", "/api/timers">) {
-    return $api.useMutation("post", "/api/timers", options);
+    const queryClient = useQueryClient();
+    return $api.useMutation("post", "/api/timers", {
+        ...options,
+        onSuccess: (...args) => {
+            queryClient.invalidateQueries({ queryKey: userTournamentsQueryKey });
+            options?.onSuccess?.(...args);
+        },
+    });
 }
 
 export function useAddManagerMutation(options?: MutationOptions<"post", "/api/timers/{tournamentId}/managers">) {
@@ -52,7 +60,14 @@ export function useDeleteClockMutation(options?: MutationOptions<"delete", "/api
 }
 
 export function useDeleteTournamentMutation(options?: MutationOptions<"delete", "/api/timers/{tournamentId}">) {
-    return $api.useMutation("delete", "/api/timers/{tournamentId}", options);
+    const queryClient = useQueryClient();
+    return $api.useMutation("delete", "/api/timers/{tournamentId}", {
+        ...options,
+        onSuccess: (...args) => {
+            queryClient.invalidateQueries({ queryKey: userTournamentsQueryKey });
+            options?.onSuccess?.(...args);
+        },
+    });
 }
 
 export function useForceSyncMutation(options?: MutationOptions<"post", "/api/timers/{tournamentId}/force-update">) {

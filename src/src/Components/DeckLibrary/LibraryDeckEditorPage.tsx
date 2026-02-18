@@ -7,9 +7,10 @@ import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTable } from '../Events/DecklistTable';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { withValidation } from '../../Util/Validators';
+import { useQueryClient } from '@tanstack/react-query';
 import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
 import { useLibraryDeckQuery } from '../../Hooks/useLibraryDeckQuery';
-import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
+import { libraryDecksQueryKey } from '../../Hooks/useLibraryDecksQuery';
 import { useDeleteLibraryDeckMutation } from '../../Hooks/useDeckMutations';
 
 export const LibraryDeckEditorPage: React.FC = () => {
@@ -19,14 +20,11 @@ export const LibraryDeckEditorPage: React.FC = () => {
   const importedDeck = location.state?.importedDeck;
 
   const { data, error, isLoading, refetch, isError } = useLibraryDeckQuery(deck_id);
-  const { refetch: refetchDeckLibrary } = useLibraryDecksQuery();
+  const queryClient = useQueryClient();
   const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
 
   const deleteDeckMutation = useDeleteLibraryDeckMutation({
-    onSuccess: () => {
-      refetchDeckLibrary();
-      navigate('/library');
-    },
+    onSuccess: () => navigate('/library'),
   });
 
   if (isLoading || formatsLoading) {
@@ -61,7 +59,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
       decklist_text: decklist_text,
     });
 
-    refetchDeckLibrary();
+    queryClient.invalidateQueries({ queryKey: libraryDecksQueryKey, refetchType: 'none' });
     if (deck_id) {
       refetch();
     }

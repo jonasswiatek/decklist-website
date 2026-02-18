@@ -1,4 +1,4 @@
-import { UseMutationOptions } from "@tanstack/react-query";
+import { UseMutationOptions, useQueryClient } from "@tanstack/react-query";
 import { FetchResponse, MaybeOptionalInit } from "openapi-fetch";
 import { HttpMethod, MediaType, PathsWithMethod } from "openapi-typescript-helpers";
 import { $api } from "../model/api/client";
@@ -19,8 +19,17 @@ type MutationOptions<
     "mutationKey" | "mutationFn"
 >;
 
+const eventListQueryKey = $api.queryOptions("get", "/api/events").queryKey;
+
 export function useCreateEventMutation(options?: MutationOptions<"post", "/api/events">) {
-    return $api.useMutation("post", "/api/events", options);
+    const queryClient = useQueryClient();
+    return $api.useMutation("post", "/api/events", {
+        ...options,
+        onSuccess: (...args) => {
+            queryClient.invalidateQueries({ queryKey: eventListQueryKey });
+            options?.onSuccess?.(...args);
+        },
+    });
 }
 
 export function useUpdateEventMutation(options?: MutationOptions<"post", "/api/events/{eventId}">) {
@@ -28,7 +37,14 @@ export function useUpdateEventMutation(options?: MutationOptions<"post", "/api/e
 }
 
 export function useDeleteEventMutation(options?: MutationOptions<"delete", "/api/events/{eventId}">) {
-    return $api.useMutation("delete", "/api/events/{eventId}", options);
+    const queryClient = useQueryClient();
+    return $api.useMutation("delete", "/api/events/{eventId}", {
+        ...options,
+        onSuccess: (...args) => {
+            queryClient.invalidateQueries({ queryKey: eventListQueryKey });
+            options?.onSuccess?.(...args);
+        },
+    });
 }
 
 export function useAddJudgeMutation(options?: MutationOptions<"post", "/api/events/{eventId}/users">) {
@@ -41,4 +57,15 @@ export function useAddPlayerMutation(options?: MutationOptions<"post", "/api/eve
 
 export function useDeleteEventUserMutation(options?: MutationOptions<"delete", "/api/events/{eventId}/users">) {
     return $api.useMutation("delete", "/api/events/{eventId}/users", options);
+}
+
+export function useLeaveEventMutation(options?: MutationOptions<"delete", "/api/events/{eventId}/users">) {
+    const queryClient = useQueryClient();
+    return $api.useMutation("delete", "/api/events/{eventId}/users", {
+        ...options,
+        onSuccess: (...args) => {
+            queryClient.invalidateQueries({ queryKey: eventListQueryKey });
+            options?.onSuccess?.(...args);
+        },
+    });
 }

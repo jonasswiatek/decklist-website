@@ -36,6 +36,7 @@ import { TournamentWrapper } from './Components/TournamentTimers/Tournament.tsx'
 import { TournamentPublicViewWrapper } from './Components/TournamentTimers/TournamentPublicView.tsx';
 import { Tools } from './Components/LandingPage/Tools.tsx';
 import { LoginScreen } from './Components/Login/Login.tsx';
+import { LoadingScreen } from './Components/Login/LoadingScreen.tsx';
 import { useAuthQuery } from './Hooks/useAuthQuery.ts';
 import { useLogoutMutation } from './Hooks/useAuthMutations.ts';
 import { ToastProvider } from './Util/ToastContext.tsx';
@@ -79,21 +80,29 @@ const router = createBrowserRouter([
   },
 ]);
 
+function AuthGate({ children }: { children: React.ReactNode }) {
+  const { isLoading } = useAuthQuery();
+  if (isLoading) return <LoadingScreen />;
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          {/* This div acts as the main flex container for the page */}
-          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-            <NavBar />
-            {/* This main element will grow to fill available space, pushing the footer down */}
-            <main style={{ flex: '1 0 auto' }}>
-              <RouterProvider router={router} />
-            </main>
-            <Footer />
-          </div>
-        </ToastProvider>
+        <AuthGate>
+          <ToastProvider>
+            {/* This div acts as the main flex container for the page */}
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+              <NavBar />
+              {/* This main element will grow to fill available space, pushing the footer down */}
+              <main style={{ flex: '1 0 auto' }}>
+                <RouterProvider router={router} />
+              </main>
+              <Footer />
+            </div>
+          </ToastProvider>
+        </AuthGate>
       </QueryClientProvider>
     </>
   );

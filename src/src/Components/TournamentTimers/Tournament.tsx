@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsSliders, BsArrowLeft } from 'react-icons/bs';
-import { useTournamentDetails, useUserTournaments } from '../../Hooks/useTournamentTimers';
+import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
 import { TournamentTimerClock } from '../../model/api/tournamentTimers';
 import { HandleValidation } from '../../Util/Validators';
 import { TimerDisplay } from './TimerDisplay';
@@ -48,7 +48,6 @@ export function TournamentWrapper(): ReactElement {
 export function Tournament({ tournament_id }: {tournament_id: string}): ReactElement {
   const { sessionId } = useAuthQuery();
   const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
-  const { refetch: refetchUserTournaments } = useUserTournaments();
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<AddManagerFormInputs>();
   const { register: registerClock, handleSubmit: handleSubmitClock, reset: resetClockForm, formState: { errors: clockErrors } } = useForm<AddClockFormInputs>({
     defaultValues: {
@@ -156,10 +155,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   });
 
   const deleteTournamentMutation = useDeleteTournamentMutation({
-    onSuccess: () => {
-      refetchUserTournaments();
-      navigate('/timers');
-    },
+    onSuccess: () => navigate('/timers'),
   });
 
   const forceSyncMutation = useForceSyncMutation({
