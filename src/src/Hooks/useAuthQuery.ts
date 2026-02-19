@@ -3,6 +3,7 @@ import { $api } from "../model/api/client";
 export function useAuthQuery() {
     const query = $api.useQuery("get", "/api/me", {}, {
         retry: false,
+        retryOnMount: false,
         refetchOnWindowFocus: false,
         staleTime: Infinity,
     });

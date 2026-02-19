@@ -81,8 +81,15 @@ const router = createBrowserRouter([
 ]);
 
 function AuthGate({ children }: { children: React.ReactNode }) {
-  const { isLoading } = useAuthQuery();
+  const { isLoading, isError, refetch } = useAuthQuery();
   if (isLoading) return <LoadingScreen />;
+  if (isError) return (
+    <div className="container py-5 text-center">
+      <h4>Something went wrong</h4>
+      <p className="text-muted">Unable to reach the server. Please try again later.</p>
+      <button className="btn btn-primary" onClick={() => refetch()}>Retry</button>
+    </div>
+  );
   return <>{children}</>;
 }
 
