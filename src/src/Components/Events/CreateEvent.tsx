@@ -44,7 +44,7 @@ export function CreateEvent() : ReactElement {
     const minDateString = minDate.toISOString().split('T')[0];
 
     const maxDate = new Date(today);
-    maxDate.setDate(today.getDate() + 30);
+    maxDate.setDate(today.getDate() + 90);
     const maxDateString = maxDate.toISOString().split('T')[0];
 
     return (
@@ -92,9 +92,6 @@ export function CreateEvent() : ReactElement {
                       max={maxDateString}
                     />
                     {errors.event_date && <div className="invalid-feedback">{errors.event_date?.message}</div>}
-                    <small className="form-text text-muted">
-                      Date can't be more than 30 days in the future.
-                    </small>
                   </div>
 
                   <div className="mb-3">
