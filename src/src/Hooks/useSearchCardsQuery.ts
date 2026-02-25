@@ -1,8 +1,10 @@
 import { useDebounce } from 'use-debounce';
 import { $api } from "../model/api/client";
 
-export function useSearchCardsQuery(searchQuery?: string) {
-    const [value] = useDebounce(searchQuery, 1000);
+export function useSearchCardsQuery(searchQuery?: string, options?: { debounceMs?: number; minLength?: number }) {
+    const debounceMs = options?.debounceMs ?? 1000;
+    const minLength = options?.minLength ?? 4;
+    const [value] = useDebounce(searchQuery, debounceMs);
 
     return $api.useQuery(
         "get",
@@ -15,7 +17,7 @@ export function useSearchCardsQuery(searchQuery?: string) {
             },
         },
         {
-            enabled: !!value && value.length > 3,
+            enabled: !!value && value.length >= minLength,
             staleTime: Infinity,
             refetchOnWindowFocus: false,
             retry: false,

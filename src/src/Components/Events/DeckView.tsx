@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
 import { BsArrowLeft, BsPerson, BsTrash, BsCardText, BsPrinter, BsClockHistory } from 'react-icons/bs';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
+import { DecklistTextarea } from '../Common/DecklistTextarea';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
 import { useEventListQuery } from '../../Hooks/useEventListQuery';
@@ -464,17 +465,17 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     </div>
                                 )}
 
-                                <textarea
+                                <DecklistTextarea
                                     id='decklist_text'
                                     className={`form-control ${errors.decklist_text ? 'is-invalid' : ''}`}
                                     placeholder={getDecklistPlaceholder(props.event.decklist_style)}
                                     required
-                                    {...register("decklist_text", { value: data?.decklist_text })}
+                                    registration={register("decklist_text", { value: data?.decklist_text })}
                                     style={{ height: 400 }}
                                     disabled={inputDisabled}
                                 />
                                 {errors.decklist_text && (
-                                    <div className="invalid-feedback">{errors.decklist_text.message}</div>
+                                    <div className="invalid-feedback d-block">{errors.decklist_text.message}</div>
                                 )}
                                 
                             </div>

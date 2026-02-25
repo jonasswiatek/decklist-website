@@ -4,6 +4,7 @@ import { DecklistGroup, Format, saveLibraryDeckRequest } from '../../model/api/a
 import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
 import { useForm } from 'react-hook-form';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
+import { DecklistTextarea } from '../Common/DecklistTextarea';
 import { DecklistTable } from '../Events/DecklistTable';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { withValidation } from '../../Util/Validators';
@@ -238,13 +239,13 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
                             </a>
                         </div>
                       </div>
-                      <textarea 
-                          id='decklist_text' 
-                          className="form-control" 
-                          placeholder={getDecklistPlaceholder(decklistStyle)} 
-                          required 
-                          {...register("decklist_text", { value: props.decklist_text })} 
-                          style={{ width: '100%', height: 400 }} 
+                      <DecklistTextarea
+                          id='decklist_text'
+                          className="form-control"
+                          placeholder={getDecklistPlaceholder(decklistStyle)}
+                          required
+                          registration={register("decklist_text", { value: props.decklist_text })}
+                          style={{ width: '100%', height: 400 }}
                       />
                       {errors.decklist_text && (
                         <div className="alert alert-danger py-1 mt-1 mb-0 small">
