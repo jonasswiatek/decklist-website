@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { withValidation } from "../../Util/Validators";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -90,17 +90,16 @@ export function LoginScreen() {
 }
 
 const LoginForm: React.FC<{ returnTo: string }> = ({ returnTo }) => {
-  const [isVerifying, setIsVerifying] = useState(false);
   const [email, setEmail] = useState("");
   const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<Inputs>();
   const queryClient = useQueryClient();
   const startLoginMutation = useStartLoginMutation();
-  const continueLoginMutation = useContinueLoginMutation({
-    onSuccess: () => {
-      queryClient.resetQueries();
-    },
-  });
+  const continueLoginMutation = useContinueLoginMutation();
   const navigate = useNavigate();
+
+  const startResult = startLoginMutation.data?.result;
+  const isVerifying = startResult === "SENT_NEW_CODE" || startResult === "REUSE_EXISTING_CODE";
+  const tooManyAttempts = continueLoginMutation.data?.error_type === "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE";
 
   type Inputs = {
     email: string;
@@ -109,19 +108,63 @@ const LoginForm: React.FC<{ returnTo: string }> = ({ returnTo }) => {
 
   const onSubmit = withValidation(setError, async (data: Inputs) => {
     if (!isVerifying) {
-      await startLoginMutation.mutateAsync({ body: { email: data.email.trim() } });
+      continueLoginMutation.reset();
+      const response = await startLoginMutation.mutateAsync({ body: { email: data.email.trim() } });
+      if (response.result === "TOO_MANY_ATTEMPTS") {
+        setError("email", { type: "custom", message: "Too many login attempts. Please try again later." });
+        return;
+      }
       setEmail(data.email);
-      setIsVerifying(true);
     } else {
-      await continueLoginMutation.mutateAsync({ body: { email: email.trim(), code: data.code!.trim() } });
-      navigate(returnTo);
+      const response = await continueLoginMutation.mutateAsync({ body: { email: email.trim(), code: data.code!.trim() } });
+      if (response.success) {
+        queryClient.resetQueries();
+        navigate(returnTo);
+      }
     }
   });
+
+  const handleStartOver = () => {
+    startLoginMutation.reset();
+    continueLoginMutation.reset();
+  };
+
+  const [countdown, setCountdown] = useState(60);
+
+  useEffect(() => {
+    if (!tooManyAttempts) {
+      setCountdown(60);
+      return;
+    }
+    if (countdown <= 0) return;
+    const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [tooManyAttempts, countdown]);
+
+  if (tooManyAttempts) {
+    return (
+      <div className="text-center py-3">
+        <div className="display-1 mb-3">🔒</div>
+        <h3 className="card-title mb-3">Too many attempts</h3>
+        <p className="text-muted mb-4">You've entered an incorrect code too many times.<br />Please wait before trying again.</p>
+        {countdown > 0 ? (
+          <p className="text-muted mb-4">You can start over in <strong>{countdown}s</strong></p>
+        ) : (
+          <p className="text-success mb-4">You can start over now.</p>
+        )}
+        <button className="btn btn-outline-primary" onClick={handleStartOver}>Start over</button>
+      </div>
+    );
+  }
+
+  const verificationMessage = startResult === "REUSE_EXISTING_CODE"
+    ? <>A code was already sent to <strong>{email}</strong>. Check your inbox.</>
+    : <>A verification code has been sent to <strong>{email}</strong></>;
 
   return (
     <>
       <h3 className="card-title mb-4">{isVerifying ? "Verify Your Email" : "Log in"}</h3>
-      {isVerifying && <p className="text-muted mb-4">A verification code has been sent to <strong>{email}</strong></p>}
+      {isVerifying && <p className="text-muted mb-4">{verificationMessage}</p>}
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-3">
           {!isVerifying ? (

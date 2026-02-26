@@ -166,6 +166,15 @@ export interface paths {
                         "application/json": components["schemas"]["LoginContinueResponse"];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -529,13 +538,6 @@ export interface paths {
                     content: {
                         "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                     };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
                 };
             };
         };
@@ -1023,7 +1025,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SaveLibraryDeckResppnse"];
+                        "application/json": components["schemas"]["SaveLibraryDeckResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -1108,7 +1110,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SaveLibraryDeckResppnse"];
+                        "application/json": components["schemas"]["SaveLibraryDeckResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -1772,7 +1774,8 @@ export interface components {
             deck_warnings: string[];
             decklist_text: string;
         };
-        LoginContinueErrorType: number;
+        /** @enum {unknown} */
+        LoginContinueErrorType: "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE" | null;
         LoginContinueRequest: {
             email: string;
             code: string;
@@ -1792,8 +1795,10 @@ export interface components {
         };
         LoginStartResponse: {
             success: boolean;
-            notification: string;
+            result: components["schemas"]["LoginStartResult"];
         };
+        /** @enum {unknown} */
+        LoginStartResult: "SENT_NEW_CODE" | "REUSE_EXISTING_CODE" | "TOO_MANY_ATTEMPTS";
         MeResponse: {
             authorized: boolean;
             email: string;
@@ -1803,7 +1808,7 @@ export interface components {
         };
         /** @enum {unknown} */
         RevisionType: "submitted" | "deleted";
-        SaveLibraryDeckResppnse: {
+        SaveLibraryDeckResponse: {
             deck_id: string;
         };
         SetDeckCheckedRequest: {
