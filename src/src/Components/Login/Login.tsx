@@ -3,7 +3,7 @@ import { withValidation } from "../../Util/Validators";
 import { useState, useEffect } from "react";
 import React from "react";
 import { GoogleLogin } from "@react-oauth/google";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Navigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthQuery } from "../../Hooks/useAuthQuery";
 import { useStartLoginMutation, useContinueLoginMutation, useGoogleLoginMutation } from "../../Hooks/useAuthMutations";
@@ -27,8 +27,7 @@ export function LoginScreen() {
   }
 
   if (authorized) {
-    navigate(returnTo, { replace: true });
-    return null;
+    return <Navigate to={returnTo} replace />;
   }
 
   return (
