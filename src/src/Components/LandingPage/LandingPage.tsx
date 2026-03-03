@@ -25,8 +25,7 @@ export function LandingPage() {
                 const eventDetails = await getEvent(joinCode.toLowerCase());
                 navigate(`/e/${eventDetails.event_id.toLowerCase()}`);
             }
-            catch (e)
-            {
+            catch {
                 setShowError(true);
             }
         }
