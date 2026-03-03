@@ -473,6 +473,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
                                     registration={register("decklist_text", { value: data?.decklist_text })}
                                     style={{ height: 400 }}
                                     disabled={inputDisabled}
+                                    knownCards={data?.groups ? new Set(data.groups.flatMap(g => g.cards.map(c => c.card_name.toLowerCase()))) : undefined}
                                 />
                                 {errors.decklist_text && (
                                     <div className="invalid-feedback d-block">{errors.decklist_text.message}</div>

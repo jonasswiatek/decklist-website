@@ -246,6 +246,7 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
                           required
                           registration={register("decklist_text", { value: props.decklist_text })}
                           style={{ width: '100%', height: 400 }}
+                          knownCards={props.groups ? new Set(props.groups.flatMap(g => g.cards.map(c => c.card_name.toLowerCase()))) : undefined}
                       />
                       {errors.decklist_text && (
                         <div className="alert alert-danger py-1 mt-1 mb-0 small">

@@ -18,13 +18,17 @@ function extractCardName(line: string): { prefix: string; cardName: string } {
 
 type DecklistTextareaProps = Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'ref'> & {
   registration: UseFormRegisterReturn;
+  knownCards?: Set<string>;
 };
 
-export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration, ...textareaProps }) => {
+const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+
+export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration, knownCards, ...textareaProps }) => {
   const localRef = useRef<HTMLTextAreaElement | null>(null);
+  const selectedCards = useRef<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, bottom: 0, left: 0 });
   const [showDropdown, setShowDropdown] = useState(false);
 
   const { data: suggestions } = useSearchCardsQuery(searchTerm, { debounceMs: 250, minLength: 1 });
@@ -40,12 +44,13 @@ export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration
     const lineStart = val.lastIndexOf('\n', pos - 1) + 1;
     const lineEndIdx = val.indexOf('\n', pos);
     const line = val.substring(lineStart, lineEndIdx === -1 ? val.length : lineEndIdx);
-    const { prefix } = extractCardName(line);
+    const { cardName: fullCardName, prefix } = extractCardName(line);
     const cursorInLine = pos - lineStart;
     const cardNameUpToCursor = line.substring(prefix.length, cursorInLine).trimStart();
 
-    const isLastLine = lineEndIdx === -1;
-    if (!isLastLine || SECTION_HEADERS.has(cardNameUpToCursor.toLowerCase()) || !/[a-z]/i.test(cardNameUpToCursor)) {
+    const normalizedName = fullCardName.trim().toLowerCase();
+    const isKnown = (knownCards != null && knownCards.has(normalizedName)) || selectedCards.current.has(normalizedName);
+    if (isKnown || SECTION_HEADERS.has(cardNameUpToCursor.toLowerCase()) || !/[a-z]/i.test(cardNameUpToCursor)) {
       setSearchTerm('');
       setShowDropdown(false);
       return;
@@ -57,9 +62,13 @@ export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration
     const coords = getCaretCoordinates(ta, pos);
     const lh = parseFloat(getComputedStyle(ta).lineHeight) || 20;
     const maxLeft = ta.clientWidth - 220;
-    setDropdownPos({ top: coords.top + lh, left: Math.max(0, Math.min(coords.left, maxLeft)) });
+    setDropdownPos({
+      top: coords.top + lh,
+      bottom: ta.clientHeight - coords.top,
+      left: Math.max(0, Math.min(coords.left, maxLeft)),
+    });
     setShowDropdown(true);
-  }, []);
+  }, [knownCards]);
 
   const handleSelect = useCallback((cardName: string) => {
     const ta = localRef.current;
@@ -87,6 +96,7 @@ export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration
       ta.focus();
     });
 
+    selectedCards.current.add(cardName.toLowerCase());
     setSearchTerm('');
     setShowDropdown(false);
     setSelectedIndex(0);
@@ -132,7 +142,12 @@ export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration
       {showDropdown && items.length > 0 && (
         <div
           className="decklist-typeahead-dropdown"
-          style={{ top: dropdownPos.top, left: dropdownPos.left }}
+          style={{
+            left: dropdownPos.left,
+            ...(isCoarsePointer
+              ? { bottom: dropdownPos.bottom, display: 'flex', flexDirection: 'column-reverse' }
+              : { top: dropdownPos.top }),
+          }}
         >
           {items.map((item, idx) => (
             <div
