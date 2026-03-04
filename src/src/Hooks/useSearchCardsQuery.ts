@@ -1,3 +1,4 @@
+import { keepPreviousData } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 import { $api } from "../model/api/client";
 
@@ -18,6 +19,7 @@ export function useSearchCardsQuery(searchQuery?: string, options?: { debounceMs
         },
         {
             enabled: !!value && value.length >= minLength,
+            placeholderData: keepPreviousData,
             staleTime: Infinity,
             refetchOnWindowFocus: false,
             retry: false,
