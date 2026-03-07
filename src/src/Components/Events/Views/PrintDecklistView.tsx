@@ -9,9 +9,9 @@ export const PrintDecklistView: React.FC = () => {
     const [ searchParams ] = useSearchParams();
     const userId = searchParams.get('id');
 
-    const { data: eventDetailsData, error: eventError, isLoading: eventLoading } = useEventDetailsQuery(event_id!);
-    
-    const { data, error, isLoading } = useDecklistQuery(event_id!, userId);
+    const { data: eventDetailsData, isError: isEventError, isLoading: eventLoading } = useEventDetailsQuery(event_id!);
+
+    const { data, isError, isLoading } = useDecklistQuery(event_id!, userId);
 
     // Apply proper class to body for print styling
     useEffect(() => {
@@ -26,7 +26,7 @@ export const PrintDecklistView: React.FC = () => {
 
     // Auto-trigger print dialog when the component loads
     useEffect(() => {
-        if (!isLoading && !eventLoading && !error && !eventError) {
+        if (!isLoading && !eventLoading && !isError && !isEventError) {
             // Small delay to ensure rendering is complete
             const timer = setTimeout(() => {
                 window.print();
@@ -34,13 +34,13 @@ export const PrintDecklistView: React.FC = () => {
             
             return () => clearTimeout(timer);
         }
-    }, [isLoading, eventLoading, error, eventError]);
+    }, [isLoading, eventLoading, isError, isEventError]);
 
     if (eventLoading || isLoading) {
         return <div className="loading-screen">Loading...</div>;
     }
 
-    if (eventError || error) {
+    if (isEventError || isError) {
         return (
             <div className="error-screen">
                 <p>Error. Try again later.</p>

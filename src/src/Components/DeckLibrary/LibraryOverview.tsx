@@ -11,8 +11,8 @@ export const LibraryOverview: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const { data: library, error: decksError, isLoading: isLibraryLoading } = useLibraryDecksQuery();
-  const { data: events, error: eventsError, isLoading: isEventsLoading } = useEventListQuery();
+  const { data: library, isError: isDecksError, isLoading: isLibraryLoading } = useLibraryDecksQuery();
+  const { data: events, isError: isEventsError, isLoading: isEventsLoading } = useEventListQuery();
 
   const onImportDeck = async (eventId: string) => {
     if (!eventId) return;
@@ -39,7 +39,7 @@ export const LibraryOverview: React.FC = () => {
       return <LoadingScreen />;
   }
   
-  if(decksError || eventsError) {
+  if(isDecksError || isEventsError) {
       return (
           <div className="alert alert-danger" role="alert">
             <h4 className="alert-heading">Error loading deck</h4>

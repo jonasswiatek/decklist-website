@@ -12,7 +12,7 @@ export function CreateEvent() : ReactElement {
     const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm<Inputs>();
     const navigate = useNavigate();
 
-    const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
+    const { data: formats, isLoading: formatsLoading, isError: isFormatsError } = useFormatsQuery();
 
     const mutation = useCreateEventMutation({
         onSuccess: (data) => {
@@ -100,7 +100,7 @@ export function CreateEvent() : ReactElement {
                       <div className="p-2 border rounded text-center">
                         <small className="text-muted">Loading formats...</small>
                       </div>
-                    ) : formatsError ? (
+                    ) : isFormatsError ? (
                       <div className="alert alert-danger py-2" role="alert">
                         <small>Error loading formats. Please refresh the page.</small>
                       </div>
@@ -122,7 +122,7 @@ export function CreateEvent() : ReactElement {
                     <button
                       type='submit'
                       className='btn btn-primary'
-                      disabled={mutation.isPending || formatsLoading || !!formatsError}
+                      disabled={mutation.isPending || formatsLoading || !!isFormatsError}
                     >
                       {mutation.isPending ? (
                         <>

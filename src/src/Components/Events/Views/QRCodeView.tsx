@@ -8,13 +8,13 @@ export const QRCodeView: React.FC = () => {
     const { event_id } = useParams<{ event_id: string }>();
     const inviteLink = `${window.location.origin}/e/${event_id}`;
 
-    const { data, error, isLoading } = useEventDetailsQuery(event_id!);
+    const { data, isError, isLoading } = useEventDetailsQuery(event_id!);
 
     if (isLoading) {
         return <LoadingScreen />
     }
 
-    if(error) {
+    if(isError) {
         return (
             <>
                 <div className='row'>

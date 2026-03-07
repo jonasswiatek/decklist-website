@@ -9,7 +9,7 @@ import { useAuthQuery } from '../../Hooks/useAuthQuery';
 
 const MyTournaments: React.FC = () => {
   const { authorized } = useAuthQuery();
-  const { data, isLoading, isError, error } = useUserTournaments(authorized || false);
+  const { data, isLoading, isError } = useUserTournaments(authorized || false);
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -22,7 +22,7 @@ const MyTournaments: React.FC = () => {
     return (
       <Container className="mt-4">
         <Alert variant="danger">
-          Error fetching tournaments: {error?.message || 'Unknown error'}
+          Error fetching tournaments. Please try again later.
         </Alert>
       </Container>
     );

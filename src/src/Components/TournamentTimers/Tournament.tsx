@@ -47,7 +47,7 @@ export function TournamentWrapper(): ReactElement {
 
 export function Tournament({ tournament_id }: {tournament_id: string}): ReactElement {
   const { sessionId } = useAuthQuery();
-  const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
+  const { data: tournamentDetails, isLoading, isError, refetch } = useTournamentDetails(tournament_id, false);
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<AddManagerFormInputs>();
   const { register: registerClock, handleSubmit: handleSubmitClock, reset: resetClockForm, formState: { errors: clockErrors } } = useForm<AddClockFormInputs>({
     defaultValues: {
@@ -256,11 +256,11 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Container className="mt-4">
         <Alert variant="danger">
-          Error loading tournament details: {error?.message || 'Unknown error'}
+          Error loading tournament details. Please try again later.
         </Alert>
       </Container>
     );

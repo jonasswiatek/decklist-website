@@ -20,9 +20,9 @@ export const LibraryDeckEditorPage: React.FC = () => {
   const location = useLocation();
   const importedDeck = location.state?.importedDeck;
 
-  const { data, error, isLoading, refetch, isError } = useLibraryDeckQuery(deck_id);
+  const { data, isLoading, refetch, isError } = useLibraryDeckQuery(deck_id);
   const queryClient = useQueryClient();
-  const { data: formats, isLoading: formatsLoading, error: formatsError } = useFormatsQuery();
+  const { data: formats, isLoading: formatsLoading, isError: isFormatsError } = useFormatsQuery();
 
   const deleteDeckMutation = useDeleteLibraryDeckMutation({
     onSuccess: () => navigate('/library'),
@@ -42,7 +42,7 @@ export const LibraryDeckEditorPage: React.FC = () => {
     );
   }
 
-  if(error || formatsError) {
+  if(isError || isFormatsError) {
       return (
           <div className="alert alert-danger" role="alert">
               <h4 className="alert-heading">Error loading deck</h4>

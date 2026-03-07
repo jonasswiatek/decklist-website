@@ -61,7 +61,7 @@ export function EventView() {
     const { event_id } = useParams();
     const { authorized } = useAuthQuery();
 
-    const { data, error, isLoading, refetch } = useEventDetailsQuery(event_id!);
+    const { data, isError, isLoading, refetch } = useEventDetailsQuery(event_id!);
 
     if (isLoading) {
         return (
@@ -69,7 +69,7 @@ export function EventView() {
         )
     }
 
-    if(error) {
+    if(isError) {
         return (
             <div className="container mt-4">
                 <p>Error. Try again later.</p>

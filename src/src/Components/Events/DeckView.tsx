@@ -21,7 +21,7 @@ export function DeckView() {
     const [ searchParams ] = useSearchParams();
     const id = searchParams.get('id');
 
-    const { data, error, isLoading } = useEventDetailsQuery(event_id!);
+    const { data, isError, isLoading } = useEventDetailsQuery(event_id!);
     
     if (isLoading) {
         return (
@@ -29,7 +29,7 @@ export function DeckView() {
         )
     }
 
-    if(error) {
+    if(isError) {
         return (
             <>
                 <div className='row'>
@@ -62,9 +62,9 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const { showToast } = useToast();
 
     const { refetch: refetchEvent } = useEventDetailsQuery(props.event.event_id, false);
-    const { data: decklistData, error: decklistError, isLoading: decklistLoading, refetch: refetchDecklist } = useDecklistQuery(props.event.event_id, props.user_id);
+    const { data: decklistData, isError: isDecklistError, isLoading: decklistLoading, refetch: refetchDecklist } = useDecklistQuery(props.event.event_id, props.user_id);
     const { data: revisions, isLoading: revisionsLoading, refetch: refetchRevisions } = useDecklistRevisionsQuery(props.event.event_id, props.user_id, false);
-    const { data: library, error: libraryError, isLoading: libraryLoading } = useLibraryDecksQuery(isPlayer);
+    const { data: library, isError: isLibraryError, isLoading: libraryLoading } = useLibraryDecksQuery(isPlayer);
     const { data: events, isLoading: eventsLoading, refetch: refetchMyEvents } = useEventListQuery(isPlayer);
 
     type Inputs = {
@@ -201,7 +201,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         return <LoadingScreen />
     }
 
-    if (decklistError || libraryError) {
+    if (isDecklistError || isLibraryError) {
         return <p>Error, try later</p>
     }
 

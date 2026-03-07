@@ -31,7 +31,7 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const { data: tournamentDetails, isLoading, error, refetch } = useTournamentDetails(tournament_id, false);
+  const { data: tournamentDetails, isLoading, isError, refetch } = useTournamentDetails(tournament_id, false);
   const {clocks: timers, addClock, removeClock, initClocks} = useTournamentClocks();
 
   useEffect(() => {
@@ -96,11 +96,11 @@ export function TournamentPublicView({ tournament_id }: { tournament_id: string 
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
         <Alert variant="danger" className="w-75 text-center shadow-sm">
           <Alert.Heading as="h4">Error Loading Tournament Timers</Alert.Heading>
-          <p>{error || "Tournament details could not be loaded."}</p>
+          <p>Tournament details could not be loaded.</p>
         </Alert>
     );
   }
