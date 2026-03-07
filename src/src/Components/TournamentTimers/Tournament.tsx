@@ -260,7 +260,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     return (
       <Container className="mt-4">
         <Alert variant="danger">
-          Error loading tournament details: {error}
+          Error loading tournament details: {error?.message || 'Unknown error'}
         </Alert>
       </Container>
     );

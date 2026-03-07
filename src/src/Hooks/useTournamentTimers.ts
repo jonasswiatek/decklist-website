@@ -1,7 +1,6 @@
 import { $api } from "../model/api/client";
 
-const TOURNAMENT_TIMERS_QUERY_KEY = 'tournamentTimers';
-export const userTournamentsQueryKey = [TOURNAMENT_TIMERS_QUERY_KEY, 'userTournaments'] as const;
+export const userTournamentsQueryKey = $api.queryOptions("get", "/api/timers").queryKey;
 
 export function useUserTournaments(enabled: boolean = true) {
     return $api.useQuery(
@@ -9,7 +8,6 @@ export function useUserTournaments(enabled: boolean = true) {
         "/api/timers",
         {},
         {
-            queryKey: [TOURNAMENT_TIMERS_QUERY_KEY, 'userTournaments'],
             staleTime: Infinity,
             retry: false,
             refetchOnWindowFocus: false,
@@ -30,7 +28,6 @@ export function useTournamentDetails(tournamentId: string, enabled: boolean = tr
             },
         },
         {
-            queryKey: [TOURNAMENT_TIMERS_QUERY_KEY, 'tournamentDetails', tournamentId],
             staleTime: Infinity,
             retry: false,
             refetchOnWindowFocus: false,
