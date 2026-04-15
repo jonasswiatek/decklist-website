@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import useWebSocket from 'react-use-websocket';
 import { TournamentTimerClock } from '../model/api/tournamentTimers';
 
 const WEBSOCKET_URL = 'wss://decklist.lol/ws';
+const RECONNECT_DELAY = 3000;
+const PING_INTERVAL = 120000;
+
 type ForbiddenMessage = {
   message: string;
   connectionId: string;
@@ -21,42 +23,65 @@ const isForbiddenMessage = (data: unknown): data is ForbiddenMessage => {
 
 const useDecklistWebSocketConnection = <T>(channelName: string) => {
   const [lastJsonMessage, setLastJsonMessage] = useState<T | undefined>(undefined);
-  const { sendJsonMessage, readyState, lastJsonMessage: webSocketLastMessage } = useWebSocket<T | undefined>(WEBSOCKET_URL, {
-    queryParams: { channel: channelName },
-    onOpen: () => console.log('WebSocket: opened connection'),
-    onClose: () => console.log('WebSocket: closed connection'),
-    onError: (event) => console.error('WebSocket: error:', event),
-    shouldReconnect: () => true,
-    heartbeat: {
-      interval: 1200000,
-      timeout: 130000,
-    }
-  });
+  const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
 
   useEffect(() => {
-    if (webSocketLastMessage) {
-      if (isForbiddenMessage(webSocketLastMessage)) {
-        console.log("WebSocket: Ping/Pong");
-      } else {
-        setLastJsonMessage(webSocketLastMessage as T);
-      }
-    }
-  }, [webSocketLastMessage, setLastJsonMessage]);
+    let ws: WebSocket | null = null;
+    let pingInterval: ReturnType<typeof setInterval>;
+    let reconnectTimeout: ReturnType<typeof setTimeout>;
+    let disposed = false;
 
-  //The ping feature of react-use-websocket is not reliable, so we implement our own ping mechanism
-  useEffect(() => {
-    if (readyState === WebSocket.OPEN) {
-      console.log("WebSocket: Starting ping interval");
-      const intervalId = setInterval(() => {
-        sendJsonMessage({ type: 'PING' });
-      }, 120000);
+    function connect() {
+      const url = `${WEBSOCKET_URL}?channel=${encodeURIComponent(channelName)}`;
+      ws = new WebSocket(url);
 
-      return () => {
-        console.log("WebSocket: Stopping ping interval");
-        clearInterval(intervalId);
+      ws.onopen = () => {
+        console.log('WebSocket: opened connection');
+        setReadyState(WebSocket.OPEN);
+
+        pingInterval = setInterval(() => {
+          if (ws?.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'PING' }));
+          }
+        }, PING_INTERVAL);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (isForbiddenMessage(data)) {
+            console.log('WebSocket: Ping/Pong');
+          } else {
+            setLastJsonMessage(data as T);
+          }
+        } catch {
+          console.error('WebSocket: failed to parse message', event.data);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket: closed connection');
+        setReadyState(WebSocket.CLOSED);
+        clearInterval(pingInterval);
+        if (!disposed) {
+          reconnectTimeout = setTimeout(connect, RECONNECT_DELAY);
+        }
+      };
+
+      ws.onerror = (event) => {
+        console.error('WebSocket: error:', event);
       };
     }
-  }, [readyState, sendJsonMessage]);
+
+    connect();
+
+    return () => {
+      disposed = true;
+      clearTimeout(reconnectTimeout);
+      clearInterval(pingInterval);
+      ws?.close();
+    };
+  }, [channelName]);
 
   return { readyState, lastJsonMessage };
 };
@@ -69,7 +94,7 @@ type EventUpdatedMessage = {
 
 export const useEventUpdated = (effect: (message: EventUpdatedMessage) => void, eventId: string) => {
   const { lastJsonMessage, readyState } = useDecklistWebSocketConnection<EventUpdatedMessage>(`decklist.lol:event:${eventId}`);
-  
+
   const effectRef = useRef(effect);
   useEffect(() => {
     effectRef.current = effect;
@@ -106,7 +131,7 @@ type TournamentTimersUpdatedMessage = {
 
 export const useTournamentTimersUpdated = (effect: (message: TournamentTimersUpdatedMessage) => void, tournamentId: string) => {
   const { lastJsonMessage, readyState } = useDecklistWebSocketConnection<TournamentTimersUpdatedMessage>(`decklist.lol:timers:tournament:${tournamentId}`);
-  
+
   const effectRef = useRef(effect);
   useEffect(() => {
     effectRef.current = effect;
@@ -117,6 +142,6 @@ export const useTournamentTimersUpdated = (effect: (message: TournamentTimersUpd
       effectRef.current(lastJsonMessage);
     }
   }, [lastJsonMessage]);
-  
+
   return { readyState };
 }
