@@ -37,6 +37,85 @@ interface AddClockFormInputs {
   duration_minutes: number;
 }
 
+function AddClockForm({ tournamentId, onClockAdded }: { tournamentId: string; onClockAdded: (clock: TournamentTimerClock) => void }): ReactElement {
+  const { register, handleSubmit, setError, formState: { errors } } = useForm<AddClockFormInputs>({
+    defaultValues: { duration_minutes: 50 }
+  });
+
+  const createClockMutation = useCreateClockMutation({
+    onSuccess: (data) => onClockAdded(data),
+    onError: (err) => HandleValidation(setError, err),
+  });
+
+  const onSubmit = (data: AddClockFormInputs) => {
+    createClockMutation.mutate({
+      params: { path: { tournamentId } },
+      body: {
+        clock_name: data.clock_name,
+        duration_seconds: data.duration_minutes * 60,
+      },
+    });
+  };
+
+  return (
+    <Card className="mb-3">
+      <Card.Header className="d-flex justify-content-between align-items-center">
+        <div>
+          <BsClockHistory className="me-2" />
+          <strong>Add Clock</strong>
+        </div>
+      </Card.Header>
+      <Card.Body>
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <Row className="mb-3">
+            <Col md={8} xs={7}>
+              <Form.Group controlId="clockName">
+                <Form.Label>Clock Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter clock name (e.g., Round 1, Break)"
+                  {...register("clock_name", { required: "Clock name is required" })}
+                  isInvalid={!!errors.clock_name}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.clock_name?.message}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+            <Col md={4} xs={5}>
+              <Form.Group controlId="clockDuration">
+                <Form.Label>Duration (min)</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Mins"
+                  {...register("duration_minutes", {
+                    required: "Duration is required",
+                    valueAsNumber: true,
+                    min: { value: 1, message: "Duration must be at least 1 minute" }
+                  })}
+                  isInvalid={!!errors.duration_minutes}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.duration_minutes?.message}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Button variant="success" type="submit" disabled={createClockMutation.isPending}>
+            {createClockMutation.isPending ? (
+              <>
+                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                Adding Clock...
+              </>
+            ) : 'Add Clock'}
+          </Button>
+        </Form>
+      </Card.Body>
+    </Card>
+  );
+}
+
 export function TournamentWrapper(): ReactElement {
   const { tournament_id } = useParams<{ tournament_id: string }>();
   if (!tournament_id) {
@@ -49,11 +128,7 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
   const { sessionId } = useAuthQuery();
   const { data: tournamentDetails, isLoading, isError, refetch } = useTournamentDetails(tournament_id, false);
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<AddManagerFormInputs>();
-  const { register: registerClock, handleSubmit: handleSubmitClock, reset: resetClockForm, formState: { errors: clockErrors } } = useForm<AddClockFormInputs>({
-    defaultValues: {
-      duration_minutes: 50
-    }
-  });
+  const [clockFormKey, setClockFormKey] = useState(0);
   const navigate = useNavigate();
   const publicLink = `${window.location.origin}/timers/${tournamentDetails?.tournament_id}/view`;
   const [copied, setCopied] = useState(false);
@@ -131,13 +206,6 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     onSuccess: () => refetch(),
   });
 
-  const createClockMutation = useCreateClockMutation({
-    onSuccess: (data) => {
-      addClock(data);
-      resetClockForm({ clock_name: '', duration_minutes: 50 });
-    },
-  });
-
   const updateClockMutation = useUpdateClockMutation({
     onSuccess: (data) => addClock(data),
   });
@@ -185,15 +253,6 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
     }
   };
 
-  const onAddClock = (data: AddClockFormInputs) => {
-    createClockMutation.mutate({
-      params: { path: { tournamentId: tournament_id } },
-      body: {
-        clock_name: data.clock_name,
-        duration_seconds: data.duration_minutes * 60,
-      },
-    });
-  };
 
   const onToggleClock = (clockId: string, currentState: boolean) => {
     updateClockMutation.mutate({
@@ -294,61 +353,14 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
       </Row>
       <Row>
         <Col lg={6} className="mb-3 mb-lg-0">
-          <Card className="mb-3">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <div>
-                <BsClockHistory className="me-2" />
-                <strong>Add Clock</strong>
-              </div>
-            </Card.Header>
-            <Card.Body>
-              <Form onSubmit={handleSubmitClock(onAddClock)}>
-                <Row className="mb-3">
-                  <Col md={8} xs={7}>
-                    <Form.Group controlId="clockName">
-                      <Form.Label>Clock Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter clock name (e.g., Round 1, Break)"
-                        {...registerClock("clock_name", { required: "Clock name is required" })}
-                        isInvalid={!!clockErrors.clock_name}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {clockErrors.clock_name?.message}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
-                  <Col md={4} xs={5}>
-                    <Form.Group controlId="clockDuration">
-                      <Form.Label>Duration (min)</Form.Label>
-                      <Form.Control
-                        type="number"
-                        placeholder="Mins"
-                        {...registerClock("duration_minutes", {
-                          required: "Duration is required",
-                          valueAsNumber: true,
-                          min: { value: 1, message: "Duration must be at least 1 minute" }
-                        })}
-                        isInvalid={!!clockErrors.duration_minutes}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {clockErrors.duration_minutes?.message}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Button variant="success" type="submit" disabled={createClockMutation.isPending}>
-                  {createClockMutation.isPending ? (
-                    <>
-                      <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                      Adding Clock...
-                    </>
-                  ) : 'Add Clock'}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
+          <AddClockForm
+            key={clockFormKey}
+            tournamentId={tournament_id}
+            onClockAdded={(clock) => {
+              addClock(clock);
+              setClockFormKey(k => k + 1);
+            }}
+          />
 
           {/* Current Clocks Section - Restructured */}
           <h4 className="mt-4 mb-3">
