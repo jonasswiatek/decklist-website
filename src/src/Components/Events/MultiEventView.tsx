@@ -58,7 +58,7 @@ export function MutliEventView() {
                       <td>
                         <span className="text-capitalize">{event.format}</span>
                       </td>
-                      <td>{new Date(event.event_date).toLocaleDateString()}</td>
+                      <td>{new Date(event.event_date + "T00:00:00").toLocaleDateString()}</td>
                     </tr>
                   ))}
                 {(!data || data?.length === 0) && (

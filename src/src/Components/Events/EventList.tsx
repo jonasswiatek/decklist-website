@@ -34,7 +34,7 @@ export function EventList() : ReactElement {
                 <span className="badge bg-primary">{event.role}</span>
               </div>
             </td>
-            <td>{new Date(event.event_date).toLocaleDateString()}</td>
+            <td>{new Date(event.event_date + "T00:00:00").toLocaleDateString()}</td>
           </tr>
         ))}
         {!isLoading && data?.length === 0 && (

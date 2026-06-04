@@ -396,14 +396,14 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
                                 </div>
                                 <div className="col-6 mb-3">
                                     <div className="fw-bold">Tournament Date:</div>
-                                    <div>{new Date(e.event.event_date).toLocaleDateString()}</div>
+                                    <div>{new Date(e.event.event_date + "T00:00:00").toLocaleDateString()}</div>
                                 </div>
                                 <div className="col-6 mb-3">
                                     <div className="fw-bold">Expiration Date:</div>
                                     <div>
                                         {
                                             (() => {
-                                                const deletionDate = new Date(e.event.event_date);
+                                                const deletionDate = new Date(e.event.event_date + "T00:00:00");
                                                 deletionDate.setDate(deletionDate.getDate() + 7);
                                                 return deletionDate.toLocaleDateString();
                                             })()
