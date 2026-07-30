@@ -110,6 +110,26 @@ which that rule flags. Everything else is unchanged (still `--max-warnings 0`).
 - **Chunk size warning** on build (~707 kB JS) is pre-existing (whole-app bundle), not from this
   work. Code-splitting could be a future task.
 
+## Dependency security (npm audit)
+
+Ran `npm audit fix` (non-breaking) and removed the unused `http-proxy-middleware`
+direct dependency. That patched everything reachable at runtime:
+vite 8.0.8→8.1.5, react-router(-dom) 7.14.1→7.18.2, postcss, @babel/*, js-yaml,
+immutable, brace-expansion (installed versions now patched), etc.
+
+Two items remain, both **not fixed on purpose** because the only fixes are breaking and
+neither affects the shipped app:
+- **react-router "RSC Mode CSRF Bypass"** — RSC/SSR-only advisory. This is a client SPA
+  (`createBrowserRouter`, no SSR/RSC), so it does not apply. npm's `--force` "fix" is a
+  *downgrade* to 7.11.0 (loses the patches above) — don't take it.
+- **brace-expansion / minimatch DoS** via `eslint` and `@redocly/openapi-core`
+  (`openapi-typescript`) — **dev/build tooling only**, never shipped. The installed
+  brace-expansion versions are already patched; npm flags minimatch's declared range.
+  Clearing it requires **eslint 10** (breaking major — verify the plugins support it first).
+
+Do **not** run `npm audit fix --force` — it downgrades react-router and force-bumps eslint.
+Revisit the eslint 10 upgrade as its own task if a clean `npm audit` is desired.
+
 ## Possible follow-ups (not done)
 
 - Visual QA pass on a real device (mobile especially) — browser automation wasn't available.
