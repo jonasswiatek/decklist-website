@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { DecklistGroup, Format, saveLibraryDeckRequest } from '../../model/api/apimodel';
-import { BsPerson, BsArrowLeft, BsTrash, BsCardText } from 'react-icons/bs';
+import { User, ArrowLeft, Trash2, FileText } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTextarea } from '../Common/DecklistTextarea';
@@ -13,6 +13,13 @@ import { useFormatsQuery } from '../../Hooks/useFormatsQuery';
 import { useLibraryDeckQuery } from '../../Hooks/useLibraryDeckQuery';
 import { libraryDecksQueryKey } from '../../Hooks/useLibraryDecksQuery';
 import { useDeleteLibraryDeckMutation } from '../../Hooks/useDeckMutations';
+import { PageContainer } from '@/Components/layout/PageContainer';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert';
+import { Spinner } from '@/Components/ui/spinner';
+
+const selectClasses = "border-input focus-visible:border-ring focus-visible:ring-ring/50 flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm text-foreground shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 [&_option]:bg-popover [&_option]:text-popover-foreground [&_optgroup]:bg-popover [&_optgroup]:text-popover-foreground";
 
 export const LibraryDeckEditorPage: React.FC = () => {
   const { deck_id } = useParams();
@@ -29,27 +36,29 @@ export const LibraryDeckEditorPage: React.FC = () => {
   });
 
   if (isLoading || formatsLoading) {
-      return <LoadingScreen />
+    return <LoadingScreen />
   }
 
-  if(isError) {
+  if (isError) {
     return (
-    <div className="alert alert-warning" role="alert">
-      <h4 className="alert-heading">Deck not found</h4>
-      <hr />
-      <p className="mb-0">No deck found.</p>
-    </div>
+      <PageContainer size="sm">
+        <Alert variant="warning">
+          <AlertTitle>Deck not found</AlertTitle>
+          <AlertDescription>No deck found.</AlertDescription>
+        </Alert>
+      </PageContainer>
     );
   }
 
-  if(isError || isFormatsError) {
-      return (
-          <div className="alert alert-danger" role="alert">
-              <h4 className="alert-heading">Error loading deck</h4>
-              <hr />
-              <p className="mb-0">Please try again later.</p>
-          </div>
-      );
+  if (isError || isFormatsError) {
+    return (
+      <PageContainer size="sm">
+        <Alert variant="destructive">
+          <AlertTitle>Error loading deck</AlertTitle>
+          <AlertDescription>Please try again later.</AlertDescription>
+        </Alert>
+      </PageContainer>
+    );
   }
 
   const handleDeckUpdate = async (deck_name: string, format: string, decklist_text: string) => {
@@ -76,29 +85,21 @@ export const LibraryDeckEditorPage: React.FC = () => {
   };
 
   return (
-    <>
-      <div className="container mt-4">
-        <div className="mb-3">
-          <button 
-            type="button" 
-            className="btn btn-link text-decoration-none p-0" 
-            onClick={() => navigate('/library')}
-          >
-            <BsArrowLeft className="me-1" /> Back to Library
-          </button>
-        </div>
-        <LibraryDeckEditor 
-          deck_name={data?.deck_name}
-          format={data?.format ?? importedDeck?.format}
-          formats={formats!.formats}
-          groups={data?.groups}
-          deck_warnings={data?.deck_warnings}
-          decklist_text={data?.decklist_text ?? importedDeck?.decklist_text}
-          onDeckUpdate={handleDeckUpdate}
-          onDeleteDeck={handleDeleteDeck}
-        />
-      </div>
-    </>
+    <PageContainer size="lg">
+      <Button variant="link" className="mb-3 h-auto p-0 text-muted-foreground hover:text-foreground" onClick={() => navigate('/library')}>
+        <ArrowLeft className="size-4" /> Back to Library
+      </Button>
+      <LibraryDeckEditor
+        deck_name={data?.deck_name}
+        format={data?.format ?? importedDeck?.format}
+        formats={formats!.formats}
+        groups={data?.groups}
+        deck_warnings={data?.deck_warnings}
+        decklist_text={data?.decklist_text ?? importedDeck?.decklist_text}
+        onDeckUpdate={handleDeckUpdate}
+        onDeleteDeck={handleDeleteDeck}
+      />
+    </PageContainer>
   );
 }
 
@@ -130,7 +131,6 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
     }
   });
 
-  // Watch the format field to update the decklist style
   useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name === 'format') {
@@ -155,158 +155,124 @@ const LibraryDeckEditor: React.FC<LibraryDeckEditorProps> = (props) => {
 
   const handleDeleteDeck = async () => {
     if (window.confirm("Are you sure you want to delete this deck? This action cannot be undone.")) {
-        props.onDeleteDeck();
+      props.onDeleteDeck();
     }
   };
 
-  // Calculate mainboard and sideboard counts
   const mainboardCount = props.groups
     ? props.groups
-        .filter(group => group.group_name !== "Sideboard")
-        .flatMap(group => group.cards)
-        .reduce((sum, card) => sum + card.quantity, 0)
+      .filter(group => group.group_name !== "Sideboard")
+      .flatMap(group => group.cards)
+      .reduce((sum, card) => sum + card.quantity, 0)
     : 0;
 
   const sideboardCount = props.groups
     ? props.groups
-        .find(group => group.group_name === "Sideboard")?.cards
-        .reduce((sum, card) => sum + card.quantity, 0) || 0
+      .find(group => group.group_name === "Sideboard")?.cards
+      .reduce((sum, card) => sum + card.quantity, 0) || 0
     : 0;
 
   return (
-  <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmitDecklist)(e); }} >
-        <div className='row'>
-            <div className='col-lg-4 col-sm-12'>
-                <div className="form-group position-relative mb-1">
-                    <div className="input-group">
-                        <span className="input-group-text" id="basic-addon1">
-                            <BsPerson />
-                        </span>
-                        <input 
-                            type='text' 
-                            id="deck_name" 
-                            className='form-control' 
-                            placeholder='Deck Name' 
-                            required 
-                            {...register("deck_name", { value: props.deck_name })} 
-                        />
-                        {(props.groups) && (
-                            <button 
-                                type="button" 
-                                className="btn btn-danger" 
-                                onClick={handleDeleteDeck}
-                                title="Delete Deck"
-                            >
-                                <BsTrash />
-                            </button>
-                        )}
-                    </div>
-                    {errors.deck_name && (
-                        <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                            <span>{errors.deck_name.message}</span>
-                        </div>
-                    )}
-                </div>
-                
-                <div className="event-info mb-1">
-                  <div className="format-container">
-                    <div className="input-group">
-                        <span className="input-group-text" id="format-addon">
-                            <BsCardText />
-                        </span>
-                        <select 
-                            id="format"
-                            className={`form-select ${errors.format ? 'is-invalid' : ''}`} 
-                            {...register("format")}
-                        >
-                            <option value="" defaultChecked>Select a format</option>
-                            {props.formats.map(format => (
-                                <option key={format.format} value={format.format}>{format.name}</option>
-                            ))}
-                        </select>
-                        {errors.format && <div className="invalid-feedback">{errors.format?.message}</div>}
-                    </div>
-                  </div>
-                </div>
-                
-                {decklistStyle && (<>
-                  <div className="form-group position-relative">
-                    <div className={`textarea-container`}>
-                      <div className="form-group mb-1">
-                        <div className="text-end">
-                            <a href={`/help/decklist#${decklistStyle.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
-                                See formatting guide
-                            </a>
-                        </div>
-                      </div>
-                      <DecklistTextarea
-                          id='decklist_text'
-                          className="form-control"
-                          placeholder={getDecklistPlaceholder(decklistStyle)}
-                          required
-                          registration={register("decklist_text", { value: props.decklist_text })}
-                          style={{ width: '100%', height: 400 }}
-                          knownCards={props.groups ? new Set(props.groups.flatMap(g => g.cards.map(c => c.card_name.toLowerCase()))) : undefined}
-                      />
-                      {errors.decklist_text && (
-                        <div className="alert alert-danger py-1 mt-1 mb-0 small">
-                            <span>{errors.decklist_text.message}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div 
-                      className="event-info mb-3 d-flex justify-content-between align-items-center position-relative" 
-                      style={{ padding: '10px', marginTop: '5px', minHeight: '60px' }}
-                  >
-                    <div className="d-flex">
-                      {decklistStyle.toLowerCase() === "commander" ? (
-                          <span className="no-wrap-text">Deck: {mainboardCount}</span>
-                      ) : (
-                          <>
-                              <span style={{ marginRight: 10 }} className="no-wrap-text">Main: {mainboardCount}</span>
-                              <span className="no-wrap-text">Side: {sideboardCount}</span>
-                          </>
-                      )}
-                    </div>
-                    {isDirty && (
-                      <button 
-                          type='submit' 
-                          className='btn btn-primary no-wrap-text' 
-                          id='submit-button'
-                          disabled={isSubmitting} // Disable button while submitting
-                      >
-                          {isSubmitting ? (
-                              <>
-                                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                  Saving
-                              </>
-                          ) : (
-                              'Save Decklist'
-                          )}
-                      </button>
-                    )}
-                  </div>
-                </>)}
+    <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmitDecklist)(e); }}>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                id="deck_name"
+                className="pl-9"
+                placeholder="Deck Name"
+                required
+                aria-invalid={!!errors.deck_name}
+                {...register("deck_name", { value: props.deck_name })}
+              />
+            </div>
+            {props.groups && (
+              <Button type="button" variant="destructive" size="icon" onClick={handleDeleteDeck} title="Delete Deck">
+                <Trash2 className="size-4" />
+              </Button>
+            )}
+          </div>
+          {errors.deck_name && <p className="mt-1 text-sm text-destructive">{errors.deck_name.message}</p>}
 
-                {props.deck_warnings && props.deck_warnings.length > 0 && (
-                    <div className="mt-3">
-                        <div className="alert alert-warning">
-                            <h5 className="alert-heading">Deck Warnings</h5>
-                            <ul className="mb-0">
-                                {props.deck_warnings.map((warning, index) => (
-                                    <li key={index}>{warning}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
+          <div className="relative mt-2">
+            <FileText className="absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+            <select
+              id="format"
+              className={`${selectClasses} pl-9`}
+              aria-invalid={!!errors.format}
+              {...register("format")}
+            >
+              <option value="" defaultChecked>Select a format</option>
+              {props.formats.map(format => (
+                <option key={format.format} value={format.format}>{format.name}</option>
+              ))}
+            </select>
+          </div>
+          {errors.format && <p className="mt-1 text-sm text-destructive">{errors.format?.message}</p>}
+
+          {decklistStyle && (<>
+            <div className="mt-3">
+              <div className="mb-1 text-right text-sm">
+                <a
+                  href={`/help/decklist#${decklistStyle.toLowerCase()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline-offset-4 hover:underline"
+                >
+                  See formatting guide
+                </a>
+              </div>
+              <DecklistTextarea
+                id="decklist_text"
+                placeholder={getDecklistPlaceholder(decklistStyle)}
+                required
+                aria-invalid={!!errors.decklist_text}
+                registration={register("decklist_text", { value: props.decklist_text })}
+                style={{ width: '100%', height: 400 }}
+                knownCards={props.groups ? new Set(props.groups.flatMap(g => g.cards.map(c => c.card_name.toLowerCase()))) : undefined}
+              />
+              {errors.decklist_text && <p className="mt-1 text-sm text-destructive">{errors.decklist_text.message}</p>}
+            </div>
+            <div className="mt-2 flex min-h-[44px] items-center justify-between gap-2">
+              <div className="flex gap-3 text-sm text-muted-foreground">
+                {decklistStyle.toLowerCase() === "commander" ? (
+                  <span className="whitespace-nowrap">Deck: {mainboardCount}</span>
+                ) : (
+                  <>
+                    <span className="whitespace-nowrap">Main: {mainboardCount}</span>
+                    <span className="whitespace-nowrap">Side: {sideboardCount}</span>
+                  </>
                 )}
+              </div>
+              {isDirty && (
+                <Button type="submit" id="submit-button" className="whitespace-nowrap" disabled={isSubmitting}>
+                  {isSubmitting ? (<><Spinner className="size-4 text-current" />Saving</>) : 'Save Decklist'}
+                </Button>
+              )}
             </div>
-            
-            <div className='col-lg-8 col-sm-12 decklist-table-container' style={{ marginTop: '10px' }}>
-                {props.groups && <DecklistTable cardGroups={props.groups} allowChecklist={false} />}
-            </div>
+          </>)}
+
+          {props.deck_warnings && props.deck_warnings.length > 0 && (
+            <Alert variant="warning" className="mt-3">
+              <AlertTitle>Deck Warnings</AlertTitle>
+              <AlertDescription>
+                <ul className="list-disc pl-4">
+                  {props.deck_warnings.map((warning, index) => (
+                    <li key={index}>{warning}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
+
+        <div className="mt-2 lg:col-span-2">
+          {props.groups && <DecklistTable cardGroups={props.groups} allowChecklist={false} />}
+        </div>
+      </div>
     </form>
   );
 }

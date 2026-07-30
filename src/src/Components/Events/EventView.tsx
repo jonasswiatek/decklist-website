@@ -1,59 +1,48 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, BadgeCheck } from 'lucide-react';
 import { JudgeView } from './Views/JudgeView';
 import { DeckEditor } from './DeckView';
 import { EventViewProps } from './EventTypes';
 import { LoadingScreen } from '../Login/LoadingScreen';
-import { BsArrowLeft } from 'react-icons/bs';
 import { useEventDetailsQuery } from '../../Hooks/useEventDetailsQuery';
 import { useAuthQuery } from '../../Hooks/useAuthQuery';
+import { PageContainer } from '@/Components/layout/PageContainer';
+import { Button } from '@/Components/ui/button';
+import { Badge } from '@/Components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert';
+import { Card, CardContent } from '@/Components/ui/card';
 
-// New EventHeader component
 const EventHeader: React.FC<{ eventName: string, eventId: string, role?: string | null }> = ({ eventName, eventId, role }) => {
     const showEventId = role === "owner" || role === "judge";
     const navigate = useNavigate();
 
     return (
-        <div className="container mt-4">
-            <div className='row'>
-                <div className='col'>
-                    <div className="mb-3">
-                        <button
-                            type="button"
-                            className="btn btn-link text-decoration-none p-0"
-                            onClick={() => navigate('/')}
-                        >
-                            <BsArrowLeft className="me-1" /> Events
-                        </button>
-                    </div>
-                    <h1>
-                        <span>{eventName}</span>
-                        {showEventId && (
-                            <small className="text-muted float-end d-none d-md-inline">
-                                <span className="badge bg-primary user-select-all">{eventId.toUpperCase()}</span>
-                            </small>
-                        )}
-                    </h1>
-                </div>
+        <PageContainer size="lg" className="pb-0">
+            <Button variant="link" className="h-auto p-0 text-muted-foreground hover:text-foreground" onClick={() => navigate('/')}>
+                <ArrowLeft className="size-4" /> Events
+            </Button>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{eventName}</h1>
+                {showEventId && (
+                    <Badge variant="secondary" className="select-all font-mono text-sm">
+                        {eventId.toUpperCase()}
+                    </Badge>
+                )}
             </div>
-        </div>
+        </PageContainer>
     );
 };
 
-// Event Full Message component
 const EventFullMessage: React.FC = () => {
     return (
-        <div className="container py-4">
-            <div className="row justify-content-center">
-                <div className="col-md-6">
-                    <div className="alert alert-warning text-center">
-                        <h5 className="alert-heading">Event is Full</h5>
-                        <p className="mb-0">
-                            This event has reached its maximum player capacity. Please contact the Tournament Organizer if you believe you should still be able to register.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <PageContainer size="sm">
+            <Alert variant="warning">
+                <AlertTitle>Event is full</AlertTitle>
+                <AlertDescription>
+                    This event has reached its maximum player capacity. Please contact the Tournament Organizer if you believe you should still be able to register.
+                </AlertDescription>
+            </Alert>
+        </PageContainer>
     );
 };
 
@@ -69,19 +58,19 @@ export function EventView() {
         )
     }
 
-    if(isError) {
+    if (isError) {
         return (
-            <div className="container mt-4">
-                <p>Error. Try again later.</p>
-            </div>
+            <PageContainer>
+                <p className="text-muted-foreground">Error. Try again later.</p>
+            </PageContainer>
         )
     }
 
-    if(!data) {
+    if (!data) {
         return (
-            <div className="container mt-4">
-                <p>Can't find this event. Check that the code you entered is correct.</p>
-            </div>
+            <PageContainer>
+                <p className="text-muted-foreground">Can't find this event. Check that the code you entered is correct.</p>
+            </PageContainer>
         )
     }
 
@@ -96,13 +85,13 @@ export function EventView() {
     }
 
     return (
-      <>
-        <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
-        {(data.player_count >= data.max_players) ?
-            <EventFullMessage /> :
-            (authorized ? <DeckEditor event={data} /> : <UnauthedView event={data} />)
-        }
-      </>
+        <>
+            <EventHeader eventName={data.event_name} eventId={data.event_id} role={data.role} />
+            {(data.player_count >= data.max_players) ?
+                <EventFullMessage /> :
+                (authorized ? <DeckEditor event={data} /> : <UnauthedView event={data} />)
+            }
+        </>
     )
 }
 
@@ -113,37 +102,32 @@ const UnauthedView: React.FC<EventViewProps> = (props) => {
     const isEventOpen = props.event.status === 'open';
 
     return (
-        <div className="container py-4">
-            <div className="row justify-content-center">
-                <div className="col-md-6">
-                    {!isEventOpen ? (
-                        <div className="alert alert-warning shadow-sm">
-                            <h5 className="alert-heading">
-                                Event Closed
-                            </h5>
-                            <p className="mb-0">
-                                This event has been closed for registration. If you need to participate, please contact your Tournament Organiser or Judge.
-                            </p>
+        <PageContainer size="sm">
+            {!isEventOpen ? (
+                <Alert variant="warning">
+                    <AlertTitle>Event closed</AlertTitle>
+                    <AlertDescription>
+                        This event has been closed for registration. If you need to participate, please contact your Tournament Organiser or Judge.
+                    </AlertDescription>
+                </Alert>
+            ) : (
+                <Card>
+                    <CardContent className="flex flex-col items-center gap-4 py-6 text-center">
+                        <div className="grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
+                            <BadgeCheck className="size-6" />
                         </div>
-                    ) : (
-                        <div className="card shadow-sm">
-                            <div className="card-body text-center py-4">
-                                <i className="bi bi-person-badge fs-1 text-info mb-3"></i>
-                                <p className="card-text mb-4">
-                                    Log in submit your decklist for this event.
-                                </p>
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-light"
-                                    onClick={() => navigate(`/login?return=${encodeURIComponent(window.location.pathname)}`)}
-                                >
-                                    Log in to Continue
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+                        <p className="text-muted-foreground">
+                            Log in to submit your decklist for this event.
+                        </p>
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate(`/login?return=${encodeURIComponent(window.location.pathname)}`)}
+                        >
+                            Log in to continue
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
+        </PageContainer>
     );
 }

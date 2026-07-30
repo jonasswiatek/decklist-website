@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { LoadingScreen } from '../../Login/LoadingScreen';
 import { useEventDetailsQuery } from '../../../Hooks/useEventDetailsQuery';
 import { QRCodeSVG } from 'qrcode.react';
+import { Button } from '@/Components/ui/button';
 
 export const QRCodeView: React.FC = () => {
     const { event_id } = useParams<{ event_id: string }>();
@@ -14,44 +15,24 @@ export const QRCodeView: React.FC = () => {
         return <LoadingScreen />
     }
 
-    if(isError) {
+    if (isError) {
         return (
-            <>
-                <div className='row'>
-                    <div className='col'>
-                        <p>Error. Try again later.</p>
-                    </div>
-                </div>
-            </>
+            <div className="flex min-h-svh flex-col items-center justify-center p-6 text-center">
+                <p className="text-muted-foreground">Error. Try again later.</p>
+            </div>
         )
     }
 
-    if(!data) {
+    if (!data) {
         return (
-            <>
-                <div className='row'>
-                    <div className='col'>
-                        <p>Can't find this tournament. Check that the code you entered is correct.</p>
-                    </div>
-                </div>
-            </>
+            <div className="flex min-h-svh flex-col items-center justify-center p-6 text-center">
+                <p className="text-muted-foreground">Can't find this tournament. Check that the code you entered is correct.</p>
+            </div>
         )
     }
 
     return (
-        <div className="qr-code-container" style={{ 
-            height: '100vh', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            padding: '20px',
-            width: '100%',
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)'
-        }}>
+        <div className="qr-code-container flex min-h-svh w-full flex-col items-center justify-center gap-8 bg-background p-5">
             <style>
                 {`
                     @media print {
@@ -66,10 +47,10 @@ export const QRCodeView: React.FC = () => {
                             width: 100% !important;
                             overflow: hidden !important;
                         }
-                        .no-print { 
-                            display: none !important; 
+                        .no-print {
+                            display: none !important;
                         }
-                        .qr-code-container { 
+                        .qr-code-container {
                             height: 100vh !important;
                             width: 100% !important;
                             padding: 10px !important;
@@ -85,7 +66,7 @@ export const QRCodeView: React.FC = () => {
                             justify-content: center !important;
                             align-items: center !important;
                         }
-                        .event-title { 
+                        .event-title {
                             margin-top: 0 !important;
                             margin-bottom: 20px !important;
                             font-size: 28px !important;
@@ -112,7 +93,7 @@ export const QRCodeView: React.FC = () => {
                         .qr-wrapper p:last-child {
                             font-size: 0.9em !important;
                         }
-                        
+
                         /* This forces the title and QR wrapper to be separate */
                         .event-title-container {
                             margin-bottom: 30px !important;
@@ -125,49 +106,31 @@ export const QRCodeView: React.FC = () => {
                     }
                 `}
             </style>
-            
-            <div className="event-title-container">
-                <h1 className="event-title" style={{ marginBottom: '30px', textAlign: 'center' }}>{data.event_name}</h1>
+
+            <div className="event-title-container text-center">
+                <h1 className="event-title text-3xl font-bold tracking-tight sm:text-4xl">{data.event_name}</h1>
             </div>
-            
+
             <div className="qr-wrapper-container">
-                <div className="qr-wrapper" style={{ 
-                    border: '1px solid #ccc', 
-                    padding: '30px', 
-                    borderRadius: '10px',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                    backgroundColor: '#f5f5f5',
-                    maxWidth: '100%',
-                    textAlign: 'center'
-                }}>
-                    <QRCodeSVG 
-                        value={inviteLink} 
-                        size={220}
+                <div className="qr-wrapper max-w-full rounded-xl border border-[#ccc] bg-[#f5f5f5] p-8 text-center shadow-lg">
+                    <QRCodeSVG
+                        value={inviteLink}
+                        size={260}
                         level="H"
                         bgColor="#f5f5f5"
                         className="qr-code"
                     />
-                    
-                    <div style={{ marginTop: '15px', wordBreak: 'break-all' }}>
-                        <p style={{ color: '#333', fontWeight: 'bold', marginBottom: '5px' }}><strong>Scan to register your decklist</strong></p>
-                        <p style={{ fontSize: '12px', color: '#333', marginTop: '0' }}>{inviteLink}</p>
+
+                    <div className="mt-4 break-all">
+                        <p className="mb-1 font-bold text-[#333]"><strong>Scan to register your decklist</strong></p>
+                        <p className="mt-0 text-xs text-[#333]">{inviteLink}</p>
                     </div>
                 </div>
             </div>
-            
-            <div className="no-print" style={{ marginTop: '30px' }}>
-                <button 
-                    onClick={() => window.print()} 
-                    className="btn btn-primary"
-                >
-                    Print QR Code
-                </button>
-                <button 
-                    onClick={() => window.close()} 
-                    className="btn btn-secondary ms-2"
-                >
-                    Close
-                </button>
+
+            <div className="no-print flex gap-2">
+                <Button onClick={() => window.print()}>Print QR Code</Button>
+                <Button variant="secondary" onClick={() => window.close()}>Close</Button>
             </div>
         </div>
     );

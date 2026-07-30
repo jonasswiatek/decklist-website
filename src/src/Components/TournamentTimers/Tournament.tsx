@@ -1,8 +1,10 @@
 import { ReactElement, useState, Fragment, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Form, Button, Table, Spinner, Alert } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
-import { BsPersonPlus, BsTrash, BsClockHistory, BsPlayFill, BsPauseFill, BsExclamationTriangleFill, BsArrowCounterclockwise, BsBoxArrowUpRight, BsCheck, BsClipboard, BsSliders, BsArrowLeft } from 'react-icons/bs';
+import {
+  UserPlus, Trash2, History, Play, Pause, TriangleAlert,
+  RotateCcw, ExternalLink, Check, Clipboard, SlidersHorizontal, ArrowLeft,
+} from 'lucide-react';
 import { useTournamentDetails } from '../../Hooks/useTournamentTimers';
 import { TournamentTimerClock } from '../../model/api/tournamentTimers';
 import { HandleValidation } from '../../Util/Validators';
@@ -11,6 +13,14 @@ import { useTournamentClocks } from './useTournamentClocks';
 import { useTournamentTimersUpdated, WebSocketTournamentTimersRefreshMessageType } from '../../Hooks/useWebsocketConnection';
 import { useAuthQuery } from '../../Hooks/useAuthQuery';
 import { useAddManagerMutation, useDeleteManagerMutation, useCreateClockMutation, useUpdateClockMutation, useResetClockMutation, useAdjustClockMutation, useDeleteClockMutation, useDeleteTournamentMutation, useForceSyncMutation } from '../../Hooks/useTournamentMutations';
+import { PageContainer } from "@/Components/layout/PageContainer";
+import { Button } from "@/Components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { Spinner } from "@/Components/ui/spinner";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
 
 const getWebSocketStatusText = (readyState: number): string => {
   switch (readyState) {
@@ -58,60 +68,58 @@ function AddClockForm({ tournamentId, onClockAdded }: { tournamentId: string; on
   };
 
   return (
-    <Card className="mb-3">
-      <Card.Header className="d-flex justify-content-between align-items-center">
-        <div>
-          <BsClockHistory className="me-2" />
-          <strong>Add Clock</strong>
-        </div>
-      </Card.Header>
-      <Card.Body>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Row className="mb-3">
-            <Col md={8} xs={7}>
-              <Form.Group controlId="clockName">
-                <Form.Label>Clock Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter clock name (e.g., Round 1, Break)"
-                  {...register("clock_name", { required: "Clock name is required" })}
-                  isInvalid={!!errors.clock_name}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.clock_name?.message}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-            <Col md={4} xs={5}>
-              <Form.Group controlId="clockDuration">
-                <Form.Label>Duration (min)</Form.Label>
-                <Form.Control
-                  type="number"
-                  placeholder="Mins"
-                  {...register("duration_minutes", {
-                    required: "Duration is required",
-                    valueAsNumber: true,
-                    min: { value: 1, message: "Duration must be at least 1 minute" }
-                  })}
-                  isInvalid={!!errors.duration_minutes}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.duration_minutes?.message}
-                </Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <History className="size-4" />
+          Add Clock
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-[2fr_1fr] gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="clockName">Clock Name</Label>
+              <Input
+                type="text"
+                id="clockName"
+                placeholder="Enter clock name (e.g., Round 1, Break)"
+                aria-invalid={!!errors.clock_name}
+                {...register("clock_name", { required: "Clock name is required" })}
+              />
+              {errors.clock_name && (
+                <p className="text-sm text-destructive">{errors.clock_name?.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clockDuration">Duration (min)</Label>
+              <Input
+                type="number"
+                id="clockDuration"
+                placeholder="Mins"
+                aria-invalid={!!errors.duration_minutes}
+                {...register("duration_minutes", {
+                  required: "Duration is required",
+                  valueAsNumber: true,
+                  min: { value: 1, message: "Duration must be at least 1 minute" }
+                })}
+              />
+              {errors.duration_minutes && (
+                <p className="text-sm text-destructive">{errors.duration_minutes?.message}</p>
+              )}
+            </div>
+          </div>
 
-          <Button variant="success" type="submit" disabled={createClockMutation.isPending}>
+          <Button type="submit" disabled={createClockMutation.isPending}>
             {createClockMutation.isPending ? (
               <>
-                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                <Spinner className="size-4 text-current" />
                 Adding Clock...
               </>
             ) : 'Add Clock'}
           </Button>
-        </Form>
-      </Card.Body>
+        </form>
+      </CardContent>
     </Card>
   );
 }
@@ -305,54 +313,57 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
 
   if(!tournamentDetails || readyState !== WebSocket.OPEN || isLoading) {
     return (
-      <Container fluid className="py-3 vh-100 d-flex flex-column justify-content-center align-items-center bg-dark">
-        <Spinner animation="border" variant="light" className="mb-3" style={{ width: '3rem', height: '3rem' }} />
-        <p className="text-light fs-5 text-center">Connecting to server...</p>
-        <p className="text-light fs-6 text-center text-muted">
+      <div className="flex min-h-svh flex-col items-center justify-center gap-3 px-4 text-center">
+        <Spinner className="size-12 text-primary" />
+        <p className="text-lg">Connecting to server...</p>
+        <p className="text-sm text-muted-foreground">
           WebSocket Status: {getWebSocketStatusText(readyState)}
         </p>
-      </Container>
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <Container className="mt-4">
-        <Alert variant="danger">
-          Error loading tournament details. Please try again later.
+      <PageContainer size="lg">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Error loading tournament details. Please try again later.
+          </AlertDescription>
         </Alert>
-      </Container>
+      </PageContainer>
     );
   }
 
   if (tournamentDetails.role !== "owner" && tournamentDetails.role !== "manager") {
     return (
-      <Container className="mt-4">
+      <PageContainer size="lg">
         <Alert variant="warning">
-          You do not have permission to view this tournament.
+          <AlertDescription>
+            You do not have permission to view this tournament.
+          </AlertDescription>
         </Alert>
-      </Container>
+      </PageContainer>
     );
   }
 
   return (
-    <Container className="mt-4">
-      <Row className="mb-3">
-        <Col>
-          <div className="mb-3">
-              <button
-                  type="button"
-                  className="btn btn-link text-decoration-none p-0"
-                  onClick={() => navigate('/timers')}
-              >
-                  <BsArrowLeft className="me-1" /> Back
-              </button>
-          </div>
-          <h2>{tournamentDetails.tournament_name}</h2>
-        </Col>
-      </Row>
-      <Row>
-        <Col lg={6} className="mb-3 mb-lg-0">
+    <PageContainer size="lg">
+      <div className="mb-6">
+        <div className="mb-3">
+          <Button
+            variant="link"
+            className="h-auto p-0"
+            onClick={() => navigate('/timers')}
+          >
+            <ArrowLeft className="size-4" /> Back
+          </Button>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight">{tournamentDetails.tournament_name}</h2>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-6">
           <AddClockForm
             key={clockFormKey}
             tournamentId={tournament_id}
@@ -362,290 +373,283 @@ export function Tournament({ tournament_id }: {tournament_id: string}): ReactEle
             }}
           />
 
-          {/* Current Clocks Section - Restructured */}
-          <h4 className="mt-4 mb-3">
-            <BsClockHistory className="me-2" />
-            Current Clocks
-          </h4>
-          {timers && timers.length > 0 ? (
-            <Table striped hover responsive size="sm" className="mb-0">
-              <tbody>
-                {timers.map((clock: TournamentTimerClock) => (
-                  <Fragment key={clock.clock_id}>
-                    <tr>
-                      <td
-                        className="align-middle"
-                        style={{
-                          maxWidth: '150px', // Adjust as needed
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}
-                        title={clock.clock_name} // Show full name on hover
-                      >
-                        {clock.clock_name}
-                      </td>
-                      <td
-                        className="align-middle text-end timer-display-font-table"
-                      >
-                        <TimerDisplay msRemaining={clock.ms_remaining} />
-                      </td>
-                      <td
-                        className="text-end align-middle"
-                        style={{ whiteSpace: 'nowrap', width: '1%' }}
-                      >
-                        <Button
-                          variant={clock.is_running ? "warning" : "success"}
-                          size="sm"
-                          onClick={() => onToggleClock(clock.clock_id, clock.is_running)}
-                          title={clock.is_running ? "Pause Clock" : "Start Clock"}
-                          className="me-1"
+          {/* Current Clocks Section */}
+          <div>
+            <h4 className="mb-3 flex items-center gap-2 text-lg font-semibold">
+              <History className="size-5" />
+              Current Clocks
+            </h4>
+            {timers && timers.length > 0 ? (
+              <Table>
+                <TableBody>
+                  {timers.map((clock: TournamentTimerClock) => (
+                    <Fragment key={clock.clock_id}>
+                      <TableRow>
+                        <TableCell
+                          className="max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap"
+                          title={clock.clock_name}
                         >
-                          {clock.is_running ? <BsPauseFill /> : <BsPlayFill />}
-                        </Button>
-                        <Button
-                          variant="info"
-                          size="sm"
-                          onClick={() => onResetClock(clock.clock_id, clock.duration_seconds)}
-                          title="Reset Clock"
-                          className="me-1"
-                        >
-                          <BsArrowCounterclockwise />
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleToggleAdjustPanel(clock.clock_id)}
-                          title="Adjust Time"
-                          className="me-1"
-                          aria-expanded={expandedClockId === clock.clock_id}
-                        >
-                          <BsSliders />
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => onDeleteClock(clock.clock_id)}
-                          title="Delete Clock"
-                        >
-                          <BsTrash />
-                        </Button>
-                      </td>
-                    </tr>
-                    {expandedClockId === clock.clock_id && (
-                      <tr>
-                        <td colSpan={3} className="p-2">
-                          <div className="d-flex justify-content-center flex-wrap">
-                            {[
-                              { label: "-1m", ms: -60000 },
-                              { label: "-30s", ms: -30000 }, { label: "-10s", ms: -10000 },
-                              { label: "+10s", ms: 10000 }, { label: "+30s", ms: 30000 },
-                              { label: "+1m", ms: 60000 },
-                            ].map(adj => (
-                              <Button
-                                key={adj.label}
-                                variant="outline-secondary"
-                                size="sm"
-                                onClick={() => onAdjustClockTime(clock.clock_id, adj.ms)}
-                                className="m-1"
-                                style={{ minWidth: '50px' }}
-                              >
-                                {adj.label}
-                              </Button>
-                            ))}
+                          {clock.clock_name}
+                        </TableCell>
+                        <TableCell className="text-right timer-display-font-table">
+                          <TimerDisplay msRemaining={clock.ms_remaining} />
+                        </TableCell>
+                        <TableCell className="w-px whitespace-nowrap text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant={clock.is_running ? "secondary" : "default"}
+                              size="icon"
+                              className="size-8"
+                              onClick={() => onToggleClock(clock.clock_id, clock.is_running)}
+                              title={clock.is_running ? "Pause Clock" : "Start Clock"}
+                            >
+                              {clock.is_running ? <Pause className="size-4" /> : <Play className="size-4" />}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="size-8"
+                              onClick={() => onResetClock(clock.clock_id, clock.duration_seconds)}
+                              title="Reset Clock"
+                            >
+                              <RotateCcw className="size-4" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="size-8"
+                              onClick={() => handleToggleAdjustPanel(clock.clock_id)}
+                              title="Adjust Time"
+                              aria-expanded={expandedClockId === clock.clock_id}
+                            >
+                              <SlidersHorizontal className="size-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="size-8"
+                              onClick={() => onDeleteClock(clock.clock_id)}
+                              title="Delete Clock"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
                           </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <p>No clocks created for this tournament yet.</p>
-          )}
-        </Col>
-        <Col lg={6}>
-          <div className="alert alert-info d-flex justify-content-between align-items-center mb-4">
-              <div style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: '70%'
-              }}>
-                  <strong>Public Link:</strong> {publicLink}
-              </div>
-              <div className="d-flex align-items-center">
-                  <button
-                      onClick={copyToClipboard}
-                      className="btn btn-primary d-flex align-items-center me-2"
-                      title="Copy to clipboard"
-                  >
-                    {copied ? <BsCheck /> : <BsClipboard />}
-                  </button>
-
-                  <Link
-                      to={publicLink}
-                      className="btn btn-primary d-flex align-items-center"
-                      title="Open public view"
-                      target="_blank" // Add this to open in a new window
-                      rel="noopener noreferrer" // Add this for security best practices
-                  >
-                      <BsBoxArrowUpRight />
-                  </Link>
-              </div>
+                        </TableCell>
+                      </TableRow>
+                      {expandedClockId === clock.clock_id && (
+                        <TableRow>
+                          <TableCell colSpan={3} className="p-2">
+                            <div className="flex flex-wrap justify-center gap-2">
+                              {[
+                                { label: "-1m", ms: -60000 },
+                                { label: "-30s", ms: -30000 }, { label: "-10s", ms: -10000 },
+                                { label: "+10s", ms: 10000 }, { label: "+30s", ms: 30000 },
+                                { label: "+1m", ms: 60000 },
+                              ].map(adj => (
+                                <Button
+                                  key={adj.label}
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => onAdjustClockTime(clock.clock_id, adj.ms)}
+                                  className="min-w-[50px]"
+                                >
+                                  {adj.label}
+                                </Button>
+                              ))}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Fragment>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-muted-foreground">No clocks created for this tournament yet.</p>
+            )}
           </div>
+        </div>
+
+        <div className="space-y-6">
+          <Alert>
+            <AlertDescription>
+              <div className="flex w-full items-center justify-between gap-2">
+                <div className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                  <strong className="text-foreground">Public Link:</strong> {publicLink}
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button
+                    size="icon"
+                    onClick={copyToClipboard}
+                    title="Copy to clipboard"
+                  >
+                    {copied ? <Check className="size-4" /> : <Clipboard className="size-4" />}
+                  </Button>
+                  <Button
+                    asChild
+                    size="icon"
+                    title="Open public view"
+                  >
+                    <Link
+                      to={publicLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="size-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
 
           {tournamentDetails.role === "owner" && (
             <>
-              <Card className="mb-3">
-                <Card.Header className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <BsPersonPlus className="me-2" />
-                    <strong>Add Manager</strong>
-                  </div>
-                </Card.Header>
-                <Card.Body>
-                  <Form onSubmit={handleSubmit(onAddManager)}>
-                    <Row className="mb-3">
-                      <Col md={6}>
-                        <Form.Group controlId="managerName">
-                          <Form.Label>Name</Form.Label>
-                          <Form.Control
-                            type="text"
-                            placeholder="Enter manager's name"
-                            {...register("name", { required: "Name is required" })}
-                            isInvalid={!!errors.name}
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.name?.message}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group controlId="managerEmail">
-                          <Form.Label>Email</Form.Label>
-                          <Form.Control
-                            type="email"
-                            placeholder="Enter manager's email"
-                            {...register("email", {
-                              required: "Email is required",
-                              pattern: {
-                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                message: "Invalid email address"
-                              }
-                            })}
-                            isInvalid={!!errors.email}
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.email?.message}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                    </Row>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserPlus className="size-4" />
+                    Add Manager
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit(onAddManager)} className="space-y-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="managerName">Name</Label>
+                        <Input
+                          type="text"
+                          id="managerName"
+                          placeholder="Enter manager's name"
+                          aria-invalid={!!errors.name}
+                          {...register("name", { required: "Name is required" })}
+                        />
+                        {errors.name && (
+                          <p className="text-sm text-destructive">{errors.name?.message}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="managerEmail">Email</Label>
+                        <Input
+                          type="email"
+                          id="managerEmail"
+                          placeholder="Enter manager's email"
+                          aria-invalid={!!errors.email}
+                          {...register("email", {
+                            required: "Email is required",
+                            pattern: {
+                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                              message: "Invalid email address"
+                            }
+                          })}
+                        />
+                        {errors.email && (
+                          <p className="text-sm text-destructive">{errors.email?.message}</p>
+                        )}
+                      </div>
+                    </div>
 
-                    <Button variant="success" type="submit" disabled={addManagerMutation.isPending}>
+                    <Button type="submit" disabled={addManagerMutation.isPending}>
                       {addManagerMutation.isPending ? (
                         <>
-                          <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                          <Spinner className="size-4 text-current" />
                           Adding...
                         </>
                       ) : 'Add Manager'}
                     </Button>
-                  </Form>
-                </Card.Body>
+                  </form>
+                </CardContent>
               </Card>
 
-              <h4 className="mt-4 mb-3">
-                <BsPersonPlus className="me-2" />
-                Current Managers
-              </h4>
-              {tournamentDetails.managers.length > 0 ? (
-                <Table striped hover responsive size="sm" className="mb-0">
-                  <thead className="table-dark">
-                    <tr>
-                      <th>Name</th>
-                      <th className="text-end"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tournamentDetails.managers.map(manager => (
-                      <tr key={manager.user_id}>
-                        <td className="align-middle">{manager.user_name}</td>
-                        <td className="text-end align-middle">
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => onRemoveManager(manager.user_id)}
-                            title="Remove Manager"
-                          >
-                            <BsTrash />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              ) : (
-                <p>No managers assigned to this tournament yet.</p>
-              )}
+              <div>
+                <h4 className="mb-3 flex items-center gap-2 text-lg font-semibold">
+                  <UserPlus className="size-5" />
+                  Current Managers
+                </h4>
+                {tournamentDetails.managers.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="text-right"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tournamentDetails.managers.map(manager => (
+                        <TableRow key={manager.user_id}>
+                          <TableCell>{manager.user_name}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="size-8"
+                              onClick={() => onRemoveManager(manager.user_id)}
+                              title="Remove Manager"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="text-muted-foreground">No managers assigned to this tournament yet.</p>
+                )}
+              </div>
             </>
           )}
 
-          <Card className="mb-3 mt-4">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <div>
-                {/* Consider an icon for Utilities, e.g., BsGear or BsCloudSync */}
-                <strong>Utilities</strong>
-              </div>
-            </Card.Header>
-            <Card.Body>
-              <p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Utilities</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
                 Use this button in case one or more presentation screens have desynchronized,
                 which can happen in case of intermittent connectivity issues.
                 While they should automatically recover given time, you can attempt to force a sync here.
               </p>
               <Button
-                variant="primary"
                 onClick={onForceSync}
-                className="w-100"
+                className="w-full"
                 disabled={forceSyncMutation.isPending}
               >
                 {forceSyncMutation.isPending ? (
                   <>
-                    <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                    <Spinner className="size-4 text-current" />
                     Syncing...
                   </>
                 ) : 'Force Sync'}
               </Button>
-              {syncStatusMessage && <p className="text-muted mt-2 text-center">{syncStatusMessage}</p>}
-            </Card.Body>
+              {syncStatusMessage && <p className="text-center text-sm text-muted-foreground">{syncStatusMessage}</p>}
+            </CardContent>
           </Card>
 
           {/* Danger Zone Section */}
           {tournamentDetails.role === "owner" && (
-            <Card className="mt-4">
-              <Card.Header className="text-white d-flex justify-content-between align-items-center">
-                <div>
-                  <BsExclamationTriangleFill className="me-2" />
-                  <strong>Danger Zone</strong>
-                </div>
-              </Card.Header>
-              <Card.Body>
-                <p>Be careful, these actions are irreversible.</p>
+            <Card className="border-destructive/40">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <TriangleAlert className="size-4" />
+                  Danger Zone
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">Be careful, these actions are irreversible.</p>
                 <Button
-                  variant="danger"
+                  variant="destructive"
                   onClick={onDeleteTournament}
-                  className="w-100"
+                  className="w-full"
                 >
-                  <BsTrash className="me-2" />
+                  <Trash2 className="size-4" />
                   Delete This Tournament
                 </Button>
-              </Card.Body>
+              </CardContent>
             </Card>
           )}
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </PageContainer>
   );
 }

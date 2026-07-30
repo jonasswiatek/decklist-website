@@ -1,11 +1,29 @@
 import { getDecklistRequest, getEvent } from "../../model/api/apimodel";
 import { LoadingScreen } from "../Login/LoadingScreen";
-import { PlusCircle, ExclamationTriangle } from 'react-bootstrap-icons';
+import { ArrowLeft, PlusCircle, TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router";
-import { BsArrowLeft } from "react-icons/bs";
 import { useEventListQuery } from "../../Hooks/useEventListQuery";
 import { useLibraryDecksQuery } from "../../Hooks/useLibraryDecksQuery";
 import { useToast } from "../../Util/ToastContext";
+import { PageContainer } from "@/Components/layout/PageContainer";
+import { Alert, AlertDescription, AlertTitle } from "@/Components/ui/alert";
+import { Button } from "@/Components/ui/button";
+import { Card, CardContent } from "@/Components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/Components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/Components/ui/table";
 
 export const LibraryOverview: React.FC = () => {
   const navigate = useNavigate();
@@ -38,105 +56,107 @@ export const LibraryOverview: React.FC = () => {
   if (isLibraryLoading || isEventsLoading) {
       return <LoadingScreen />;
   }
-  
-  if(isDecksError || isEventsError) {
+
+  if (isDecksError || isEventsError) {
       return (
-          <div className="alert alert-danger" role="alert">
-            <h4 className="alert-heading">Error loading deck</h4>
-            <hr />
-            <p className="mb-0">Please try again later.</p> 
-          </div>
+          <PageContainer size="lg">
+            <Alert variant="destructive">
+              <TriangleAlert />
+              <AlertTitle>Error loading deck</AlertTitle>
+              <AlertDescription>Please try again later.</AlertDescription>
+            </Alert>
+          </PageContainer>
       );
   }
 
   const pastEvents = events?.filter(event => event.role === "player");
 
   return (
-    <>
-      <div className="container mt-4">
-        <div className="mb-3">
-          <button 
-            type="button" 
-            className="btn btn-link text-decoration-none p-0" 
-            onClick={() => navigate('/')}
-          >
-            <BsArrowLeft className="me-1" /> Back to Events
-          </button>
-        </div>
-        <div className="mb-4">
-          <h2>Your saved decks</h2>
-          <p className="text-muted">You can quickly reuse these decklists when signing up for events</p>
-        </div>
-        <div className="mb-4">
-          {library && library.decks.length >= 20 ? (
-            <div className="alert alert-warning">
-              You can only have a maximum of 20 saved decks. Please delete some decks before creating new ones.
-            </div>
-          ) : (
-            <div className="row g-3">
-              <div className="col-12 col-md-auto">
-                <button onClick={() => navigate('/library/deck')} className="btn btn-primary w-100">
-                  <PlusCircle className="me-2" /> Create New Deck
-                </button>
-              </div>
-              <div className="col-12 col-md-auto">
-                <select 
-                    className="form-select w-100" 
-                    onChange={(e) => onImportDeck(e.target.value)}
-                    defaultValue=""
-                    disabled={pastEvents?.length === 0}
-                  >
-                    <option value="" disabled>Import from event</option>
-                    {pastEvents?.map((event) => (
-                      <option key={event.event_id} value={event.event_id}>
-                        {event.event_name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
-        {!library || library.decks.length === 0 ? (
-          <div className="text-center mt-5">
-            <h3>No decks found in your library</h3>
-            <p>Create a deck to get started.</p>
-          </div>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th scope="col">Deck Name</th>
-                  <th scope="col"></th>
-                  <th scope="col">Format</th>
-                </tr>
-              </thead>
-              <tbody>
-                {library.decks.map((deck) => (
-                  <tr key={deck.deck_id}>
-                    <td 
-                        className="align-middle" 
-                        onClick={() => navigate(`/library/deck/${deck.deck_id}`)}
-                        style={{ cursor: 'pointer' }}
-                        title="View deck"
-                    >
-                        {deck.deck_name}
-                    </td>
-                    <td className="text-end">
-                        <div>
-                            {deck.has_warnings && <ExclamationTriangle className="text-warning" />}
-                        </div>
-                    </td>
-                    <td>{deck.format_name || "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-      )}
-      <p className="mt-3 text-muted fst-italic">Decks that haven't been used for 90 days are automatically deleted</p>
+    <PageContainer size="lg">
+      <Button variant="link" className="mb-3 h-auto p-0" onClick={() => navigate('/')}>
+        <ArrowLeft className="size-4" /> Back to Events
+      </Button>
+
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold">Your saved decks</h2>
+        <p className="text-muted-foreground">You can quickly reuse these decklists when signing up for events</p>
       </div>
-    </>
+
+      <div className="mb-6">
+        {library && library.decks.length >= 20 ? (
+          <Alert variant="warning">
+            <TriangleAlert />
+            <AlertDescription>
+              You can only have a maximum of 20 saved decks. Please delete some decks before creating new ones.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button onClick={() => navigate('/library/deck')}>
+              <PlusCircle className="size-4" /> Create New Deck
+            </Button>
+            <Select
+              onValueChange={(value) => onImportDeck(value)}
+              disabled={pastEvents?.length === 0}
+            >
+              <SelectTrigger className="w-full sm:w-64">
+                <SelectValue placeholder="Import from event" />
+              </SelectTrigger>
+              <SelectContent>
+                {pastEvents?.map((event) => (
+                  <SelectItem key={event.event_id} value={event.event_id}>
+                    {event.event_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      {!library || library.decks.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
+            <h3 className="text-lg font-semibold">No decks found in your library</h3>
+            <p className="text-sm text-muted-foreground">Create a deck to get started.</p>
+            <Button onClick={() => navigate('/library/deck')}>
+              <PlusCircle className="size-4" /> Create New Deck
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Deck Name</TableHead>
+                  <TableHead></TableHead>
+                  <TableHead>Format</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {library.decks.map((deck) => (
+                  <TableRow
+                    key={deck.deck_id}
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/library/deck/${deck.deck_id}`)}
+                    title="View deck"
+                  >
+                    <TableCell className="font-medium">{deck.deck_name}</TableCell>
+                    <TableCell className="text-right">
+                      {deck.has_warnings && <TriangleAlert className="ml-auto size-4 text-warning" />}
+                    </TableCell>
+                    <TableCell>{deck.format_name || "-"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      <p className="mt-4 text-sm italic text-muted-foreground">Decks that haven't been used for 90 days are automatically deleted</p>
+    </PageContainer>
   );
 }

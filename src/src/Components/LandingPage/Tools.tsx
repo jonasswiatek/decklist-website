@@ -1,4 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import { Clock } from "lucide-react";
+import { PageContainer } from "@/Components/layout/PageContainer";
+import { Button } from "@/Components/ui/button";
 
 export function Tools() {
     const navigate = useNavigate();
@@ -8,17 +11,18 @@ export function Tools() {
     };
 
     return (
-        <div className="container text-center mt-5">
-            <div className="mt-4">
-                <button
-                    className="btn btn-dark btn-lg d-flex flex-column align-items-center p-3"
+        <PageContainer size="default">
+            <div className="flex justify-center">
+                <Button
+                    variant="secondary"
+                    size="lg"
                     onClick={handleTournamentTimersClick}
-                    style={{ minWidth: '150px', minHeight: '100px' }} // Added style for explicit sizing
+                    className="flex h-auto min-h-[100px] min-w-[150px] flex-col items-center gap-2 p-4"
                 >
-                    <span style={{ fontSize: '2rem' }}>⏰</span> {/* Icon placeholder */}
-                    <span className="mt-1">Tournament Timers</span>
-                </button>
+                    <Clock className="size-8" />
+                    <span>Tournament Timers</span>
+                </Button>
             </div>
-        </div>
+        </PageContainer>
     )
 }

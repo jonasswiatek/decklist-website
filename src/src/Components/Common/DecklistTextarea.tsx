@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import { UseFormRegisterReturn } from 'react-hook-form';
 import { useSearchCardsQuery } from '../../Hooks/useSearchCardsQuery';
 import { getCaretCoordinates } from '../../Util/getCaretCoordinates';
+import { cn } from '@/lib/utils';
 
 const SECTION_HEADERS = new Set([
   'sideboard', 'commander', 'companion', 'mainboard', 'main deck', 'deck', 'maindeck',
@@ -23,7 +24,7 @@ type DecklistTextareaProps = Omit<React.TextareaHTMLAttributes<HTMLTextAreaEleme
 
 const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
 
-export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration, knownCards, ...textareaProps }) => {
+export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration, knownCards, className, ...textareaProps }) => {
   const localRef = useRef<HTMLTextAreaElement | null>(null);
   const selectedCards = useRef<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
@@ -130,10 +131,14 @@ export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration
   const { ref: rhfRef, onChange: rhfOnChange, ...restReg } = registration;
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="relative">
       <textarea
         {...restReg}
         {...textareaProps}
+        className={cn(
+          "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive flex w-full rounded-md border bg-transparent px-3 py-2 font-mono text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
         ref={(e) => { rhfRef(e); localRef.current = e; }}
         onChange={(e) => { rhfOnChange(e); updateSearch(); }}
         onKeyDown={handleKeyDown}
@@ -141,7 +146,7 @@ export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration
       />
       {showDropdown && items.length > 0 && (
         <div
-          className="decklist-typeahead-dropdown"
+          className="absolute z-50 max-h-60 min-w-[200px] max-w-full overflow-y-auto rounded-md border bg-popover py-1 shadow-md"
           style={{
             left: dropdownPos.left,
             ...(isCoarsePointer
@@ -152,7 +157,12 @@ export const DecklistTextarea: React.FC<DecklistTextareaProps> = ({ registration
           {items.map((item, idx) => (
             <div
               key={item.card_name}
-              className={`decklist-typeahead-item ${idx === selectedIndex ? 'active' : ''}`}
+              className={cn(
+                "cursor-pointer truncate px-3 py-1.5 text-sm",
+                idx === selectedIndex
+                  ? "bg-primary text-primary-foreground"
+                  : "text-popover-foreground hover:bg-accent"
+              )}
               onMouseDown={(e) => { e.preventDefault(); handleSelect(item.card_name); }}
               onMouseEnter={() => setSelectedIndex(idx)}
             >

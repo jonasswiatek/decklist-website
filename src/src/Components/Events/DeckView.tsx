@@ -5,7 +5,7 @@ import { EventDetails, getDecklistRequest, getLibraryDeckRequest } from '../../m
 import { DecklistTable } from './DecklistTable';
 import { useForm } from 'react-hook-form';
 import { HandleValidation } from '../../Util/Validators';
-import { BsArrowLeft, BsPerson, BsTrash, BsCardText, BsPrinter, BsClockHistory } from 'react-icons/bs';
+import { ArrowLeft, User, Trash2, FileText, Printer, History } from 'lucide-react';
 import { getDecklistPlaceholder } from '../../Util/DecklistPlaceholders';
 import { DecklistTextarea } from '../Common/DecklistTextarea';
 import { LoadingScreen } from '../Login/LoadingScreen';
@@ -15,32 +15,34 @@ import { useLibraryDecksQuery } from '../../Hooks/useLibraryDecksQuery';
 import { useDecklistQuery } from '../../Hooks/useDecklistQuery';
 import { useDecklistRevisionsQuery } from '../../Hooks/useDecklistRevisionsQuery';
 import { useSubmitDeckMutation, useDeleteDeckMutation, useSetDeckCheckedMutation } from '../../Hooks/useDeckMutations';
+import { PageContainer } from '@/Components/layout/PageContainer';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert';
+import { Spinner } from '@/Components/ui/spinner';
+import { cn } from '@/lib/utils';
 
 export function DeckView() {
     const { event_id } = useParams();
-    const [ searchParams ] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const id = searchParams.get('id');
 
     const { data, isError, isLoading } = useEventDetailsQuery(event_id!);
-    
+
     if (isLoading) {
         return (
             <LoadingScreen />
         )
     }
 
-    if(isError) {
+    if (isError) {
         return (
-            <>
-                <div className='row'>
-                    <div className='col'>
-                        <p>Error. Try again later.</p>
-                    </div>
-                </div>
-            </>
+            <PageContainer>
+                <p className="text-muted-foreground">Error. Try again later.</p>
+            </PageContainer>
         )
     }
-    
+
     return (<DeckEditor event={data!} user_id={id} />)
 }
 
@@ -48,6 +50,8 @@ type DeckEditorProps = {
     event: EventDetails,
     user_id?: string | null,
 }
+
+const selectClasses = "border-input focus-visible:border-ring focus-visible:ring-ring/50 flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm text-foreground shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 [&_option]:bg-popover [&_option]:text-popover-foreground [&_optgroup]:bg-popover [&_optgroup]:text-popover-foreground";
 
 export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isJudge = props.user_id != null;
@@ -73,7 +77,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         deck_name?: string,
         decklist_text: string
     };
- 
+
     const { register, setError, handleSubmit, clearErrors, reset, setValue, formState: { errors, isDirty } } = useForm<Inputs>();
     const submitMutation = useSubmitDeckMutation({
         onSuccess: () => {
@@ -183,7 +187,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
         else {
             setShowRevisionId(null);
         }
-        
+
         setShowRevisionsTable(newShowState);
     };
 
@@ -202,7 +206,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     }
 
     if (isDecklistError || isLibraryError) {
-        return <p>Error, try later</p>
+        return <PageContainer><p className="text-muted-foreground">Error, try later</p></PageContainer>
     }
 
     const selectedRevision = revisions?.revisions.find(revision => revision.revision_id === showRevisionId);
@@ -210,7 +214,7 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
     const isViewingPreviousRevision = !(selectedRevision?.is_current ?? true);
 
     if (isJudge && !data) {
-        return <p>No decklist found</p>
+        return <PageContainer><p className="text-muted-foreground">No decklist found</p></PageContainer>
     }
 
     // Calculate mainboard and sideboard counts
@@ -229,317 +233,291 @@ export const DeckEditor: React.FC<DeckEditorProps> = (props) => {
 
     const hasSubmission = !!data;
     const inputDisabled = (isJudge && !isEditing) || !isOpen;
+    const blurred = isJudge && !isEditing;
     const availableSavedDecks = library?.decks.filter(deck => deck.format === props.event.format) ?? [];
     const pastEvents = events?.filter(
         event => event.role === "player" &&
-        event.format === props.event.format &&
-        event.event_id !== props.event.event_id) ?? [];
+            event.format === props.event.format &&
+            event.event_id !== props.event.event_id) ?? [];
 
     return (
-        <>
-        <div className="container mt-4">
-        {isJudge && (
-            <div className='row'>
-                <div className='col-12 mb-3 d-flex justify-content-between align-items-center'>
-                    <button 
-                        type="button" 
-                        className="btn btn-link text-decoration-none p-0" 
-                        onClick={handleBackToEvent}
-                    >
-                        <BsArrowLeft className="me-1" /> Back
-                    </button>
-                    {!showRevisionsTable && (
-                        <FlagCheckedButton 
-                            eventId={props.event.event_id} 
-                            userId={props.user_id!} 
-                            isChecked={data?.is_deck_checked || false} 
-                            refetch={handleDeckChecked} 
-                        />
-                    )}
-                </div>
-                {data?.player_name && (
-                    <div className='col-12 mb-3'>
-                        <h3 className="deck-player-name">
-                            <BsPerson className="me-2" />
+        <PageContainer size="lg">
+            {isJudge && (
+                <div className="mb-4">
+                    <div className="flex items-center justify-between">
+                        <Button variant="link" className="h-auto p-0 text-muted-foreground hover:text-foreground" onClick={handleBackToEvent}>
+                            <ArrowLeft className="size-4" /> Back
+                        </Button>
+                        {!showRevisionsTable && (
+                            <FlagCheckedButton
+                                eventId={props.event.event_id}
+                                userId={props.user_id!}
+                                isChecked={data?.is_deck_checked || false}
+                                refetch={handleDeckChecked}
+                            />
+                        )}
+                    </div>
+                    {data?.player_name && (
+                        <h3 className="mt-3 flex items-center gap-2 text-xl font-semibold">
+                            <User className="size-5 text-muted-foreground" />
                             {data.player_name}
                         </h3>
-                    </div>
-                )}
-            </div>
-        )}
-
-        <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmitDecklist)(e); }} >
-            <div className='row'>
-
-                <div className='col-lg-4 col-sm-12'>
-                    {!showRevisionsTable && (
-                        <>
-                            {!isOpen && !hasSubmission && (
-                                <div className="alert alert-info mb-3">This tournament is past its decklist submission deadline.</div>
-                            )}
-                            {!isOpen && hasSubmission && (
-                                <div className="alert alert-info mb-3"><b>Your decklist is submitted</b>, but can no longer be modified because the submission deadline has passed.</div>
-                            )}
-                            {!isJudge && isOpen && hasSubmission && (
-                                <div className="alert alert-success mb-3"><b>Your decklist is submitted</b>, and can be modified until the submission deadline.</div>
-                            )}
-                        </>
                     )}
-                        <div className="event-info mb-3 d-flex justify-content-between align-items-center">
-                            <p className="mb-0"><strong>Format:</strong> {props.event.format_name}</p>
-                            <div className="d-flex">
-                                {data && (
-                                    <>
-                                    <button
+                </div>
+            )}
+
+            <form onSubmit={(e) => { clearErrors(); handleSubmit(onSubmitDecklist)(e); }}>
+                <div className="grid gap-6 lg:grid-cols-3">
+
+                    <div className="lg:col-span-1">
+                        {!showRevisionsTable && (
+                            <>
+                                {!isOpen && !hasSubmission && (
+                                    <Alert className="mb-3"><AlertDescription>This tournament is past its decklist submission deadline.</AlertDescription></Alert>
+                                )}
+                                {!isOpen && hasSubmission && (
+                                    <Alert className="mb-3"><AlertDescription><b className="text-foreground">Your decklist is submitted</b>, but can no longer be modified because the submission deadline has passed.</AlertDescription></Alert>
+                                )}
+                                {!isJudge && isOpen && hasSubmission && (
+                                    <Alert variant="success" className="mb-3"><AlertDescription><b>Your decklist is submitted</b>, and can be modified until the submission deadline.</AlertDescription></Alert>
+                                )}
+                            </>
+                        )}
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                            <p className="text-sm"><strong>Format:</strong> {props.event.format_name}</p>
+                            {data && (
+                                <div className="flex gap-2">
+                                    <Button
                                         type="button"
-                                        className="btn btn-sm btn-outline-secondary me-2"
+                                        variant="outline"
+                                        size="icon"
                                         title={showRevisionsTable ? "Hide Revisions" : "Show Revisions"}
                                         onClick={handleShowRevisions}
                                         disabled={revisionsLoading}
                                     >
-                                        {revisionsLoading ? (
-                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        ) : (
-                                            <BsClockHistory />
-                                        )}
-                                    </button>
-                                    <Link 
-                                        to={`/e/${props.event.event_id}/deck/print${props.user_id ? `?id=${props.user_id}` : ''}`}
-                                        className="btn btn-sm btn-outline-secondary"
-                                        title="Print Decklist"
-                                        target="_blank" // Add this to open in a new window
-                                        rel="noopener noreferrer" // Add this for security best practices
-                                    >
-                                        <BsPrinter className="me-1" /> Print
-                                    </Link>
-                                    </>
-                                )}
-                            </div>
+                                        {revisionsLoading ? <Spinner className="size-4" /> : <History className="size-4" />}
+                                    </Button>
+                                    <Button asChild variant="outline" size="sm" title="Print Decklist">
+                                        <Link
+                                            to={`/e/${props.event.event_id}/deck/print${props.user_id ? `?id=${props.user_id}` : ''}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <Printer className="size-4" /> Print
+                                        </Link>
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                         {showRevisionsTable && revisions && revisions.revisions.length > 0 && (
-                            <div className='col-12 mb-3'>
-                                <table className="table table-sm table-hover" style={{ fontSize: '0.8rem' }}>
-                                    <thead>
-                                        <tr>
-                                            <th>Revision</th>
-                                            <th>By</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {revisions.revisions.map((revision) => (
-                                            <tr 
-                                                key={revision.revision_id} 
-                                                onClick={() => handleSelectRevision(revision.revision_id)} 
-                                                className={revision.revision_id === showRevisionId ? 'table-success' : ''}
-                                                style={{ 
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                <td>{new Date(revision.created_at).toLocaleString()} {revision.is_current ? "- latest" : ""}</td>
-                                                <td>{revision.revised_by}</td>
-                                                <td>{revision.revision_type}</td>
+                            <div className="mb-3">
+                                <div className="overflow-hidden rounded-md border">
+                                    <table className="w-full text-xs">
+                                        <thead className="bg-muted/50 text-muted-foreground">
+                                            <tr>
+                                                <th className="px-2 py-1.5 text-left font-medium">Revision</th>
+                                                <th className="px-2 py-1.5 text-left font-medium">By</th>
+                                                <th className="px-2 py-1.5 text-left font-medium"></th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                <p className="small text-muted mb-0">Only the last 20 revisions are shown.</p>
+                                        </thead>
+                                        <tbody>
+                                            {revisions.revisions.map((revision) => (
+                                                <tr
+                                                    key={revision.revision_id}
+                                                    onClick={() => handleSelectRevision(revision.revision_id)}
+                                                    className={cn(
+                                                        "cursor-pointer border-t transition-colors hover:bg-muted/50",
+                                                        revision.revision_id === showRevisionId && "bg-primary/15"
+                                                    )}
+                                                >
+                                                    <td className="px-2 py-1.5">{new Date(revision.created_at).toLocaleString()} {revision.is_current ? "- latest" : ""}</td>
+                                                    <td className="px-2 py-1.5">{revision.revised_by}</td>
+                                                    <td className="px-2 py-1.5">{revision.revision_type}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">Only the last 20 revisions are shown.</p>
                             </div>
                         )}
                         {showRevisionsTable && revisions && revisions.revisions.length === 0 && (
-                            <div className='col-12 mb-3'>
-                                <p className="text-muted">No revisions found for this decklist.</p>
-                            </div>
+                            <p className="mb-3 text-muted-foreground">No revisions found for this decklist.</p>
                         )}
-                    {!showRevisionsTable && (<>
-                        <div className="position-relative">
-                            <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
-                                <span className="input-group-text" id="basic-addon1">
-                                    <BsPerson />
-                                </span>
-                                <input
-                                    type='text'
-                                    id="player_name"
-                                    className={`form-control ${errors.player_name ? 'is-invalid' : ''}`}
-                                    placeholder='Your Name'
-                                    required
-                                    {...register("player_name", { value: data?.player_name ?? '' })}
-                                    disabled={inputDisabled}
-                                />
+                        {!showRevisionsTable && (<>
+                            <div className={cn("flex gap-2 transition", blurred && "pointer-events-none blur-sm opacity-60")}>
+                                <div className="relative flex-1">
+                                    <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        type="text"
+                                        id="player_name"
+                                        className="pl-9"
+                                        placeholder="Your Name"
+                                        required
+                                        aria-invalid={!!errors.player_name}
+                                        {...register("player_name", { value: data?.player_name ?? '' })}
+                                        disabled={inputDisabled}
+                                    />
+                                </div>
                                 {data && !isJudge && isOpen && (
-                                    <button
+                                    <Button
                                         type="button"
-                                        className="btn btn-danger"
+                                        variant="destructive"
+                                        size="icon"
                                         onClick={handleDeleteDeck}
                                         disabled={deleteDeckMutation.isPending}
                                     >
-                                        {deleteDeckMutation.isPending ? (
-                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        ) : (
-                                            <BsTrash />
-                                        )}
-                                    </button>
-                                )}
-                                {errors.player_name && (
-                                    <div className="invalid-feedback">{errors.player_name.message}</div>
+                                        {deleteDeckMutation.isPending ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
+                                    </Button>
                                 )}
                             </div>
-                        </div>
-                        <div className="position-relative mt-2">
-                            <div className={`input-group ${isJudge && !isEditing ? 'blurred' : ''}`}>
-                                <span className="input-group-text" id="basic-addon2">
-                                    <BsCardText />
-                                </span>
-                                <input
-                                    type='text'
+                            {errors.player_name && <p className="mt-1 text-sm text-destructive">{errors.player_name.message}</p>}
+
+                            <div className={cn("relative mt-2 transition", blurred && "pointer-events-none blur-sm opacity-60")}>
+                                <FileText className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                    type="text"
                                     id="deck_name"
-                                    className={`form-control ${errors.deck_name ? 'is-invalid' : ''}`}
-                                    placeholder='Deck Name (Optional)'
+                                    className="pl-9"
+                                    placeholder="Deck Name (Optional)"
+                                    aria-invalid={!!errors.deck_name}
                                     {...register("deck_name", { value: data?.deck_name ?? '' })}
                                     disabled={inputDisabled}
                                 />
-                                {errors.deck_name && (
-                                    <div className="invalid-feedback">{errors.deck_name.message}</div>
-                                )}
                             </div>
-                        </div>
-                        <div className="position-relative">
-                            {isJudge && !isEditing && (
-                                <button 
-                                    type="button" 
-                                    className="btn btn-primary edit-button-overlay" 
-                                    onClick={() => {
-                                        setIsEditing(true);
-                                    }}
-                                >
-                                    Edit Decklist
-                                </button>
-                            )}
-                            <div className={`textarea-container ${isJudge && !isEditing ? 'blurred' : ''}`}>
-                                <div className="mb-1">
+                            {errors.deck_name && <p className="mt-1 text-sm text-destructive">{errors.deck_name.message}</p>}
+
+                            <div className="relative mt-3">
+                                {blurred && (
+                                    <Button
+                                        type="button"
+                                        className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
+                                        onClick={() => setIsEditing(true)}
+                                    >
+                                        Edit Decklist
+                                    </Button>
+                                )}
+                                <div className={cn(blurred && "pointer-events-none blur-sm opacity-60")}>
                                     {!isJudge && (
-                                        <div className="text-end">
-                                            <a href={`/help/decklist#${props.event.decklist_style.toLowerCase()}`} target="_blank" rel="noopener noreferrer">
+                                        <div className="mb-1 text-right text-sm">
+                                            <a
+                                                href={`/help/decklist#${props.event.decklist_style.toLowerCase()}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-primary underline-offset-4 hover:underline"
+                                            >
                                                 See formatting guide
                                             </a>
                                         </div>
                                     )}
+
+                                    {!isJudge && (
+                                        <div className="mb-2">
+                                            <select
+                                                className={selectClasses}
+                                                onChange={(e) => {
+                                                    const selectedDeckId = e.target.value;
+                                                    if (selectedDeckId) {
+                                                        handleImportDeck(selectedDeckId);
+                                                    }
+                                                }}
+                                                disabled={(availableSavedDecks.length === 0 && pastEvents.length === 0) || inputDisabled}
+                                            >
+                                                <option key="none" value="none">
+                                                    {availableSavedDecks.length === 0 && pastEvents.length === 0
+                                                        ? "No saved decks for this format"
+                                                        : "Import from..."}
+                                                </option>
+                                                {availableSavedDecks.length > 0 && (
+                                                    <optgroup label="My Decks">
+                                                        {availableSavedDecks.map(deck => (
+                                                            <option key={`saved-${deck.deck_id}`} value={`saved:${deck.deck_id}`}>
+                                                                {deck.deck_name}
+                                                            </option>
+                                                        ))}
+                                                    </optgroup>
+                                                )}
+                                                {pastEvents && pastEvents.length > 0 && (
+                                                    <optgroup label="Other Events">
+                                                        {pastEvents.map(event => (
+                                                            <option key={`event-${event.event_id}`} value={`event:${event.event_id}`}>
+                                                                {event.event_name}
+                                                            </option>
+                                                        ))}
+                                                    </optgroup>
+                                                )}
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <DecklistTextarea
+                                        id="decklist_text"
+                                        aria-invalid={!!errors.decklist_text}
+                                        placeholder={getDecklistPlaceholder(props.event.decklist_style)}
+                                        required
+                                        registration={register("decklist_text", { value: data?.decklist_text })}
+                                        style={{ height: 400 }}
+                                        disabled={inputDisabled}
+                                        knownCards={data?.groups ? new Set(data.groups.flatMap(g => g.cards.map(c => c.card_name.toLowerCase()))) : undefined}
+                                    />
+                                    {errors.decklist_text && (
+                                        <p className="mt-1 text-sm text-destructive">{errors.decklist_text.message}</p>
+                                    )}
                                 </div>
-
-                                {!isJudge && (
-                                    <div className="mb-1">
-                                        <select 
-                                            className="form-select" 
-                                            onChange={(e) => {
-                                                const selectedDeckId = e.target.value;
-                                                if (selectedDeckId) {
-                                                    handleImportDeck(selectedDeckId);
-                                                }
-                                            }}
-                                            disabled={(availableSavedDecks.length === 0 && pastEvents.length === 0) || inputDisabled}
-                                        >
-                                            <option key="none" value="none">
-                                                {availableSavedDecks.length === 0 && pastEvents.length === 0
-                                                    ? "No saved decks for this format" 
-                                                    : "Import from..."}
-                                            </option>
-                                            {availableSavedDecks.length > 0 && (
-                                                <optgroup label="My Decks">
-                                                    {availableSavedDecks.map(deck => (
-                                                        <option key={`saved-${deck.deck_id}`} value={`saved:${deck.deck_id}`}>
-                                                            {deck.deck_name}
-                                                        </option>
-                                                    ))}
-                                                </optgroup>
-                                            )}
-                                            {pastEvents && pastEvents.length > 0 && (
-                                                <optgroup label="Other Events">
-                                                    {pastEvents.map(event => (
-                                                        <option key={`event-${event.event_id}`} value={`event:${event.event_id}`}>
-                                                            {event.event_name}
-                                                        </option>
-                                                    ))}
-                                                </optgroup>
-                                            )}
-                                        </select>
-                                    </div>
-                                )}
-
-                                <DecklistTextarea
-                                    id='decklist_text'
-                                    className={`form-control ${errors.decklist_text ? 'is-invalid' : ''}`}
-                                    placeholder={getDecklistPlaceholder(props.event.decklist_style)}
-                                    required
-                                    registration={register("decklist_text", { value: data?.decklist_text })}
-                                    style={{ height: 400 }}
-                                    disabled={inputDisabled}
-                                    knownCards={data?.groups ? new Set(data.groups.flatMap(g => g.cards.map(c => c.card_name.toLowerCase()))) : undefined}
-                                />
-                                {errors.decklist_text && (
-                                    <div className="invalid-feedback d-block">{errors.decklist_text.message}</div>
-                                )}
-                                
                             </div>
-                        </div>
-                        <div className="event-info mb-3 mt-1 p-2 d-flex justify-content-between align-items-center">
-                                <div className="d-flex">
+                            <div className="mt-2 flex items-center justify-between gap-2">
+                                <div className="flex gap-3 text-sm text-muted-foreground">
                                     {props.event.decklist_style.toLowerCase() === "commander" ? (
-                                        <span className="no-wrap-text">Deck: {mainboardCount}</span>
+                                        <span className="whitespace-nowrap">Deck: {mainboardCount}</span>
                                     ) : (
                                         <>
-                                            <span className="me-2 no-wrap-text">Main: {mainboardCount}</span>
-                                            <span className="no-wrap-text">Side: {sideboardCount}</span>
+                                            <span className="whitespace-nowrap">Main: {mainboardCount}</span>
+                                            <span className="whitespace-nowrap">Side: {sideboardCount}</span>
                                         </>
                                     )}
                                 </div>
                                 {isDirty && (
-                                    <button
-                                        type='submit'
-                                        className='btn btn-primary no-wrap-text'
-                                        id='submit-button'
+                                    <Button
+                                        type="submit"
+                                        id="submit-button"
+                                        className="whitespace-nowrap"
                                         disabled={submitMutation.isPending}
                                     >
                                         {submitMutation.isPending ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                Submitting
-                                            </>
+                                            <><Spinner className="size-4 text-current" />Submitting</>
                                         ) : (
                                             data ? 'Resubmit Decklist' : 'Submit Decklist'
                                         )}
-                                    </button>
+                                    </Button>
                                 )}
-                        </div>
-                    </>)}
-
-                    {showRevisionsTable && isViewingPreviousRevision && (
-                        <>
-                            <div className="alert alert-warning mb-3">You're viewing a previous version of this decklist.</div>
-                        </>
-                    )}
-
-                    {data?.deck_warnings && data.deck_warnings.length > 0 && (
-                        <div className="mt-3">
-                            <div className="alert alert-warning">
-                                <h5 className="alert-heading">Deck Warnings</h5>
-                                <ul className="mb-0">
-                                    {data.deck_warnings.map((warning, index) => (
-                                        <li key={index}>{warning}</li>
-                                    ))}
-                                </ul>
                             </div>
-                        </div>
-                    )}
+                        </>)}
+
+                        {showRevisionsTable && isViewingPreviousRevision && (
+                            <Alert variant="warning" className="mb-3"><AlertDescription>You're viewing a previous version of this decklist.</AlertDescription></Alert>
+                        )}
+
+                        {data?.deck_warnings && data.deck_warnings.length > 0 && (
+                            <Alert variant="warning" className="mt-3">
+                                <AlertTitle>Deck Warnings</AlertTitle>
+                                <AlertDescription>
+                                    <ul className="list-disc pl-4">
+                                        {data.deck_warnings.map((warning, index) => (
+                                            <li key={index}>{warning}</li>
+                                        ))}
+                                    </ul>
+                                </AlertDescription>
+                            </Alert>
+                        )}
+                    </div>
+
+
+                    <div className="mt-2 lg:col-span-2">
+                        {data && <DecklistTable cardGroups={data.groups} allowChecklist={isJudge} />}
+                    </div>
                 </div>
-                
-                
-                <div className='col-lg-8 col-sm-12 decklist-table-container' style={{ marginTop: '10px' }}>
-                    {data && <DecklistTable cardGroups={data.groups} allowChecklist={isJudge} />}
-                </div>
-            </div>
-        </form>
-        </div>
-        </>
+            </form>
+        </PageContainer>
     )
 }
 
@@ -564,13 +542,13 @@ const FlagCheckedButton: React.FC<{ eventId: string, userId: string, isChecked: 
     };
 
     return (
-        <button
+        <Button
             type="button"
             onClick={onSubmit}
-            className={`btn ${setCheckedMutation.isPending ? 'btn-secondary' : (localCheckedState ? 'btn-warning' : 'btn-success')}`}
+            variant={setCheckedMutation.isPending ? 'secondary' : (localCheckedState ? 'outline' : 'default')}
             disabled={setCheckedMutation.isPending}
         >
             {localCheckedState ? 'Mark as Unchecked' : 'Mark as Checked'}
-        </button>
+        </Button>
     );
 };

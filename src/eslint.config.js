@@ -26,4 +26,11 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // shadcn/ui primitives co-locate variant helpers (cva) with components.
+    files: ['src/Components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 );

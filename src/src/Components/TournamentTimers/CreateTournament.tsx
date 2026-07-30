@@ -1,10 +1,16 @@
 import { ReactElement } from 'react';
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Button, Card, Form, Spinner, Alert } from 'react-bootstrap';
-import { BsArrowLeft } from 'react-icons/bs';
+import { ArrowLeft } from 'lucide-react';
 import { HandleValidation } from '../../Util/Validators';
 import { useCreateTournamentMutation } from '../../Hooks/useTournamentMutations';
+import { PageContainer } from "@/Components/layout/PageContainer";
+import { Button } from "@/Components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { Spinner } from "@/Components/ui/spinner";
 
 // Define the expected input type for the form
 type Inputs = {
@@ -32,69 +38,59 @@ export function CreateTournament(): ReactElement {
   };
 
   return (
-    <Container className="mt-4">
-      <div className="mb-3">
+    <PageContainer size="sm">
+      <div className="mb-4">
         <Button
           variant="link"
-          className="text-decoration-none p-0"
+          className="h-auto p-0"
           onClick={() => navigate('/timers')}
         >
-          <BsArrowLeft className="me-1" /> Back to Tournament Timers
+          <ArrowLeft className="size-4" /> Back to Tournament Timers
         </Button>
       </div>
 
-      <Row className="justify-content-center">
-        <Col md={8} lg={6}>
-          <Card className="mb-4">
-            <Card.Header as="h5" className="bg-dark text-white">
-              Create New Tournament Timer
-            </Card.Header>
-            <Card.Body>
-              <Form onSubmit={handleSubmit(onSubmit)}>
-                {errors.root?.serverError && (
-                  <Alert variant="danger">
-                    {errors.root.serverError.message}
-                  </Alert>
-                )}
-                <Form.Group className="mb-3" controlId="tournament_name">
-                  <Form.Label>Tournament Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter tournament name (e.g., Modern RCQ Q1)"
-                    isInvalid={!!errors.tournament_name}
-                    {...register("tournament_name", { required: "Tournament name is required" })}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.tournament_name?.message}
-                  </Form.Control.Feedback>
-                </Form.Group>
+      <Card>
+        <CardHeader>
+          <CardTitle>Create New Tournament Timer</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {errors.root?.serverError && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  {errors.root.serverError.message}
+                </AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="tournament_name">Tournament Name</Label>
+              <Input
+                type="text"
+                id="tournament_name"
+                placeholder="Enter tournament name (e.g., Modern RCQ Q1)"
+                aria-invalid={!!errors.tournament_name}
+                {...register("tournament_name", { required: "Tournament name is required" })}
+              />
+              {errors.tournament_name && (
+                <p className="text-sm text-destructive">{errors.tournament_name?.message}</p>
+              )}
+            </div>
 
-                <div className="d-grid mt-4">
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    disabled={mutation.isPending}
-                  >
-                    {mutation.isPending ? (
-                      <>
-                        <Spinner
-                          as="span"
-                          animation="border"
-                          size="sm"
-                          role="status"
-                          aria-hidden="true"
-                          className="me-2"
-                        />
-                        Creating...
-                      </>
-                    ) : 'Create Tournament Timer'}
-                  </Button>
-                </div>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? (
+                <>
+                  <Spinner className="size-4 text-current" />
+                  Creating...
+                </>
+              ) : 'Create Tournament Timer'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </PageContainer>
   );
 }

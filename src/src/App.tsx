@@ -1,22 +1,22 @@
-import './App.scss'
 import {
   createBrowserRouter,
+  NavLink,
   Outlet,
   RouterProvider,
   ScrollRestoration,
+  useLocation,
 } from "react-router-dom";
-import { EventView } from './Components/Events/EventView.tsx'
-import { ProtectedLayout } from './Components/Login/LoggedIn.tsx';
-import { LandingPage } from './Components/LandingPage/LandingPage.tsx';
+import { useState } from "react";
 import {
   QueryClient,
   QueryClientProvider,
   useQueryClient,
 } from '@tanstack/react-query'
+import { LogIn, LogOut, Menu } from "lucide-react";
 
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
+import { EventView } from './Components/Events/EventView.tsx'
+import { ProtectedLayout } from './Components/Login/LoggedIn.tsx';
+import { LandingPage } from './Components/LandingPage/LandingPage.tsx';
 import { CreateEvent } from './Components/Events/CreateEvent.tsx';
 import { DeckView } from './Components/Events/DeckView.tsx';
 import { QRCodeView } from './Components/Events/Views/QRCodeView';
@@ -40,12 +40,222 @@ import { LoadingScreen } from './Components/Login/LoadingScreen.tsx';
 import { useAuthQuery } from './Hooks/useAuthQuery.ts';
 import { useLogoutMutation } from './Hooks/useAuthMutations.ts';
 import { ToastProvider } from './Util/ToastContext.tsx';
+import { Button } from '@/Components/ui/button';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/Components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 const queryClient = new QueryClient()
 
+const NAV_LINKS = [
+  { to: "/e/new", label: "Create Tournament" },
+  { to: "/library", label: "My Decks" },
+  { to: "/tools", label: "Tools" },
+] as const;
+
+/** Routes that render fullscreen with no chrome (kiosk / print / projector). */
+function useChromeless() {
+  const { pathname } = useLocation();
+  return (
+    /\/e\/.*\/qr$/i.test(pathname) ||
+    /\/e\/.*\/deck\/print$/i.test(pathname) ||
+    /\/timers\/.*\/view$/i.test(pathname)
+  );
+}
+
+function Brand({ className }: { className?: string }) {
+  return (
+    <NavLink
+      to="/"
+      className={cn(
+        "group flex items-center gap-2 text-lg font-semibold tracking-tight",
+        className
+      )}
+    >
+      <span className="grid size-7 place-items-center rounded-md bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
+        <span className="text-sm font-bold">D</span>
+      </span>
+      <span>
+        decklist<span className="text-primary">.lol</span>
+      </span>
+    </NavLink>
+  );
+}
+
+function NavBar() {
+  const { authorized } = useAuthQuery();
+  const queryClient = useQueryClient();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  const logoutMutation = useLogoutMutation({
+    onSuccess: () => {
+      queryClient.resetQueries();
+    },
+  });
+
+  if (useChromeless()) return null;
+
+  const handleLogout = () => logoutMutation.mutate({});
+  const loginHref = `/login?return=${encodeURIComponent(
+    location.pathname + location.search
+  )}`;
+
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+      isActive
+        ? "bg-secondary text-foreground"
+        : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+    );
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <Brand />
+
+        {/* Desktop nav */}
+        <nav className="hidden items-center gap-1 md:flex">
+          {NAV_LINKS.map((link) => (
+            <NavLink key={link.to} to={link.to} className={linkClass}>
+              {link.label}
+            </NavLink>
+          ))}
+          <div className="mx-2 h-5 w-px bg-border" />
+          {authorized ? (
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="size-4" />
+              Log out
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="sm">
+              <NavLink to={loginHref}>
+                <LogIn className="size-4" />
+                Log in
+              </NavLink>
+            </Button>
+          )}
+        </nav>
+
+        {/* Mobile nav */}
+        <div className="md:hidden">
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Menu className="size-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <SheetHeader>
+                <SheetTitle className="text-left">
+                  <Brand />
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-1 px-2">
+                {NAV_LINKS.map((link) => (
+                  <SheetClose asChild key={link.to}>
+                    <NavLink
+                      to={link.to}
+                      className={({ isActive }) =>
+                        cn(
+                          "rounded-md px-3 py-2.5 text-base font-medium transition-colors",
+                          isActive
+                            ? "bg-secondary text-foreground"
+                            : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                        )
+                      }
+                    >
+                      {link.label}
+                    </NavLink>
+                  </SheetClose>
+                ))}
+              </nav>
+              <div className="mt-auto p-4">
+                {authorized ? (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    <LogOut className="size-4" />
+                    Log out
+                  </Button>
+                ) : (
+                  <SheetClose asChild>
+                    <Button asChild className="w-full">
+                      <NavLink to={loginHref}>
+                        <LogIn className="size-4" />
+                        Log in
+                      </NavLink>
+                    </Button>
+                  </SheetClose>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function Footer() {
+  if (useChromeless()) return null;
+
+  const footerLinks = [
+    { to: "/help/privacy", label: "Privacy Policy" },
+    { to: "/help/terms-and-services", label: "Terms of Service" },
+    { to: "/help/contribute", label: "Contribute" },
+    { to: "/help/about", label: "About" },
+  ];
+
+  return (
+    <footer className="mt-auto border-t border-border/60 py-6">
+      <div className="mx-auto w-full max-w-7xl px-4 text-center sm:px-6">
+        <p className="text-sm text-muted-foreground">
+          Brought to you with love, for free and with no guarantees.
+        </p>
+        <nav className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-sm">
+          {footerLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
+    </footer>
+  );
+}
+
+function RootLayout() {
+  return (
+    <div className="flex min-h-svh flex-col">
+      <ScrollRestoration />
+      <NavBar />
+      <main className="flex flex-1 flex-col">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
 const router = createBrowserRouter([
   {
-    element: <><ScrollRestoration /><Outlet /></>,
+    element: <RootLayout />,
     children: [
       // --- Public routes ---
       { path: "/", element: <LandingPage /> },
@@ -83,120 +293,28 @@ const router = createBrowserRouter([
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { isLoading, isError, refetch } = useAuthQuery();
   if (isLoading) return <LoadingScreen />;
-  if (isError) return (
-    <div className="container py-5 text-center">
-      <h4>Something went wrong</h4>
-      <p className="text-muted">Unable to reach the server. Please try again later.</p>
-      <button className="btn btn-primary" onClick={() => refetch()}>Retry</button>
-    </div>
-  );
+  if (isError)
+    return (
+      <div className="flex min-h-svh flex-col items-center justify-center gap-3 px-4 text-center">
+        <h4 className="text-xl font-semibold">Something went wrong</h4>
+        <p className="text-muted-foreground">
+          Unable to reach the server. Please try again later.
+        </p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    );
   return <>{children}</>;
 }
 
 function App() {
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <AuthGate>
-          <ToastProvider>
-            {/* This div acts as the main flex container for the page */}
-            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-              <NavBar />
-              {/* This main element will grow to fill available space, pushing the footer down */}
-              <main style={{ flex: '1 0 auto' }}>
-                <RouterProvider router={router} />
-              </main>
-              <Footer />
-            </div>
-          </ToastProvider>
-        </AuthGate>
-      </QueryClientProvider>
-    </>
-  );
-}
-
-function NavBar()
-{
-  const { authorized } = useAuthQuery();
-  const queryClient = useQueryClient();
-  const logoutMutation = useLogoutMutation({
-    onSuccess: () => {
-      queryClient.resetQueries();
-    },
-  });
-
-  const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
-  const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
-  const isTournamentPublicViewRoute = window.location.pathname.match(/\/timers\/.*\/view$/i) !== null;
-
-  if (isQRCodeRoute || isPrintDecklistRoute || isTournamentPublicViewRoute) {
-    return null;
-  }
-
-  // Custom navigation function to avoid full page reloads
-  const handleNavigate = (path: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    history.pushState(null, '', path);
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  };
-
-  const handleLogout = () => {
-    logoutMutation.mutate({});
-  }
-
-  return <>
-    <Navbar collapseOnSelect expand="md">
-      <Container>
-        <Navbar.Brand onClick={handleNavigate('/')} href="/" className="ps-2">decklist.lol</Navbar.Brand>
-        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-        <Navbar.Collapse id="responsive-navbar-nav">
-          <Nav className="ms-auto">
-            <Nav.Link onClick={handleNavigate('/e/new')} href="/e/new">Create Tournament</Nav.Link>
-            <Nav.Link onClick={handleNavigate('/library')} href="/library">My Decks</Nav.Link>
-            <Nav.Link onClick={handleNavigate('/tools')} href="/tools">Tools</Nav.Link>
-            {authorized ? (
-              <>
-                <Nav.Link onClick={() => handleLogout()}>Log out</Nav.Link>
-              </>
-              ) :
-              (
-                <>
-                  <Nav.Link onClick={handleNavigate(`/login?return=${encodeURIComponent(window.location.pathname + window.location.search)}`)} href="/login">Log in</Nav.Link>
-                </>
-              )}
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
-    <Container id='top-floating-container'>
-    </Container>
-  </>
-}
-
-function Footer() {
-  const isQRCodeRoute = window.location.pathname.match(/\/e\/.*\/qr$/i) !== null;
-  const isPrintDecklistRoute = window.location.pathname.match(/\/e\/.*\/deck\/print$/i) !== null;
-  const isTournamentPublicViewRoute = window.location.pathname.match(/\/timers\/.*\/view$/i) !== null;
-
-  if (isQRCodeRoute || isPrintDecklistRoute || isTournamentPublicViewRoute) {
-    return null;
-  }
-
-  return (
-    <footer className="py-3 mt-auto"> {/* mt-auto will now work as expected */}
-      <Container className="text-center">
-        <div className="mt-2">
-          Brought to you with love, for free and with no guarantees.
-        </div>
-
-        <Nav className="justify-content-center small">
-          <Nav.Link href="/help/privacy" className="text-reset text-decoration-none">Privacy Policy</Nav.Link>
-          <Nav.Link href="/help/terms-and-services" className="text-reset text-decoration-none">Terms of Service</Nav.Link>
-          <Nav.Link href="/help/contribute" className="text-reset text-decoration-none">Contribute</Nav.Link>
-          <Nav.Link href="/help/about" className="text-reset text-decoration-none">About</Nav.Link>
-        </Nav>
-      </Container>
-    </footer>
+    <QueryClientProvider client={queryClient}>
+      <AuthGate>
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
+      </AuthGate>
+    </QueryClientProvider>
   );
 }
 

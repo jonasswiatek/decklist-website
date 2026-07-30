@@ -1,11 +1,15 @@
 import React from 'react';
-import { Button, Container, Row, Col, Alert, Table } from 'react-bootstrap';
 import { useUserTournaments } from '../../Hooks/useTournamentTimers';
 import { UserTournamentsResponseItem } from '../../model/api/tournamentTimers';
 import { LoadingScreen } from '../Login/LoadingScreen';
 import { useNavigate, Link } from 'react-router-dom';
-import { BsArrowLeft } from 'react-icons/bs';
+import { ArrowLeft } from 'lucide-react';
 import { useAuthQuery } from '../../Hooks/useAuthQuery';
+import { PageContainer } from "@/Components/layout/PageContainer";
+import { Button } from "@/Components/ui/button";
+import { Badge } from "@/Components/ui/badge";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
 
 const MyTournaments: React.FC = () => {
   const { authorized } = useAuthQuery();
@@ -20,88 +24,85 @@ const MyTournaments: React.FC = () => {
 
   if (isError) {
     return (
-      <Container className="mt-4">
-        <Alert variant="danger">
-          Error fetching tournaments. Please try again later.
+      <PageContainer size="lg">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Error fetching tournaments. Please try again later.
+          </AlertDescription>
         </Alert>
-      </Container>
+      </PageContainer>
     );
   }
 
   return (
-    <Container className="mt-4">
+    <PageContainer size="lg">
+      <div className="mb-6">
+        <div className="mb-3">
+          <Button
+            variant="link"
+            className="h-auto p-0"
+            onClick={() => navigate('/tools')}
+          >
+            <ArrowLeft className="size-4" /> Tools
+          </Button>
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Round timers for your tournaments</h1>
+        <p className="mt-2 text-lg text-muted-foreground">Synchronized with WebSockets and judge access via mobile.</p>
+      </div>
 
-      <Row className="mb-4">
-        <Col>
-          <div className="mb-3">
-              <button
-                  type="button"
-                  className="btn btn-link text-decoration-none p-0"
-                  onClick={() => navigate('/tools')}
-              >
-                  <BsArrowLeft className="me-1" /> Tools
-              </button>
-          </div>
-          <h1 className="display-5">Round timers for your tournaments</h1>
-          <p className="lead text-muted">Synchronized with WebSockets and judge access via mobile.</p>
-        </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col>
-          {!authorized ? (
-            <Alert variant="info" className="text-center">
+      <div className="mb-4">
+        {!authorized ? (
+          <Alert>
+            <AlertDescription className="w-full items-center gap-3 text-center">
               <p>Please log in to view your tournaments.</p>
-              <Button variant="primary" onClick={() => navigate('/login?return=/timers')}>
+              <Button onClick={() => navigate('/login?return=/timers')}>
                 Log In
               </Button>
-            </Alert>
-          ) : (
-            <Table hover responsive>
-              <thead>
-                <tr>
-                  <th scope='col'>Tournament Name</th>
-                  <th scope='col'>Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data?.tournaments && data.tournaments.length > 0 ? (
-                  data.tournaments.map((tournament: UserTournamentsResponseItem) => (
-                    <tr key={tournament.tournament_id}>
-                      <td>
-                        <Link
-                          to={`/timers/${tournament.tournament_id}`}
-                          className="fw-semibold text-decoration-none"
-                        >
-                          {tournament.tournament_name}
-                        </Link>
-                      </td>
-                      <td><span className="badge bg-primary">{tournament.role}</span></td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={2} className="text-center py-4">
-                      You currently have no tournament timers set up.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-          )}
-        </Col>
-      </Row>
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tournament Name</TableHead>
+                <TableHead>Role</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data?.tournaments && data.tournaments.length > 0 ? (
+                data.tournaments.map((tournament: UserTournamentsResponseItem) => (
+                  <TableRow key={tournament.tournament_id}>
+                    <TableCell>
+                      <Link
+                        to={`/timers/${tournament.tournament_id}`}
+                        className="font-semibold text-primary underline-offset-4 hover:underline"
+                      >
+                        {tournament.tournament_name}
+                      </Link>
+                    </TableCell>
+                    <TableCell><Badge>{tournament.role}</Badge></TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2} className="py-4 text-center text-muted-foreground">
+                    You currently have no tournament timers set up.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
+      </div>
 
       {authorized && (
-        <Row className="mt-4">
-          <Col className="text-end">
-            <Button variant="primary" onClick={() => navigate('/timers/new') }>
-              Create New Tournament
-            </Button>
-          </Col>
-        </Row>
+        <div className="mt-4 flex justify-end">
+          <Button onClick={() => navigate('/timers/new')}>
+            Create New Tournament
+          </Button>
+        </div>
       )}
-    </Container>
+    </PageContainer>
   );
 };
 

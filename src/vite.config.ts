@@ -1,21 +1,22 @@
 import { defineConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
+import tailwindcss from '@tailwindcss/vite'
 import * as path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
     alias: {
-      '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
+      '@': path.resolve(__dirname, 'src'),
     }
   },
-  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
+  plugins: [react(), tailwindcss(), babel({ presets: [reactCompilerPreset()] })],
   server: {
     proxy: {
       '/api': {
-        //target: 'https://decklist.lol',
-        target: 'http://localhost:5290',
+        target: 'https://decklist.lol',
+        //target: 'http://localhost:5290',
         changeOrigin: true,
       },
     },

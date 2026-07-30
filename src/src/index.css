@@ -1,0 +1,230 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------ */
+/*  Theme tokens — dark-first, neutral slate/zinc + emerald accent      */
+/* ------------------------------------------------------------------ */
+:root {
+  --radius: 0.65rem;
+
+  --background: oklch(0.16 0.006 264);
+  --foreground: oklch(0.985 0 0);
+
+  --card: oklch(0.205 0.006 264);
+  --card-foreground: oklch(0.985 0 0);
+
+  --popover: oklch(0.205 0.006 264);
+  --popover-foreground: oklch(0.985 0 0);
+
+  /* emerald-500 */
+  --primary: oklch(0.696 0.17 162.48);
+  --primary-foreground: oklch(0.16 0.02 166);
+
+  --secondary: oklch(0.274 0.006 264);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.269 0.006 264);
+  --muted-foreground: oklch(0.708 0.014 264);
+
+  --accent: oklch(0.274 0.006 264);
+  --accent-foreground: oklch(0.985 0 0);
+
+  --destructive: oklch(0.637 0.208 25.33);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --success: oklch(0.696 0.17 162.48);
+  --warning: oklch(0.795 0.162 86.05);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.696 0.17 162.48);
+
+  --chart-1: oklch(0.696 0.17 162.48);
+  --chart-2: oklch(0.6 0.118 184.7);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.44);
+
+  --sidebar: oklch(0.205 0.006 264);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.696 0.17 162.48);
+  --sidebar-primary-foreground: oklch(0.16 0.02 166);
+  --sidebar-accent: oklch(0.274 0.006 264);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.696 0.17 162.48);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
+  --font-mono: "M PLUS Code Latin", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+  /* thin scrollbars that match the dark theme */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 20%, transparent) transparent;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Decklist multi-column layout                                        */
+/* ------------------------------------------------------------------ */
+.decklist-columns {
+  column-count: 2;
+  column-gap: 2rem;
+}
+@media (max-width: 800px) {
+  .decklist-columns {
+    column-count: 1;
+  }
+}
+.decklist-column-item {
+  break-inside: avoid;
+}
+
+/* mana symbol spacing */
+.ms-cost {
+  margin-right: 0.2rem;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tournament timer fonts (container-query scaled)                     */
+/* ------------------------------------------------------------------ */
+.clock-container-query {
+  container-type: inline-size;
+}
+.timer-display-font {
+  font-family: var(--font-mono);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-variation-settings: "wdth" 100;
+  font-size: clamp(3rem, 28cqw, 18rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.timer-display-font-table {
+  font-family: var(--font-mono);
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-variation-settings: "wdth" 100;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+.clock-name-font {
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  font-size: clamp(1.25rem, 10cqw, 9rem);
+}
+
+/* periodic shake used to draw attention to a timer nearing time */
+@keyframes shake-warning {
+  0% { transform: translateX(0); }
+  1.67% { transform: translateX(-2px); }
+  3.33% { transform: translateX(2px); }
+  5% { transform: translateX(-2px); }
+  6.67% { transform: translateX(2px); }
+  8.33% { transform: translateX(-2px); }
+  10% { transform: translateX(2px); }
+  11.67% { transform: translateX(-2px); }
+  13.33% { transform: translateX(2px); }
+  15% { transform: translateX(-2px); }
+  16.67% { transform: translateX(0); }
+  100% { transform: translateX(0); }
+}
+.shake-warning-border {
+  animation: shake-warning 3s infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Print styles for decklists                                          */
+/* ------------------------------------------------------------------ */
+@media print {
+  body,
+  #root {
+    background-color: #fff !important;
+    color: #000 !important;
+    font-size: 90% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .print-decklist-columns {
+    column-count: 2;
+    column-gap: 20px;
+    column-fill: auto;
+    width: 100%;
+  }
+  .print-decklist-group {
+    break-inside: avoid;
+    display: inline-block;
+    width: 100%;
+  }
+  .no-print {
+    display: none !important;
+  }
+  * {
+    color: #000 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+}

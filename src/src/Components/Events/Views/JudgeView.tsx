@@ -1,12 +1,29 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { BsQrCode, BsClipboard, BsCheck, BsLockFill, BsUnlockFill, BsSearch, BsPersonPlus, BsChevronDown, BsChevronUp, BsDownload, BsTrash, BsExclamationTriangleFill, BsCheckCircleFill } from 'react-icons/bs';
+import {
+    QrCode, Clipboard, Check, Lock, LockOpen, Search, UserPlus,
+    ChevronDown, ChevronUp, Download, Trash2, TriangleAlert, CircleCheck
+} from 'lucide-react';
 import { HandleValidation } from '../../../Util/Validators';
 import { EventViewProps } from '../EventTypes';
 import { useAuthQuery } from '../../../Hooks/useAuthQuery';
 import { useEventUpdated } from '../../../Hooks/useWebsocketConnection';
 import { useUpdateEventMutation, useDeleteEventMutation, useDeleteEventUserMutation, useLeaveEventMutation, useAddJudgeMutation, useAddPlayerMutation } from '../../../Hooks/useEventMutations';
+import { PageContainer } from '@/Components/layout/PageContainer';
+import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Alert, AlertDescription } from '@/Components/ui/alert';
+import { Spinner } from '@/Components/ui/spinner';
+import { cn } from '@/lib/utils';
+
+const FILTERS = [
+    { key: 'all', label: 'All' },
+    { key: 'checked', label: 'Checked' },
+    { key: 'unchecked', label: 'Unchecked' },
+    { key: 'warnings', label: 'Warnings' },
+] as const;
 
 export const JudgeView: React.FC<EventViewProps> = (e) => {
     const players = e.event.participants.filter(a => a.role === "player");
@@ -22,16 +39,15 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const { refetch: refetchEvent } = e;
 
     useEventUpdated((message) => {
-        if(refetchEvent && message.refresh && message.updated_by_session_id != auth.sessionId) {
+        if (refetchEvent && message.refresh && message.updated_by_session_id != auth.sessionId) {
             console.log("Refetching event");
             refetchEvent();
         }
     }, e.event.event_id);
 
-    // Filtered players based on search term and deck status
     const filteredPlayers = players.filter(player => {
         const matchesSearch = player.player_name.toLowerCase().includes(searchTerm.trim().toLowerCase());
-        const matchesDeckStatus = 
+        const matchesDeckStatus =
             filterByDeckStatus === 'all' ||
             (filterByDeckStatus === 'checked' && player.is_deck_checked) ||
             (filterByDeckStatus === 'unchecked' && !player.is_deck_checked) ||
@@ -60,7 +76,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     const toggleEventState = () => {
         const isOpen = e.event.status === "open";
 
-        // Judges can only close events, not reopen them
         if (e.event.role === "judge" && isOpen) {
             const confirmed = window.confirm(
                 "As a judge, you can close this tournament but cannot reopen it.\n\n" +
@@ -71,7 +86,6 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
             if (!confirmed) return;
         }
 
-        // Only proceed if owner (who can do both) or judge closing the event
         if (e.event.role === "owner" || isOpen) {
             updateEventMutation.mutate({
                 params: { path: { eventId: e.event.event_id } },
@@ -90,11 +104,10 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
     };
 
     const handleDownloadDecklists = () => {
-        // Simply open the URL in a new tab, browser will handle the download
         window.open(`/api/events/${e.event.event_id}/decks/all`, '_blank');
     };
 
-    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<{player_name: string, email: string}>();
+    const { register, reset, setError, handleSubmit, clearErrors, formState: { errors } } = useForm<{ player_name: string, email: string }>();
     const addJudgeMutation = useAddJudgeMutation({
         onSuccess: () => {
             e.refetch!();
@@ -102,7 +115,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         },
         onError: (err) => HandleValidation(setError, err),
     });
-    const onAddJudge = (data: {player_name: string, email: string}) => {
+    const onAddJudge = (data: { player_name: string, email: string }) => {
         addJudgeMutation.mutate({
             params: { path: { eventId: e.event.event_id } },
             body: {
@@ -113,8 +126,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         });
     };
 
-    // Handler for adding a player
-    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors } } = useForm<{player_name: string, email: string}>();
+    const { register: registerPlayer, handleSubmit: handleSubmitPlayer, reset: resetPlayer, setError: setPlayerError, clearErrors: clearPlayerErrors, formState: { errors: playerErrors } } = useForm<{ player_name: string, email: string }>();
     const addPlayerMutation = useAddPlayerMutation({
         onSuccess: (response) => {
             resetPlayer();
@@ -126,7 +138,7 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         },
         onError: (err) => HandleValidation(setPlayerError, err),
     });
-    const onAddPlayer = (data: {player_name: string, email: string}) => {
+    const onAddPlayer = (data: { player_name: string, email: string }) => {
         addPlayerMutation.mutate({
             params: { path: { eventId: e.event.event_id } },
             body: {
@@ -162,426 +174,327 @@ export const JudgeView: React.FC<EventViewProps> = (e) => {
         }
     };
 
+    const isOpen = e.event.status === "open";
+    const isRemoving = (userId: string) => deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === userId;
+    const visiblePlayers = searchTerm !== '' ? filteredPlayers : filteredPlayers.slice(0, 50);
+
     return (
-        <>
-        <div className="container">
-            <div className='row'>
-                <div className='col-12 col-lg-6 mb-4'>
-                    <h2 className="mb-3">Decks</h2>
-                    
-                    {/* Add Player Form */}
-                    <div className="card mb-3">
-                        <div 
-                            className="card-header d-flex align-items-center justify-content-between cursor-pointer" 
+        <PageContainer size="lg">
+            <div className="grid gap-6 lg:grid-cols-2">
+                {/* ----- Decks column ----- */}
+                <div>
+                    <h2 className="mb-3 text-xl font-semibold">Decks</h2>
+
+                    {/* Add Player */}
+                    <Card className="mb-4 gap-0 py-0">
+                        <button
+                            type="button"
+                            className="flex w-full items-center justify-between px-4 py-3 text-left"
                             onClick={() => setShowAddDeckForm(!showAddDeckForm)}
-                            style={{ cursor: 'pointer' }}
                         >
-                            <div className="d-flex align-items-center">
-                                <BsPersonPlus className="me-2" />
-                                <strong>Manually Add Deck</strong>
-                            </div>
-                            {showAddDeckForm ? <BsChevronUp /> : <BsChevronDown />}
-                        </div>
+                            <span className="flex items-center gap-2 font-semibold">
+                                <UserPlus className="size-4" /> Manually add deck
+                            </span>
+                            {showAddDeckForm ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                        </button>
                         {showAddDeckForm && (
-                            <div className="card-body">
-                                <form onSubmit={(e) => { clearPlayerErrors(); handleSubmitPlayer(onAddPlayer)(e); }}>
-                                    <div className="mb-3">
-                                        <input
+                            <CardContent className="border-t py-4">
+                                <form className="space-y-3" onSubmit={(ev) => { clearPlayerErrors(); handleSubmitPlayer(onAddPlayer)(ev); }}>
+                                    <div>
+                                        <Input
                                             type="text"
-                                            className={`form-control ${playerErrors.player_name ? 'is-invalid' : ''}`}
                                             placeholder="Player Name"
                                             required
+                                            aria-invalid={!!playerErrors.player_name}
                                             {...registerPlayer("player_name")}
                                         />
-                                        {playerErrors.player_name && <div className="invalid-feedback">{playerErrors.player_name.message}</div>}
-                                    </div>
-                                    <div className="mb-3">
-                                        <input
-                                            type="email"
-                                            className={`form-control ${playerErrors.email ? 'is-invalid' : ''}`}
-                                            placeholder="Email (optional)"
-                                            {...registerPlayer("email")}
-                                        />
-                                        {playerErrors.email && <div className="invalid-feedback">{playerErrors.email.message}</div>}
+                                        {playerErrors.player_name && <p className="mt-1 text-sm text-destructive">{playerErrors.player_name.message}</p>}
                                     </div>
                                     <div>
-                                        <button 
-                                            type="submit" 
-                                            className="btn btn-success" 
-                                            disabled={addPlayerMutation.isPending}
-                                        >
-                                            {addPlayerMutation.isPending ? (
-                                                <>
-                                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                    Adding...
-                                                </>
-                                            ) : 'Add Deck'}
-                                        </button>
+                                        <Input
+                                            type="email"
+                                            placeholder="Email (optional)"
+                                            aria-invalid={!!playerErrors.email}
+                                            {...registerPlayer("email")}
+                                        />
+                                        {playerErrors.email && <p className="mt-1 text-sm text-destructive">{playerErrors.email.message}</p>}
                                     </div>
+                                    <Button type="submit" disabled={addPlayerMutation.isPending}>
+                                        {addPlayerMutation.isPending ? (<><Spinner className="size-4 text-current" />Adding...</>) : 'Add Deck'}
+                                    </Button>
                                 </form>
-                            </div>
+                            </CardContent>
                         )}
-                    </div>
+                    </Card>
 
-                    <table className="table table-striped table-hover">
-                    <thead className="table-dark">
-                    <tr>
-                        <th>Players ({players.length}/{e.event.max_players})</th>
-                        <th className="text-end">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {players.length > 0 && (
-                        <tr className="bg-light">
-                            <td colSpan={2}>
-                                <div className="input-group my-2">
-                                    <span className="input-group-text">
-                                        <BsSearch />
-                                    </span>
-                                    <input
+                    {/* Player search + filters */}
+                    <div className="mb-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium text-muted-foreground">
+                                Players ({players.length}/{e.event.max_players})
+                            </h3>
+                        </div>
+                        {players.length > 0 && (
+                            <>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
                                         type="text"
-                                        className="form-control"
                                         placeholder="Search by player name"
+                                        className="pl-9 pr-16"
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(ev) => setSearchTerm(ev.target.value)}
                                     />
                                     {searchTerm && (
-                                        <button 
-                                            className="btn btn-outline-secondary" 
+                                        <button
                                             type="button"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
                                             onClick={() => setSearchTerm('')}
                                         >
                                             Clear
                                         </button>
                                     )}
                                 </div>
-                                <div className="btn-group w-100 mt-2">
-                                    <button 
-                                        className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'all' ? 'active' : ''}`} 
-                                        onClick={() => setFilterByDeckStatus('all')}
-                                    >
-                                        All
-                                    </button>
-                                    <button 
-                                        className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'checked' ? 'active' : ''}`} 
-                                        onClick={() => setFilterByDeckStatus('checked')}
-                                    >
-                                        Checked
-                                    </button>
-                                    <button 
-                                        className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'unchecked' ? 'active' : ''}`} 
-                                        onClick={() => setFilterByDeckStatus('unchecked')}
-                                    >
-                                        Unchecked
-                                    </button>
-                                    <button 
-                                        className={`btn btn-outline-secondary px-1 py-1 ${filterByDeckStatus === 'warnings' ? 'active' : ''}`} 
-                                        onClick={() => setFilterByDeckStatus('warnings')}
-                                    >
-                                        Warnings
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    )}
-                    {filteredPlayers.length > 50 && searchTerm === '' && (
-                        <tr>
-                            <td colSpan={2} className="text-center py-3 bg-warning-subtle">
-                                Showing first 50 of {filteredPlayers.length} players. Please use the search bar to find specific players.
-                            </td>
-                        </tr>
-                    )}
-                    {(searchTerm !== '' ? filteredPlayers : filteredPlayers.slice(0, 50)).map((p) => {
-                        return (
-                            <tr key={p.user_id}>
-                                <td 
-                                    className="align-middle" 
-                                    onClick={() => navigate('/e/' + e.event.event_id + '/deck?id=' + p.user_id)}
-                                    style={{ cursor: 'pointer' }}
-                                    title="View deck"
-                                >
-                                    {p.player_name}
-                                </td>
-                                <td className="text-end align-middle">
-                                    <div className="d-flex justify-content-end align-items-center">
-                                        {p.has_deck_warning && (
-                                            <BsExclamationTriangleFill className="text-warning me-2" title="Warning" />
-                                        )}
-                                        {p.is_deck_checked && (
-                                            <BsCheckCircleFill className="text-success me-2" title="Checked" />
-                                        )}
-                                        <Link 
-                                            to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id} 
-                                            className="btn btn-sm btn-primary me-2"
-                                            title="View Deck"
-                                        >
-                                            <BsSearch />
-                                        </Link>
-                                        <button
+                                <div className="flex flex-wrap gap-1">
+                                    {FILTERS.map(f => (
+                                        <Button
+                                            key={f.key}
                                             type="button"
-                                            className="btn btn-sm btn-danger"
+                                            size="sm"
+                                            variant={filterByDeckStatus === f.key ? 'default' : 'outline'}
+                                            onClick={() => setFilterByDeckStatus(f.key)}
+                                        >
+                                            {f.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Players list */}
+                    <Card className="gap-0 py-0">
+                        {filteredPlayers.length > 50 && searchTerm === '' && (
+                            <div className="border-b bg-warning/10 px-3 py-2 text-center text-sm text-warning">
+                                Showing first 50 of {filteredPlayers.length} players. Use the search bar to find specific players.
+                            </div>
+                        )}
+                        <ul className="divide-y">
+                            {visiblePlayers.map((p) => (
+                                <li key={p.user_id} className="flex items-center justify-between gap-2 px-3 py-2">
+                                    <button
+                                        type="button"
+                                        className="flex-1 truncate text-left hover:text-primary"
+                                        onClick={() => navigate('/e/' + e.event.event_id + '/deck?id=' + p.user_id)}
+                                        title="View deck"
+                                    >
+                                        {p.player_name}
+                                    </button>
+                                    <div className="flex shrink-0 items-center gap-2">
+                                        {p.has_deck_warning && <TriangleAlert className="size-4 text-warning" aria-label="Warning" />}
+                                        {p.is_deck_checked && <CircleCheck className="size-4 text-primary" aria-label="Checked" />}
+                                        <Button asChild size="icon" className="size-8" title="View Deck">
+                                            <Link to={'/e/' + e.event.event_id + '/deck?id=' + p.user_id}>
+                                                <Search className="size-4" />
+                                            </Link>
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="size-8"
                                             onClick={() => onRemovePlayer(p.user_id, p.player_name)}
                                             title="Remove Player"
-                                            disabled={deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === p.user_id}
+                                            disabled={isRemoving(p.user_id)}
                                         >
-                                            {deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === p.user_id ? (
-                                                <span className="spinner-border" style={{ width: '1em', height: '1em' }} role="status" aria-hidden="true"></span>
-                                            ) : (
-                                                <BsTrash />
-                                            )}
-                                        </button>
+                                            {isRemoving(p.user_id) ? <Spinner className="size-4 text-current" /> : <Trash2 className="size-4" />}
+                                        </Button>
                                     </div>
-                                </td>
-                            </tr>
-                        )
-                    })}
-                    {filteredPlayers.length === 0 && (
-                        <tr>
-                            <td colSpan={2} className="text-center py-3">
-                                {players.length <= 0 
-                                    ? "No players have joined this tournament yet" 
-                                    : "No players match your filter"}
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                    </table>
-                </div>
-                <div className='col-12 col-lg-6'>
-                    <h2 className="mb-3">Tournament</h2>
-                    
-                    <div className="alert alert-info d-flex justify-content-between align-items-center mb-4">
-                        <div style={{
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            maxWidth: '70%'
-                        }}>
-                            <strong>Invite Link:</strong> {inviteLink}
-                        </div>
-                        <div className="d-flex align-items-center">
-                            <button 
-                                onClick={copyToClipboard} 
-                                className="btn btn-primary d-flex align-items-center me-2"
-                                title="Copy to clipboard"
-                            >
-                                {copied ? <BsCheck /> : <BsClipboard />}
-                            </button>
-                            
-                            <Link 
-                                to={`/e/${e.event.event_id}/qr`} 
-                                className="btn btn-primary d-flex align-items-center"
-                                title="Show QR code"
-                                target="_blank" // Add this to open in a new window
-                                rel="noopener noreferrer" // Add this for security best practices
-                            >
-                                <BsQrCode />
-                            </Link>
-                        </div>
-                    </div>
-                    
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <strong>Tournament Information</strong>
-                        </div>
-                        <div className="card-body">
-                            <div className="row">
-                                <div className="col-6 mb-3">
-                                    <div className="fw-bold">Format:</div>
-                                    <div>{e.event.format_name}</div>
-                                </div>
-                                <div className="col-6 mb-3">
-                                    <div className="fw-bold">Participants:</div>
-                                    <div>{players.length} / {e.event.max_players}</div>
-                                </div>
-                                <div className="col-6 mb-3">
-                                    <div className="fw-bold">Tournament Date:</div>
-                                    <div>{new Date(e.event.event_date + "T00:00:00").toLocaleDateString()}</div>
-                                </div>
-                                <div className="col-6 mb-3">
-                                    <div className="fw-bold">Expiration Date:</div>
-                                    <div>
-                                        {
-                                            (() => {
-                                                const deletionDate = new Date(e.event.event_date + "T00:00:00");
-                                                deletionDate.setDate(deletionDate.getDate() + 7);
-                                                return deletionDate.toLocaleDateString();
-                                            })()
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <strong>Status</strong>
-                        </div>
-                        <div className="card-body">
-                            <div className="d-flex align-items-center">
-                                <div className="form-check form-switch me-3">
-                                    <input 
-                                        className="form-check-input" 
-                                        type="checkbox" 
-                                        id="eventToggle" 
-                                        checked={e.event.status == "open"} 
-                                        onChange={toggleEventState}
-                                        disabled={e.event.role === "judge" && e.event.status != "open"}
-                                    />
-                                    <label className="form-check-label" htmlFor="eventToggle">
-                                        {e.event.status == "open" ? 
-                                            <span className="text-success d-flex align-items-center">
-                                                <BsUnlockFill className="me-1" /> Open
-                                            </span> : 
-                                            <span className="text-danger d-flex align-items-center">
-                                                <BsLockFill className="me-1" /> Closed
-                                            </span>
-                                        }
-                                    </label>
-                                </div>
-                            </div>
-                            <p className="mb-0 mt-2 text-muted">
-                                {e.event.status == "open" ? 
-                                    "Players can submit and modify decks when the tournament is open." : 
-                                    "Players cannot submit or modify decks when the tournament is closed."}
-                            </p>
-                            {e.event.role === "judge" && e.event.status != "open" && (
-                                <div className="alert alert-warning mt-3 mb-0">
-                                    <small>
-                                        Only the tournament owner can reopen this tournament.
-                                    </small>
-                                </div>
+                                </li>
+                            ))}
+                            {filteredPlayers.length === 0 && (
+                                <li className="px-3 py-6 text-center text-sm text-muted-foreground">
+                                    {players.length <= 0 ? "No players have joined this tournament yet" : "No players match your filter"}
+                                </li>
                             )}
+                        </ul>
+                    </Card>
+                </div>
+
+                {/* ----- Tournament column ----- */}
+                <div className="space-y-4">
+                    <h2 className="text-xl font-semibold">Tournament</h2>
+
+                    {/* Invite link */}
+                    <div className="flex items-center gap-2 rounded-lg border bg-card p-3">
+                        <div className="min-w-0 flex-1 truncate text-sm">
+                            <span className="font-semibold">Invite Link:</span> {inviteLink}
                         </div>
+                        <Button onClick={copyToClipboard} size="icon" title="Copy to clipboard">
+                            {copied ? <Check className="size-4" /> : <Clipboard className="size-4" />}
+                        </Button>
+                        <Button asChild size="icon" title="Show QR code">
+                            <Link to={`/e/${e.event.event_id}/qr`} target="_blank" rel="noopener noreferrer">
+                                <QrCode className="size-4" />
+                            </Link>
+                        </Button>
                     </div>
-                    
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <strong>Utilities</strong>
-                        </div>
-                        <div className="card-body">
-                            <div className="d-flex flex-column gap-3">
-                                <div>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-primary d-flex align-items-center"
-                                        onClick={handleDownloadDecklists}
-                                    >
-                                        <BsDownload className="me-2" /> Download All Decklists
-                                    </button>
-                                    <p className="mt-2 mb-0 small text-muted">
-                                        Download all decklists as a single text file for offline use or printing.
-                                    </p>
-                                </div>
-                                <div>
-                                    <Link 
-                                        to={`/e/${e.event.event_id}/sync/eventlink`}
-                                        className="btn btn-primary d-flex align-items-center"
-                                        style={{ width: "fit-content" }}
-                                    >
-                                        Eventlink Sync
-                                    </Link>
-                                    <p className="mt-2 mb-0 small text-muted">
-                                        Cross reference submissions with eventlink player list.
-                                    </p>
+
+                    {/* Tournament info */}
+                    <Card>
+                        <CardHeader><CardTitle className="text-base">Tournament Information</CardTitle></CardHeader>
+                        <CardContent className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <div className="font-semibold">Format:</div>
+                                <div className="text-muted-foreground">{e.event.format_name}</div>
+                            </div>
+                            <div>
+                                <div className="font-semibold">Participants:</div>
+                                <div className="text-muted-foreground">{players.length} / {e.event.max_players}</div>
+                            </div>
+                            <div>
+                                <div className="font-semibold">Tournament Date:</div>
+                                <div className="text-muted-foreground">{new Date(e.event.event_date + "T00:00:00").toLocaleDateString()}</div>
+                            </div>
+                            <div>
+                                <div className="font-semibold">Expiration Date:</div>
+                                <div className="text-muted-foreground">
+                                    {(() => {
+                                        const deletionDate = new Date(e.event.event_date + "T00:00:00");
+                                        deletionDate.setDate(deletionDate.getDate() + 7);
+                                        return deletionDate.toLocaleDateString();
+                                    })()}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div className="card mb-4">
-                        <div className="card-header">
-                            <strong>Danger Zone</strong>
-                        </div>
-                        <div className="card-body">
+                        </CardContent>
+                    </Card>
+
+                    {/* Status */}
+                    <Card>
+                        <CardHeader><CardTitle className="text-base">Status</CardTitle></CardHeader>
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <span className={cn("flex items-center gap-1.5 font-medium", isOpen ? "text-primary" : "text-destructive")}>
+                                    {isOpen ? <LockOpen className="size-4" /> : <Lock className="size-4" />}
+                                    {isOpen ? "Open" : "Closed"}
+                                </span>
+                                <Button
+                                    type="button"
+                                    variant={isOpen ? "outline" : "default"}
+                                    size="sm"
+                                    onClick={toggleEventState}
+                                    disabled={e.event.role === "judge" && !isOpen}
+                                >
+                                    {isOpen ? "Close tournament" : "Reopen tournament"}
+                                </Button>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                {isOpen
+                                    ? "Players can submit and modify decks when the tournament is open."
+                                    : "Players cannot submit or modify decks when the tournament is closed."}
+                            </p>
+                            {e.event.role === "judge" && !isOpen && (
+                                <Alert variant="warning"><AlertDescription>Only the tournament owner can reopen this tournament.</AlertDescription></Alert>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Utilities */}
+                    <Card>
+                        <CardHeader><CardTitle className="text-base">Utilities</CardTitle></CardHeader>
+                        <CardContent className="flex flex-col gap-4">
+                            <div>
+                                <Button type="button" onClick={handleDownloadDecklists}>
+                                    <Download className="size-4" /> Download All Decklists
+                                </Button>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    Download all decklists as a single text file for offline use or printing.
+                                </p>
+                            </div>
+                            <div>
+                                <Button asChild>
+                                    <Link to={`/e/${e.event.event_id}/sync/eventlink`}>Eventlink Sync</Link>
+                                </Button>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    Cross reference submissions with eventlink player list.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Danger zone */}
+                    <Card className="border-destructive/40">
+                        <CardHeader><CardTitle className="text-base text-destructive">Danger Zone</CardTitle></CardHeader>
+                        <CardContent>
                             {e.event.role === "owner" ? (
                                 <>
-                                    <p className="text-muted mb-3">
+                                    <p className="mb-3 text-sm text-muted-foreground">
                                         Deleting a tournament will permanently remove all related data including decks and user registrations.
                                     </p>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-danger"
-                                        onClick={handleDeleteEvent}>
+                                    <Button type="button" variant="destructive" onClick={handleDeleteEvent}>
                                         Delete Tournament
-                                    </button>
+                                    </Button>
                                 </>
                             ) : (
                                 <>
-                                    <p className="text-muted mb-3">
+                                    <p className="mb-3 text-sm text-muted-foreground">
                                         Leaving the event will remove you as a judge. You will no longer have access to manage this tournament.
                                     </p>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-danger"
-                                        onClick={onDisassociateSelf}>
+                                    <Button type="button" variant="destructive" onClick={onDisassociateSelf}>
                                         Leave Event
-                                    </button>
+                                    </Button>
                                 </>
                             )}
-                        </div>
-                    </div>
-                    
-                    {(e.event.role === "owner") && (
-                        <>
-                            <h2 className="mb-3">Judges</h2>
+                        </CardContent>
+                    </Card>
 
-                            <form onSubmit={(e) => { clearErrors(); handleSubmit(onAddJudge)(e); }} className="mb-3">
-                                <div className="d-flex gap-2 align-items-start">
-                                    <div className="flex-fill">
-                                        <input id='player_name' type="text" className={`form-control ${errors.player_name ? 'is-invalid' : ''}`} placeholder="Judge Name" required {...register("player_name")} />
-                                        {errors.player_name && <div className="invalid-feedback">{errors.player_name.message}</div>}
+                    {/* Judges */}
+                    {(e.event.role === "owner") && (
+                        <div>
+                            <h2 className="mb-3 text-xl font-semibold">Judges</h2>
+
+                            <form onSubmit={(ev) => { clearErrors(); handleSubmit(onAddJudge)(ev); }} className="mb-3">
+                                <div className="flex items-start gap-2">
+                                    <div className="flex-1">
+                                        <Input id="player_name" type="text" placeholder="Judge Name" required aria-invalid={!!errors.player_name} {...register("player_name")} />
+                                        {errors.player_name && <p className="mt-1 text-sm text-destructive">{errors.player_name.message}</p>}
                                     </div>
-                                    <div className="flex-fill">
-                                        <input id='email' type="text" className={`form-control ${errors.email ? 'is-invalid' : ''}`} placeholder="Email Address" required {...register("email")} />
-                                        {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
+                                    <div className="flex-1">
+                                        <Input id="email" type="text" placeholder="Email Address" required aria-invalid={!!errors.email} {...register("email")} />
+                                        {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>}
                                     </div>
-                                    <button
-                                        type='submit'
-                                        className='btn btn-success'
-                                        disabled={addJudgeMutation.isPending}
-                                    >
-                                        {addJudgeMutation.isPending ? (
-                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        ) : 'Add'}
-                                    </button>
+                                    <Button type="submit" disabled={addJudgeMutation.isPending}>
+                                        {addJudgeMutation.isPending ? <Spinner className="size-4 text-current" /> : 'Add'}
+                                    </Button>
                                 </div>
                             </form>
-                            <table className="table table-striped table-hover">
-<tbody>
-                                {judges.map((p) => {
-                                    return (
-                                        <tr key={p.user_id}>
-                                            <td>{p.player_name}</td>
-                                            <td className="text-end">
-                                                <div className="d-flex justify-content-end align-items-center">
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-sm btn-danger"
-                                                        onClick={() => onRemovePlayer(p.user_id, p.player_name)}
-                                                        title="Remove Judge"
-                                                        disabled={deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === p.user_id}
-                                                    >
-                                                        {deleteEventUserMutation.isPending && deleteEventUserMutation.variables?.body?.user_id === p.user_id ? (
-                                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                        ) : (
-                                                            <BsTrash />
-                                                        )}
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
-                                </tbody>
-                            </table>
-
-                        </>
+                            <Card className="gap-0 py-0">
+                                <ul className="divide-y">
+                                    {judges.map((p) => (
+                                        <li key={p.user_id} className="flex items-center justify-between gap-2 px-3 py-2">
+                                            <span className="truncate">{p.player_name}</span>
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="icon"
+                                                className="size-8"
+                                                onClick={() => onRemovePlayer(p.user_id, p.player_name)}
+                                                title="Remove Judge"
+                                                disabled={isRemoving(p.user_id)}
+                                            >
+                                                {isRemoving(p.user_id) ? <Spinner className="size-4 text-current" /> : <Trash2 className="size-4" />}
+                                            </Button>
+                                        </li>
+                                    ))}
+                                    {judges.length === 0 && (
+                                        <li className="px-3 py-4 text-center text-sm text-muted-foreground">No judges yet.</li>
+                                    )}
+                                </ul>
+                            </Card>
+                        </div>
                     )}
                 </div>
             </div>
-        </div>
-        </>
+        </PageContainer>
     )
 }
